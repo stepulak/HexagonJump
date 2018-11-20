@@ -32,7 +32,6 @@ public:
 private:
 
 	std::vector<BeatUnit> _beatUnits;
-
 };
 
 }
