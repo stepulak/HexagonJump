@@ -1,10 +1,9 @@
 #pragma once
 
 #include "FFT.hpp"
+#include "Utils.hpp"
 
 namespace hexagon::fft {
-
-static inline constexpr double pi() { return std::atan(1) * 4; }
 
 static void BinaryReverseTwoArrays(std::vector<double>& x, std::vector<double>& y)
 {
@@ -43,7 +42,7 @@ static void Radix2InPlace(std::vector<double>& real, std::vector<double>& imagin
 		{
 			auto c = std::cos(a);
 			auto s = std::sin(a);
-			a += -2 * pi() / m;
+			a += -2 * utils::pi() / m;
 			for (size_t k = j; k < real.size(); k = k + m)
 			{
 				auto t1 = c * real[k + n] - s * imaginary[k + n];

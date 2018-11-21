@@ -4,6 +4,8 @@
 
 namespace hexagon::utils {
 
+static inline constexpr double pi() { return std::atan(1) * 4; }
+
 enum class Direction {
 	UP,
 	DOWN,

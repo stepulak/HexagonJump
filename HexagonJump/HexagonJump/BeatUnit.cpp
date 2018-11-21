@@ -10,8 +10,7 @@ void BeatUnit::SetHeight(float height)
 
 void BeatUnit::Update(float deltaTime)
 {
-	if (_height > MIN_HEIGHT)
-	{
+	if (_height > MIN_HEIGHT) {
 		std::cout << _height << std::endl;
 		_height -= HEIGHT_UPDATE_VEL * deltaTime;
 		std::cout << _height << std::endl;

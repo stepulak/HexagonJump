@@ -15,7 +15,7 @@ public:
 	void TryToJump();
 	void TryToFallDownFast();
 
-	void Update(float deltaTime, float gravity /*TODO particle system*/);
+	void Update(float deltaTime, float gravity /*TODO particle system + obstacles*/);
 
 private:
 
@@ -34,6 +34,7 @@ private:
 
 	static constexpr size_t NUM_POSITION_HISTORY_ELEMS = 10;
 	static constexpr float TRY_TO_JUMP_TIMER_DEFAULT = .1f;
+	static constexpr float PLAYER_HORIZONTAL_FRICTION = 800.f;
 
 	bool CanJump() const { return _verticalStatus == VerticalPositionStatus::ON_GROUND; }
 
@@ -45,10 +46,14 @@ private:
 	float _x;
 	float _y;
 	float _radius;
-	float _angle;
-	float _angleAnimationRotation;
-	float _rotationVelocity;
+	float _angle = .0f;
+	float _angleAnimationRotation = .0f;
+	float _rotationVelocity = .0f;
+	bool _isRotating = false;
 	float _tryToJumpTimer = TRY_TO_JUMP_TIMER_DEFAULT;
+	float _horizontalVelocity = .0f;
+	float _verticalVelocity = .0f;
+	bool _isMovingRight = false;
 
 	VerticalPositionStatus _verticalStatus = VerticalPositionStatus::FALLING;
 
