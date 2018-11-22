@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClInclude Include="BeatUnit.hpp" />
     <ClInclude Include="BeatUnitManager.hpp" />
+    <ClInclude Include="Camera.hpp" />
     <ClInclude Include="FFT.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Utils.hpp" />

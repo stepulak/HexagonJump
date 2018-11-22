@@ -42,7 +42,7 @@ static void Radix2InPlace(std::vector<double>& real, std::vector<double>& imagin
 		{
 			auto c = std::cos(a);
 			auto s = std::sin(a);
-			a += -2 * utils::pi() / m;
+			a += -2 * utils::PI / m;
 			for (size_t k = j; k < real.size(); k = k + m)
 			{
 				auto t1 = c * real[k + n] - s * imaginary[k + n];
