@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <SFML/Graphics.hpp>
 
 namespace hexagon {
 
@@ -8,6 +9,10 @@ class Player {
 public:
 
 	Player(float x, float y, float radius);
+
+	sf::Vector2f GetPosition() const { return sf::Vector2f(_x, _y); }
+	float GetRadius() const { return _radius; }
+	float GetAngle() const { return _angle; }
 
 	void StartMovingRight(float velocity);
 	void StopMovingRight();
@@ -26,7 +31,7 @@ private:
 		ON_GROUND
 	};
 
-	struct PositionHistory {
+	struct PlayerPosition {
 		float x;
 		float y;
 		float angle;
@@ -36,39 +41,55 @@ private:
 	static constexpr float TRY_TO_JUMP_TIMER_DEFAULT = .1f;
 	static constexpr float MOVEMENT_HISTORY_UPDATE_TIME = .005f;
 	static constexpr float PLAYER_HORIZONTAL_FRICTION = 800.f;
-	static constexpr float PLAYER_JUMP_INITIAL_VELOCITY = 1900.f;
+	static constexpr float PLAYER_JUMP_INITIAL_VELOCITY = -250.f;
 	static constexpr float PLAYER_ROTATION_VELOCITY = 5.f;
 
-	bool CanJump() const { return _verticalStatus == VerticalPositionStatus::ON_GROUND; }
+	bool IsFalling() const {
+		return IsFallingSlow() || IsFallingFast();
+	}
+
+	bool IsJumping() const {
+		return _verticalStatus == VerticalPositionStatus::JUMPING;
+	}
+
+	bool IsOnGround() const {
+		return _verticalStatus == VerticalPositionStatus::ON_GROUND;
+	}
+
+	bool IsFallingSlow() const {
+		return _verticalStatus == VerticalPositionStatus::FALLING;
+	}
+
+	bool IsFallingFast() const {
+		return _verticalStatus == VerticalPositionStatus::FALLING_FAST;
+	}
 
 	void ImmediateJump();
 	void StopJumping();
+	void StopFalling();
 	void Move(float distX, float distY);
 	void StartRotating();
 	void StopRotating();
-	void StartFalling();
-	void StopFalling();
-	void UpdateMovementHistory();
+	
+	void UpdateTryToJumpCountdown(float deltaTime);
+	void UpdateJumping(float deltaTime);
+	void UpdateVerticalVelocity(float deltaTime, float gravity);
+	void UpdateHorizontalVelocity(float deltaTime);
+	void UpdateRotation(float deltaTime);
+	void UpdateMovementHistory(float deltaTime);
 
 	float _x;
 	float _y;
 	float _radius;
-	
 	float _angle = .0f;
-	float _angleAnimationRotation = .0f;
 	float _rotationVelocity = .0f;
 	bool _isRotating = false;
-	
 	float _tryToJumpTimer = TRY_TO_JUMP_TIMER_DEFAULT;
-	
 	float _horizontalVelocity = .0f;
 	float _verticalVelocity = .0f;
 	bool _isMovingRight = false;
-
 	float _movementHistoryTimer = .0f;
-
 	VerticalPositionStatus _verticalStatus = VerticalPositionStatus::FALLING;
-
-	std::array<PositionHistory, NUM_POSITION_HISTORY_ELEMS> _positionHistory;
+	std::array<PlayerPosition, NUM_POSITION_HISTORY_ELEMS> _positionHistory;
 };
 }

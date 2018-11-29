@@ -1,53 +1,75 @@
-#include "BeatUnitManager.hpp"
+#include "Player.hpp"
 #include "Utils.hpp"
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 using namespace hexagon;
 
 int main()
 {
-	BeatUnitManager m(1);
-	auto& unit = m.GetUnit(0);
-
+	Player p(100, 100, 50);
 	sf::RenderWindow window(sf::VideoMode(800, 600), "My window");
 	
 	sf::Clock deltaClock;
 	float time = 0.f;
-	// run the program as long as the window is open
+	bool keyleft = false;
+	bool keyright = false;
+
 	while (window.isOpen())
 	{
 		float dt = deltaClock.restart().asMilliseconds() / 1000.f;
-
-		// check all the window's events that were triggered since the last iteration of the loop
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-			// "close requested" event: we close the window
-			if (event.type == sf::Event::Closed)
-				window.close();
+			if (event.type == sf::Event::Closed) window.close();
+			if (event.type == sf::Event::KeyPressed) {
+				if (event.key.code == sf::Keyboard::Space) {
+					p.TryToJump();
+				}
+				if (event.key.code == sf::Keyboard::C) {
+					p.TryToFallDownFast();
+				}
+				if (event.key.code == sf::Keyboard::A) {
+					keyleft = true;
+				}
+				if (event.key.code == sf::Keyboard::D) {
+					keyright = true;
+				}
+			}
+			if (event.type == sf::Event::KeyReleased) {
+				if (event.key.code == sf::Keyboard::A) {
+					keyleft = false;
+				}
+				if (event.key.code == sf::Keyboard::D) {
+					keyright = false;
+				}
+			}
 		}
-
-		// clear the window with black color
 		window.clear(sf::Color::Black);
 
-		// draw everything here...
-		// window.draw(...);
-		auto triangle = utils::CountTriangleCoords(100, unit.Height() * 100, utils::Direction::UP);
-		triangle.setFillColor(sf::Color(255, 255, 255));
-		triangle.setPosition(sf::Vector2f(100, 100));
-		window.draw(triangle);
+		p.Update(dt, 9.81 * 100);
 
-		time += dt;
-		std::cout << time << std::endl;
-		if (time > 2.f) {
-			std::cout << "NOW" << std::endl;
-			time = 0.f;
-			unit.SetHeight(1.0);
+		sf::CircleShape c(p.GetRadius(), 6);
+		c.setPosition(p.GetPosition());
+		c.setFillColor(sf::Color(255, 255, 255));
+		c.setRotation(p.GetAngle() * 180.f / utils::PI);
+		c.setOrigin(p.GetRadius() / 2.f, p.GetRadius() / 2.f);
+
+		/*if (p.GetPosition().y > 200 && p.IsFalling()) {
+			p.StopFalling();
+		}*/
+
+		if (keyright) {
+			p.StartMovingRight(100);
 		}
-		m.UpdateUnits(dt);
+		else {
+			p.StopMovingRight();
+		}
 
-		// end the current frame
+		window.draw(c);
 		window.display();
+		std::this_thread::sleep_for(std::chrono::milliseconds(16));
 	}
 
 	return 0;

@@ -135,6 +135,7 @@
     <ClInclude Include="BeatUnitManager.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="FFT.hpp" />
+    <ClInclude Include="ParticleSystem.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Utils.hpp" />
   </ItemGroup>

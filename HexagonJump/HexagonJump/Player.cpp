@@ -1,5 +1,6 @@
 #include "Player.hpp"
 #include "Utils.hpp"
+#include <iostream>
 
 namespace hexagon {
 
@@ -23,62 +24,33 @@ void Player::StopMovingRight()
 
 void Player::TryToJump()
 {
+	_tryToJumpTimer = TRY_TO_JUMP_TIMER_DEFAULT;
 }
 
 void Player::TryToFallDownFast()
 {
+	if (IsJumping()) {
+		StopJumping();
+	}
+	if (IsFalling()) {
+		_verticalStatus = VerticalPositionStatus::FALLING_FAST;
+	}
 }
 
 void Player::Update(float deltaTime, float gravity)
 {
-	if (_tryToJumpTimer > 0) {
-		_tryToJumpTimer -= deltaTime;
-		if (_tryToJumpTimer <= 0) {
-			ImmediateJump();
-		}
-	}
+	UpdateTryToJumpCountdown(deltaTime);
+	UpdateJumping(deltaTime);
+	UpdateVerticalVelocity(deltaTime, gravity);
+	UpdateHorizontalVelocity(deltaTime);
+	UpdateMovementHistory(deltaTime);
 
-	if (_verticalStatus == VerticalPositionStatus::JUMPING) {
-		_verticalVelocity -= gravity * deltaTime;
-
-		if (_verticalVelocity <= 0) {
-			StopJumping();
-		}
-		if (_isRotating) {
-			_angle += _rotationVelocity * deltaTime;
-			_angleAnimationRotation += std::fabs(_rotationVelocity) * deltaTime;
-
-			if (_angleAnimationRotation >= 1.f / 3.f * utils::PI) {
-				StopRotating();
-			}
-		}
-	}
-	else if (_verticalStatus == VerticalPositionStatus::FALLING) {
-		_verticalVelocity += gravity * deltaTime;
-	}
-	else if (_verticalStatus == VerticalPositionStatus::FALLING_FAST) {
-		_verticalVelocity += 2 * gravity * deltaTime;
-	}
-	_verticalVelocity = std::min(_verticalVelocity, 2 * gravity);
-
-	if (!_isMovingRight && _horizontalVelocity > 0) {
-		_horizontalVelocity -= PLAYER_HORIZONTAL_FRICTION * deltaTime;
-
-		if (_horizontalVelocity <= 0) {
-			_horizontalVelocity = 0;
-		}
-	}
-
-	_movementHistoryTimer += deltaTime;
-	if (_movementHistoryTimer >= MOVEMENT_HISTORY_UPDATE_TIME) {
-		_movementHistoryTimer = 0;
-		UpdateMovementHistory();
-	}
+	Move(_horizontalVelocity * deltaTime, _verticalVelocity * deltaTime);
 }
 
 void Player::ImmediateJump()
 {
-	if (!CanJump()) {
+	if (!IsOnGround()) {
 		return; // Player cannot jump
 	}
 	_verticalStatus = VerticalPositionStatus::JUMPING;
@@ -105,39 +77,88 @@ void Player::Move(float distX, float distY)
 
 void Player::StartRotating()
 {
-	_rotationVelocity = PLAYER_ROTATION_VELOCITY;
-	_rotationVelocity *= utils::Random(-1, 1);
+	auto rotationDir = utils::Random(0, 1);
+	_rotationVelocity = PLAYER_ROTATION_VELOCITY * ((rotationDir == 0) ? -1 : 1);
+	_isRotating = true;
 }
 
 void Player::StopRotating()
 {
-	float anglePart = utils::PI / 3.f;
-	float baseAngle = static_cast<int>(_angle / anglePart) * anglePart;
-
-	if (_angle > 0) {
-		if (_angle - baseAngle > baseAngle + anglePart - _angle) {
-			_angle = baseAngle;
-		}
-		else {
-			_angle = baseAngle + anglePart;
-		}
-	}
-
+	_angle = 0;
 	_rotationVelocity = 0;
-	_angleAnimationRotation = 0;
-}
-
-void Player::StartFalling()
-{
-	//TODO REMOVE
+	_isRotating = false;
 }
 
 void Player::StopFalling()
 {
+	if (!IsFalling()) {
+		return;
+	}
+	_verticalStatus = VerticalPositionStatus::ON_GROUND;
+	_verticalVelocity = 0;
 }
 
-void Player::UpdateMovementHistory()
+void Player::UpdateTryToJumpCountdown(float deltaTime)
 {
+	if (_tryToJumpTimer > 0) {
+		_tryToJumpTimer -= deltaTime;
+		if (_tryToJumpTimer <= 0) {
+			ImmediateJump();
+		}
+	}
+}
+
+void Player::UpdateJumping(float deltaTime)
+{
+	if (!IsJumping()) {
+		return; // Nothing to update
+	}
+	if (_verticalVelocity >= 0) {
+		StopJumping();
+	}
+	UpdateRotation(deltaTime); // Rotation is part of jumping
+}
+
+void Player::UpdateVerticalVelocity(float deltaTime, float gravity)
+{
+	if (IsFallingSlow() ||
+		_verticalStatus == VerticalPositionStatus::JUMPING) {
+		_verticalVelocity += gravity * deltaTime;
+	}
+	else if (_verticalStatus == VerticalPositionStatus::FALLING_FAST) {
+		_verticalVelocity += 2 * gravity * deltaTime;
+	}
+	_verticalVelocity = std::min(_verticalVelocity, 2 * gravity);
+}
+
+void Player::UpdateHorizontalVelocity(float deltaTime)
+{
+	if (!_isMovingRight && _horizontalVelocity > 0) {
+		_horizontalVelocity -= PLAYER_HORIZONTAL_FRICTION * deltaTime;
+
+		if (_horizontalVelocity <= 0) {
+			_horizontalVelocity = 0;
+		}
+	}
+}
+
+void Player::UpdateRotation(float deltaTime)
+{
+	if (_isRotating) {
+		_angle += _rotationVelocity * deltaTime;
+		if (std::fabs(_angle) >= 1.f / 3.f * utils::PI) {
+			StopRotating();
+		}
+	}
+}
+
+void Player::UpdateMovementHistory(float deltaTime)
+{
+	_movementHistoryTimer += deltaTime;
+	if (_movementHistoryTimer >= MOVEMENT_HISTORY_UPDATE_TIME) {
+		_movementHistoryTimer = 0;
+		// TODO
+	}
 }
 
 }
