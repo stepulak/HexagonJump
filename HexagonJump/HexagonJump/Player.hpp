@@ -44,25 +44,11 @@ private:
 	static constexpr float PLAYER_JUMP_INITIAL_VELOCITY = -250.f;
 	static constexpr float PLAYER_ROTATION_VELOCITY = 5.f;
 
-	bool IsFalling() const {
-		return IsFallingSlow() || IsFallingFast();
-	}
-
-	bool IsJumping() const {
-		return _verticalStatus == VerticalPositionStatus::JUMPING;
-	}
-
-	bool IsOnGround() const {
-		return _verticalStatus == VerticalPositionStatus::ON_GROUND;
-	}
-
-	bool IsFallingSlow() const {
-		return _verticalStatus == VerticalPositionStatus::FALLING;
-	}
-
-	bool IsFallingFast() const {
-		return _verticalStatus == VerticalPositionStatus::FALLING_FAST;
-	}
+	bool IsFalling() const { return IsFallingSlow() || IsFallingFast(); }
+	bool IsJumping() const { return _verticalStatus == VerticalPositionStatus::JUMPING; }
+	bool IsOnGround() const { return _verticalStatus == VerticalPositionStatus::ON_GROUND; }
+	bool IsFallingSlow() const { return _verticalStatus == VerticalPositionStatus::FALLING; }
+	bool IsFallingFast() const { return _verticalStatus == VerticalPositionStatus::FALLING_FAST; }
 
 	void ImmediateJump();
 	void StopJumping();
