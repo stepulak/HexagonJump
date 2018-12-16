@@ -3,9 +3,13 @@
 #include <SFML/Graphics.hpp>
 #include <random>
 
-namespace hexagon::utils {
+namespace hexagon {
 
 static constexpr float PI = 3.141592f;
+
+static constexpr float DegreeToRadius(float radius) {
+	return radius * 180.f / PI;
+}
 
 enum class Direction {
 	UP,
@@ -44,6 +48,20 @@ static int Random(int from, int to) {
 	static std::random_device rd;
 	static std::mt19937 eng(rd());
 	return std::uniform_int_distribution<>(from, to)(eng);
+}
+
+template<typename TEnum>
+static TEnum operator|(TEnum m1, TEnum m2)
+{
+	using UType = typename std::underlying_type<TEnum>::type;
+	return static_cast<TEnum>(static_cast<UType>(m1) | static_cast<UType>(m2));
+}
+
+template<typename TEnum>
+static bool operator&(TEnum m1, TEnum m2)
+{
+	using UType = typename std::underlying_type<TEnum>::type;
+	return static_cast<bool>(static_cast<UType>(m1) & static_cast<UType>(m2));
 }
 
 }

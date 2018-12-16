@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Camera.hpp"
+#include "Utils.hpp"
+
 #include <cstdint>
 #include <functional>
 #include <optional>
@@ -19,7 +22,11 @@ public:
 
 	static constexpr auto INFINITY_TIME = -1.f;
 
-	Particle() = default;
+	Particle() {
+		Clear();
+	}
+	
+	bool IsFree() const { return _isFree; }
 
 	// Fluent API
 	Particle& SetPosition(float x, float y) { _x = x; _y = y; return *this; }
@@ -29,51 +36,42 @@ public:
 	Particle& SetProportionsAcceleration(float acc) { _proportionsAcceleration = acc; return *this; }
 	Particle& SetDirectionAngle(float angle) { _directionAngle = angle; return *this; }
 	Particle& SetDirectionAngleVelocity(float vel) { _directionAngleVelocity = vel; return *this; }
-	Particle& SetTextureAngle(float angle) { _textureAngle = angle; return *this; }
-	Particle& SetTextureAngleVelocity(float vel) { _textureAngleVelocity = vel; return *this; }
+	Particle& SetBodyAngle(float angle) { _bodyAngle = angle; return *this; }
+	Particle& SetBodyAngleVelocity(float vel) { _bodyAngleVelocity = vel; return *this; }
 	Particle& SetFadeMode(FadeMode mode) { _fadeMode = mode; return *this; }
 	Particle& SetFadeTime(float time) { _fadeTime = time; return *this; }
 	Particle& SetEndTime(float time) { _endTime = time; return *this; }
-	Particle& ResetTimer() { _fadeTime = 0.f; return *this; }
-	Particle& Occupy() { _isFree = false; return *this; }
 	Particle& SetColor(sf::Color&& col) { _color = std::move(col); return *this; }
 	Particle& SetTexture(sf::Texture& tex) { _texture = std::make_optional(std::ref(tex)); return *this; }
-
-	bool IsFree() const { return _isFree; }
+	Particle& Clear();
 
 	void Update(float deltaTime);
-	// void Draw() const;
+	void Draw(const Camera& camera, sf::RenderWindow& window) const;
 
 private:
 
-	float _x = 0.f;
-	float _y = 0.f;
-	float _width = 0.f;
-	float _height = 0.f;
-	float _velocity = 0.f;
-	float _acceleration = 0.f;
-	float _proportionsAcceleration = 0.f;
+	float _x;
+	float _y;
+	float _width;
+	float _height;
+	float _velocity;
+	float _acceleration;
+	float _proportionsAcceleration;
 	
-	float _directionAngle = 0.f;
-	float _directionAngleVelocity = 0.f;
-	float _textureAngle = 0.f;
-	float _textureAngleVelocity = 0.f;
+	float _directionAngle;
+	float _directionAngleVelocity;
+	float _bodyAngle;
+	float _bodyAngleVelocity;
 
-	float _timer = 0.f;
-	float _endTime = 0.f;
-	float _fadeTime = 0.f;
-	FadeMode _fadeMode = FadeMode::NO_FADE;
+	float _timer;
+	float _endTime;
+	float _fadeTime;
+	FadeMode _fadeMode;
 
-	bool _isFree = false;
+	bool _isFree;
 
 	sf::Color _color;
 	std::optional<std::reference_wrapper<sf::Texture>> _texture;
 };
-
-static Particle::FadeMode operator|(Particle::FadeMode m1, Particle::FadeMode m2)
-{
-	using UType = std::underlying_type<Particle::FadeMode>::type;
-	return static_cast<Particle::FadeMode>(static_cast<UType>(m1) | static_cast<UType>(m2));
-}
 
 }

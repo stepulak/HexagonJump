@@ -1,6 +1,6 @@
 #pragma once
 
-#include <utility>
+#include <SFML/Graphics.hpp>
 
 namespace hexagon {
 
@@ -10,25 +10,19 @@ public:
 	Camera(float virtualScreenWidth, float virtualScreenHeight, float realScreenWidth, float realScreenHeight)
 		: _virtualScreenWidth(virtualScreenWidth)
 		, _virtualScreenHeight(virtualScreenHeight)
-		, _realScreenWidth(realScreenWidth)
+		, _realScreenWidth(realScreenWidth) 
 		, _realScreenHeight(realScreenHeight) {
 	}
 
-	std::pair<float, float> GetResolutionScale() {
-		return std::make_pair(_realScreenWidth / _virtualScreenWidth, _realScreenHeight / _virtualScreenHeight);
-	}
-
-	std::pair<float, float> GetResolutionScaleInversed() {
-		return std::make_pair(_virtualScreenWidth / _realScreenWidth, _virtualScreenHeight / _realScreenHeight);
-	}
+	sf::View GetVirtualView() const { return sf::View(sf::FloatRect(0, 0, _virtualScreenWidth, _virtualScreenHeight)); }
+	sf::Vector2f GetRealProportions() const { return sf::Vector2f(_realScreenWidth, _realScreenHeight); }
 
 private:
-
-	//float _x;
-	//float _y;
+	
 	float _virtualScreenWidth;
 	float _virtualScreenHeight;
 	float _realScreenWidth;
 	float _realScreenHeight;
 };
+
 }

@@ -42,7 +42,7 @@ static void Radix2InPlace(std::vector<double>& real, std::vector<double>& imagin
 		{
 			auto c = std::cos(a);
 			auto s = std::sin(a);
-			a += -2 * utils::PI / m;
+			a += -2 * PI / m;
 			for (size_t k = j; k < real.size(); k = k + m)
 			{
 				auto t1 = c * real[k + n] - s * imaginary[k + n];
@@ -62,7 +62,7 @@ void FFT(std::vector<double>& real, std::vector<double>& imaginary)
 	{
 		throw std::runtime_error("real.size() != imaginary.size()");
 	}
-	auto exponent = std::log2f(real.size());
+	auto exponent = std::log2f(static_cast<float>(real.size()));
 	float intpart;
 	if (std::modf(exponent, &intpart) != 0.f)
 	{

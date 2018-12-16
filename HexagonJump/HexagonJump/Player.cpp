@@ -77,7 +77,7 @@ void Player::Move(float distX, float distY)
 
 void Player::StartRotating()
 {
-	auto rotationDir = utils::Random(0, 1);
+	auto rotationDir = Random(0, 1);
 	_rotationVelocity = PLAYER_ROTATION_VELOCITY * ((rotationDir == 0) ? -1 : 1);
 	_isRotating = true;
 }
@@ -146,7 +146,7 @@ void Player::UpdateRotation(float deltaTime)
 {
 	if (_isRotating) {
 		_angle += _rotationVelocity * deltaTime;
-		if (std::fabs(_angle) >= 1.f / 3.f * utils::PI) {
+		if (std::fabs(_angle) >= 1.f / 3.f * PI) {
 			StopRotating();
 		}
 	}
