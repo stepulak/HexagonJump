@@ -126,8 +126,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BeatUnit.cpp" />
-    <ClCompile Include="FFT.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MusicVisualization.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -136,7 +136,7 @@
     <ClInclude Include="BeatUnit.hpp" />
     <ClInclude Include="BeatUnitManager.hpp" />
     <ClInclude Include="Camera.hpp" />
-    <ClInclude Include="FFT.hpp" />
+    <ClInclude Include="MusicVisualization.hpp" />
     <ClInclude Include="Particle.hpp" />
     <ClInclude Include="ParticleSystem.hpp" />
     <ClInclude Include="Player.hpp" />

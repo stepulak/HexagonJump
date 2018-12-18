@@ -1,8 +1,10 @@
-#include "ParticleSystem.hpp"
 #include "Utils.hpp"
+#include "Camera.hpp"
+#include "MusicVisualization.hpp"
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <SFML/Audio.hpp>
 
 using namespace hexagon;
 
@@ -16,9 +18,17 @@ int main()
 	bool keyleft = false;
 	bool keyright = false;
 
-	ParticleSystem p;
-	sf::Texture tex;
-	tex.loadFromFile("test.jpg");
+	sf::SoundBuffer buffer;
+	buffer.loadFromFile("C:\\Users\\stepan\\Documents\\HexagonJump\\HexagonJump\\x64\\Debug\\DontBeSoShy.ogg");
+	std::cout << buffer.getDuration().asSeconds() << std::endl;
+	std::cout << buffer.getSampleCount() << std::endl;
+	std::cout << buffer.getSampleRate() << std::endl;
+
+	auto start = std::chrono::system_clock::now();
+	auto data = CountMusicVisualizationData(buffer, 1 / 20.f, 8);
+	auto stop = std::chrono::system_clock::now();
+	std::cout << "done" << std::endl;
+	std::cout << "time elapsed " << (std::chrono::duration<double>(stop - start)).count() << std::endl;
 
 	while (window.isOpen())
 	{
@@ -29,20 +39,6 @@ int main()
 			if (event.type == sf::Event::Closed) window.close();
 			if (event.type == sf::Event::KeyPressed) {
 				if (event.key.code == sf::Keyboard::Space) {
-					p.AddParticle()
-						.SetPosition(100, 100)
-						.SetProportions(100, 100)
-						.SetVelocity(10)
-						.SetAcceleration(50)
-						.SetDirectionAngle(PI * 1.5f)
-						.SetBodyAngle(PI * 3)
-						.SetBodyAngleVelocity(-PI)
-						.SetDirectionAngleVelocity(PI * 1.5f)
-						.SetProportionsAcceleration(10.f)
-						.SetFadeMode(Particle::FadeMode::FADE_OUT | Particle::FadeMode::FADE_IN)
-						.SetFadeTime(1.f)
-						.SetEndTime(2.f)
-						.SetTexture(tex);
 				}
 				if (event.key.code == sf::Keyboard::C) {
 				}
@@ -63,8 +59,8 @@ int main()
 			}
 		}
 		window.clear(sf::Color::Black);
-		p.Update(dt);
-		p.Draw(camera, window);
+
+
 		window.setView(camera.GetVirtualView());
 		window.display();
 		std::this_thread::sleep_for(std::chrono::milliseconds(16));
