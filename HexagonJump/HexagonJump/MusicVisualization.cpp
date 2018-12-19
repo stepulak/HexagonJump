@@ -81,10 +81,10 @@ std::pair<MusicVisualizationData, double> CountMusicVisualizationData(const sf::
 	auto sampleRate = buffer.getSampleRate();
 	auto sampleCount = buffer.getSampleCount();
 	auto samplesPerTick = static_cast<size_t>(gameTimerate * sampleRate);
-	auto samplesPerTickFull = static_cast<size_t>(std::pow(2, static_cast<int>(std::log2(samplesPerTick) + 1)));
+	auto samplesPerTickPowerOfTwo = static_cast<size_t>(std::pow(2, static_cast<int>(std::log2(samplesPerTick) + 1)));
 	auto samplesPerColumn = samplesPerTick / spectrumColumns;
 	double avgSampleValue = 0;
-	std::vector<double> samplesReal(samplesPerTickFull), samplesImaginary(samplesPerTickFull);
+	std::vector<double> samplesReal(samplesPerTickPowerOfTwo), samplesImaginary(samplesPerTickPowerOfTwo);
 	MusicVisualizationData visualizationData;
 	visualizationData.reserve((sampleCount / samplesPerTick));
 

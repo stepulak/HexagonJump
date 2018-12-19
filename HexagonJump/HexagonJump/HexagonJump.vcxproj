@@ -126,6 +126,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BeatUnit.cpp" />
+    <ClCompile Include="BeatUnitManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MusicVisualization.cpp" />
     <ClCompile Include="Particle.cpp" />

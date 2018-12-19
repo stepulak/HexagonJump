@@ -19,7 +19,7 @@ int main()
 	bool keyright = false;
 
 	sf::SoundBuffer buffer;
-	buffer.loadFromFile("C:\\Users\\stepan\\Documents\\HexagonJump\\HexagonJump\\x64\\Debug\\DontBeSoShy.ogg");
+	buffer.loadFromFile("D:\\Git\\HexagonJump\\HexagonJump\\x64\\Debug\\ogg.ogg");
 	std::cout << buffer.getDuration().asSeconds() << std::endl;
 	std::cout << buffer.getSampleCount() << std::endl;
 	std::cout << buffer.getSampleRate() << std::endl;
