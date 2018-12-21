@@ -15,10 +15,12 @@ public:
 	BeatUnit& GetUnit(size_t index) { return _beatUnits[index]; }
 	const BeatUnit& GetUnit(size_t index) const { return _beatUnits[index]; }
 
+	size_t VisualizationDataIndex() const { return _visualizationDataIndex; }
+
 	void Start() { _active = true; }
 	void Stop() { _active = false; }
 
-	void Update(float deltaTime, float game);
+	void Update(float deltaTime, float gameTimerate);
 
 private:
 

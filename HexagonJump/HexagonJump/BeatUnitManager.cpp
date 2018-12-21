@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <chrono>
 #include <random>
+#include <iostream>
 
 namespace hexagon {
 
@@ -44,7 +45,7 @@ void BeatUnitManager::SetNewHeights()
 {
 	const auto& data = _visualizationData[_visualizationDataIndex];
 	for (size_t i = 0u; i < data.size(); i++) {
-		_beatUnits[i].SetHeight(std::pow(data[i], 1.5) * 20 / _averageSampleValue);
+		_beatUnits[i].SetHeight(std::pow(data[i], 1.60) * 6000 / _averageSampleValue);
 	}
 }
 
