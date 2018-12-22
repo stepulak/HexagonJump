@@ -14,6 +14,7 @@ public:
 
 	bool InCollision(const Player& player) const override;
 	float SaveDistanceToTravel(const Player& player, float wantedDistance, Direction direction) const override;
+	void Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const override;
 
 private:
 

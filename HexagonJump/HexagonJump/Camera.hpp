@@ -4,6 +4,7 @@
 
 namespace hexagon {
 
+// Simple horizontal camera
 class Camera {
 public:
 
@@ -16,9 +17,13 @@ public:
 
 	sf::View GetVirtualView() const { return sf::View(sf::FloatRect(0, 0, _virtualScreenWidth, _virtualScreenHeight)); }
 	sf::Vector2f GetRealProportions() const { return sf::Vector2f(_realScreenWidth, _realScreenHeight); }
+	
+	float GetPosition() const { return _position; }
+	void Move(float distance) { _position += distance; }
 
 private:
 	
+	float _position;
 	float _virtualScreenWidth;
 	float _virtualScreenHeight;
 	float _realScreenWidth;

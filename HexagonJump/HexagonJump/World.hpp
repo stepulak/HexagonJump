@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Obstacle.hpp"
+
 #include <vector>
 
 namespace hexagon {
@@ -12,6 +13,8 @@ public:
 
 	void AddObstacle(Obstacle::Ptr obstacle) { _obstacles.emplace_back(std::move(obstacle)); }
 	const ObstacleContainer& GetObstacles() const { return _obstacles; }
+
+	void Draw(const Camera& camera) const;
 
 private:
 

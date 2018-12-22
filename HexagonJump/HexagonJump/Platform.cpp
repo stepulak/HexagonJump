@@ -20,4 +20,12 @@ float Platform::SaveDistanceToTravel(const Player& player, float wantedDistance,
 	return RectangleDistanceAfterMovement(playerBody, _rectangle, wantedDistance, direction);
 }
 
+void Platform::Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const
+{
+	auto platformBody = sf::RectangleShape(GetSize());
+	platformBody.setPosition(GetPosition() - sf::Vector2f(camera.GetPosition(), 0.f));
+	platformBody.setFillColor(color);
+	window.draw(platformBody);
+}
+
 }

@@ -23,12 +23,20 @@ float Spike::SaveDistanceToTravel(const Player& player, float wantedDistance, Di
 	return CheckCollisionWithCircle(playerMoved, player.GetRadius()) ? 0.f : wantedDistance;
 }
 
+void Spike::Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const
+{
+	auto spikeBody = CountTriangleCoords(_width, _maxHeight * _beatUnit.Height(), _direction);
+	spikeBody.setFillColor(color);
+	window.draw(spikeBody);
+}
+
 bool Spike::CheckCollisionWithCircle(const sf::Vector2f& position, float radius) const
 {
 	auto circleBody = CreateRectangleFromCircleBody(position, radius);
-	auto spike = CountTriangleCoords(_width, _maxHeight * _beatUnit.Height(), _direction);
-	for (size_t i = 0u; i < spike.getPointCount(); i++) {
-		if (circleBody.contains(spike.getPoint(i))) {
+	auto spikeBody = CountTriangleCoords(_width, _maxHeight * _beatUnit.Height(), _direction);
+
+	for (size_t i = 0u; i < spikeBody.getPointCount(); i++) {
+		if (circleBody.contains(spikeBody.getPoint(i))) {
 			return true;
 		}
 	}
