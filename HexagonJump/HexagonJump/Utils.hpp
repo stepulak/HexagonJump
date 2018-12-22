@@ -18,37 +18,18 @@ enum class Direction {
 	RIGHT
 };
 
-static sf::ConvexShape CountTriangleCoords(float width, float height, Direction topVertexDirection) {
-	sf::ConvexShape shape(3);
-	float dx = 0.f, dy = 0.f;
+sf::ConvexShape CountTriangleCoords(float width, float height, Direction topVertexDirection);
 
-	switch (topVertexDirection)
-	{
-	case Direction::UP:
-		dx = 0, dy = -1;
-		break;
-	case Direction::DOWN:
-		dx = 0, dy = 1;
-		break;
-	case Direction::LEFT:
-		dx = -1, dy = 0;
-		break;
-	case Direction::RIGHT:
-		dx = 1, dy = 0;
-		break;
-	}
+// Collision functions
+float RectangleAbsoluteXDistance(const sf::FloatRect& rect1, const sf::FloatRect& rect2);
+float RectangleAbsoluteYDistance(const sf::FloatRect& rect1, const sf::FloatRect& rect2);
+float RectangleDistanceAfterMovement(sf::FloatRect dynamicRect, const sf::FloatRect& staticRect, float distance, Direction direction);
 
-	shape.setPoint(0, sf::Vector2f(-dy * width / 2, -dx * width / 2));
-	shape.setPoint(1, sf::Vector2f(dy * width / 2, dx * width / 2));
-	shape.setPoint(2, sf::Vector2f(dx * height, dy * height));
-	return shape;
+static inline sf::FloatRect RectangleFromCircleBody(const sf::Vector2f& position, float radius) {
+	return { position.x - radius, position.y - radius, radius * 2, radius * 2 };
 }
 
-static int Random(int from, int to) {
-	static std::random_device rd;
-	static std::mt19937 eng(rd());
-	return std::uniform_int_distribution<>(from, to)(eng);
-}
+int Random(int from, int to);
 
 template<typename TEnum>
 static TEnum operator|(TEnum m1, TEnum m2)
