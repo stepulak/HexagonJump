@@ -1,6 +1,7 @@
 #include "Player.hpp"
 #include "Utils.hpp"
 #include <iostream>
+#include "Platform.hpp"
 
 namespace hexagon {
 
@@ -11,15 +12,16 @@ Player::Player(float x, float y, float radius)
 {
 }
 
-void Player::StartMovingRight(float velocity)
+void Player::StartMoving(float velocity, bool rightDirection)
 {
 	_horizontalVelocity = velocity;
-	_isMovingRight = true;
+	_isMoving = true;
+	_isMovingRight = rightDirection;
 }
 
-void Player::StopMovingRight()
+void Player::StopMoving()
 {
-	_isMovingRight = false;
+	_isMoving = false;
 }
 
 void Player::TryToJump()
@@ -37,7 +39,7 @@ void Player::TryToFallDownFast()
 	}
 }
 
-void Player::Update(float deltaTime, float gravity)
+void Player::Update(float deltaTime, float gravity, const World& world)
 {
 	UpdateTryToJumpCountdown(deltaTime);
 	UpdateJumping(deltaTime);
@@ -45,7 +47,12 @@ void Player::Update(float deltaTime, float gravity)
 	UpdateHorizontalVelocity(deltaTime);
 	UpdateMovementHistory(deltaTime);
 
-	Move(_horizontalVelocity * deltaTime, _verticalVelocity * deltaTime);
+	if (InCollisionWithSpike(world)) {
+		// TODO Die();
+		std::cout << "DEAD" << std::endl;
+	}
+
+	TryToMove(_horizontalVelocity * deltaTime * (_isMovingRight ? 1.f : -1.f), _verticalVelocity * deltaTime, world);
 }
 
 void Player::ImmediateJump()
@@ -69,8 +76,26 @@ void Player::StopJumping()
 	StopRotating();
 }
 
-void Player::Move(float distX, float distY)
+void Player::TryToMove(float distX, float distY, const World& world)
 {
+	for (const auto& obstacle : world.GetObstacles()) {
+		if (obstacle->GetType() != Obstacle::Type::PLATFORM) {
+			continue;
+		}
+
+		distX = std::min(HorizontalMovementSaveDistance(distX, obstacle), distX);
+		auto [verticalCollision, cutDistY] = VerticalMovementSaveDistance(distY, obstacle);
+
+		if (verticalCollision) {
+			if (IsJumping()) {
+				StopJumping();
+			}
+			else if (IsFalling()) {
+				StopFalling();
+			}
+			distY = cutDistY;
+		}
+	}
 	_x += distX;
 	_y += distY;
 }
@@ -96,6 +121,40 @@ void Player::StopFalling()
 	}
 	_verticalStatus = VerticalPositionStatus::ON_GROUND;
 	_verticalVelocity = 0;
+}
+
+bool Player::InCollisionWithSpike(const World& world) const
+{
+	for (const auto& obstacle : world.GetObstacles()) {
+		if (obstacle->GetType() == Obstacle::Type::SPIKE && obstacle->InCollision(*this)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+float Player::HorizontalMovementSaveDistance(float distance, const Obstacle::Ptr& obstacle) const
+{
+	if (distance > 0) {
+		return obstacle->SaveDistanceToTravel(*this, distance, Direction::RIGHT);
+	}
+	else if (distance < 0) {
+		return -obstacle->SaveDistanceToTravel(*this, -distance, Direction::LEFT);
+	}
+	return 0.f;
+}
+
+std::pair<bool, float> Player::VerticalMovementSaveDistance(float distance, const Obstacle::Ptr& obstacle) const
+{
+	if (distance > 0) {
+		auto newDistance = obstacle->SaveDistanceToTravel(*this, distance, Direction::DOWN);
+		return { newDistance < distance, newDistance };
+	}
+	else if (distance < 0) {
+		auto newDistance = -obstacle->SaveDistanceToTravel(*this, -distance, Direction::UP);
+		return { newDistance > distance, newDistance };
+	}
+	return { false, 0.f };
 }
 
 void Player::UpdateTryToJumpCountdown(float deltaTime)
@@ -133,7 +192,7 @@ void Player::UpdateVerticalVelocity(float deltaTime, float gravity)
 
 void Player::UpdateHorizontalVelocity(float deltaTime)
 {
-	if (!_isMovingRight && _horizontalVelocity > 0) {
+	if (!_isMoving && _horizontalVelocity > 0) {
 		_horizontalVelocity -= PLAYER_HORIZONTAL_FRICTION * deltaTime;
 
 		if (_horizontalVelocity <= 0) {

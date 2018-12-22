@@ -9,6 +9,8 @@ class Player;
 class Obstacle {
 public:
 
+	using Ptr = std::unique_ptr<Obstacle>;
+
 	enum class Type {
 		PLATFORM,
 		SPIKE
@@ -19,7 +21,7 @@ public:
 
 	virtual ~Obstacle() = default;
 
-	Type ObstacleType() const { return _type; }
+	Type GetType() const { return _type; }
 	
 	virtual bool InCollision(const Player& player) const = 0;
 	virtual float SaveDistanceToTravel(const Player& player, float wantedDistance, Direction direction) const = 0;

@@ -2,6 +2,9 @@
 #include "Camera.hpp"
 #include "MusicVisualization.hpp"
 #include "BeatUnitManager.hpp"
+#include "Player.hpp"
+#include "Platform.hpp"
+
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -19,6 +22,10 @@ int main()
 	bool keyleft = false;
 	bool keyright = false;
 	
+	Player player(100, 100, 50);
+	World world;
+	world.AddObstacle(std::make_unique<Platform>(Platform(50, 200, 300, 100)));
+
 	while (window.isOpen())
 	{
 		float dt = deltaClock.restart().asMilliseconds() / 1000.f;
@@ -28,27 +35,46 @@ int main()
 			if (event.type == sf::Event::Closed) window.close();
 			if (event.type == sf::Event::KeyPressed) {
 				if (event.key.code == sf::Keyboard::Space) {
+					player.TryToJump();
 				}
 				if (event.key.code == sf::Keyboard::C) {
+					player.TryToFallDownFast();
 				}
 				if (event.key.code == sf::Keyboard::A) {
 					keyleft = true;
+					player.StartMoving(100, false);
 				}
 				if (event.key.code == sf::Keyboard::D) {
 					keyright = true;
+					player.StartMoving(100, true);
 				}
 			}
 			if (event.type == sf::Event::KeyReleased) {
 				if (event.key.code == sf::Keyboard::A) {
 					keyleft = false;
+					player.StopMoving();
 				}
 				if (event.key.code == sf::Keyboard::D) {
 					keyright = false;
+					player.StopMoving();
 				}
 			}
 		}
 		window.clear(sf::Color::Black);
 
+		player.Update(dt, 9.81f * 100, world);
+		auto plpos = player.GetPosition();
+		auto plrad = player.GetRadius();
+		sf::CircleShape circleShape(plrad, 6);
+		circleShape.setPosition(plpos);
+		circleShape.setOrigin(plrad, plrad);
+		circleShape.setRotation(RadiusToDegree(player.GetAngle()));
+		window.draw(circleShape);
+
+		auto plat = dynamic_cast<const Platform&>(*world.GetObstacles().front());
+		sf::RectangleShape rectShape(plat.GetSize());
+		rectShape.setPosition(plat.GetPosition());
+		window.draw(rectShape);
 
 		window.setView(camera.GetVirtualView());
 		window.display();

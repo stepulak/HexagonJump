@@ -1,9 +1,13 @@
 #pragma once
 
+#include "World.hpp"
+
 #include <array>
 #include <SFML/Graphics.hpp>
 
 namespace hexagon {
+
+class Platform;
 
 class Player {
 public:
@@ -14,13 +18,13 @@ public:
 	float GetRadius() const { return _radius; }
 	float GetAngle() const { return _angle; }
 
-	void StartMovingRight(float velocity);
-	void StopMovingRight();
+	void StartMoving(float velocity, bool rightDirection);
+	void StopMoving();
 
 	void TryToJump();
 	void TryToFallDownFast();
 
-	void Update(float deltaTime, float gravity /*TODO particle system + obstacles*/);
+	void Update(float deltaTime, float gravity, const World& world);
 	
 private:
 
@@ -53,10 +57,14 @@ private:
 	void ImmediateJump();
 	void StopJumping();
 	void StopFalling();
-	void Move(float distX, float distY);
+	void TryToMove(float distX, float distY, const World& world);
 	void StartRotating();
 	void StopRotating();
-	
+
+	bool InCollisionWithSpike(const World& world) const;
+	float HorizontalMovementSaveDistance(float distance, const Obstacle::Ptr& obstacle) const;
+	std::pair<bool, float> VerticalMovementSaveDistance(float distance, const Obstacle::Ptr& obstacle) const;
+
 	void UpdateTryToJumpCountdown(float deltaTime);
 	void UpdateJumping(float deltaTime);
 	void UpdateVerticalVelocity(float deltaTime, float gravity);
@@ -73,6 +81,7 @@ private:
 	float _tryToJumpTimer = TRY_TO_JUMP_TIMER_DEFAULT;
 	float _horizontalVelocity = .0f;
 	float _verticalVelocity = .0f;
+	bool _isMoving = false;
 	bool _isMovingRight = false;
 	float _movementHistoryTimer = .0f;
 	VerticalPositionStatus _verticalStatus = VerticalPositionStatus::FALLING;

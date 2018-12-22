@@ -101,28 +101,20 @@ float RectangleAbsoluteYDistance(const sf::FloatRect& rect1, const sf::FloatRect
 float RectangleDistanceAfterMovement(sf::FloatRect dynamicRect, const sf::FloatRect& staticRect, float distance, Direction direction)
 {
 	float returnDistance = 0.f;
+	auto moved = MoveVectorInDirection(sf::Vector2f{ dynamicRect.left, dynamicRect.top }, distance, direction);
+
+	dynamicRect.left = moved.x;
+	dynamicRect.top = moved.y;
 
 	switch (direction) {
 	case Direction::DOWN:
-		dynamicRect.top += distance;
-		if (dynamicRect.intersects(staticRect)) {
-			returnDistance = RectangleAbsoluteYDistance(dynamicRect, staticRect);
-		}
-		break;
 	case Direction::UP:
-		dynamicRect.top -= distance;
 		if (dynamicRect.intersects(staticRect)) {
 			returnDistance = RectangleAbsoluteYDistance(dynamicRect, staticRect);
 		}
 		break;
 	case Direction::LEFT:
-		dynamicRect.left -= distance;
-		if (dynamicRect.intersects(staticRect)) {
-			returnDistance = RectangleAbsoluteXDistance(dynamicRect, staticRect);
-		}
-		break;
 	case Direction::RIGHT:
-		dynamicRect.left += distance;
 		if (dynamicRect.intersects(staticRect)) {
 			returnDistance = RectangleAbsoluteXDistance(dynamicRect, staticRect);
 		}
@@ -130,6 +122,25 @@ float RectangleDistanceAfterMovement(sf::FloatRect dynamicRect, const sf::FloatR
 	}
 
 	return distance + returnDistance;
+}
+
+sf::Vector2f MoveVectorInDirection(sf::Vector2f vec, float distance, Direction direction)
+{
+	switch (direction) {
+	case Direction::DOWN:
+		vec.y += distance;
+		break;
+	case Direction::UP:
+		vec.y -= distance;
+		break;
+	case Direction::LEFT:
+		vec.x -= distance;
+		break;
+	case Direction::RIGHT:
+		vec.x += distance;
+		break;
+	}
+	return vec;
 }
 
 int Random(int from, int to)

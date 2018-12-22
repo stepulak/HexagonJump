@@ -11,12 +11,12 @@ Platform::Platform(float leftX, float topY, float width, float height)
 
 bool Platform::InCollision(const Player& player) const
 {
-	return RectangleFromCircleBody(player.GetPosition(), player.GetRadius()).intersects(_rectangle);
+	return CreateRectangleFromCircleBody(player.GetPosition(), player.GetRadius()).intersects(_rectangle);
 }
 
 float Platform::SaveDistanceToTravel(const Player& player, float wantedDistance, Direction direction) const
 {
-	auto playerBody = RectangleFromCircleBody(player.GetPosition(), player.GetRadius());
+	auto playerBody = CreateRectangleFromCircleBody(player.GetPosition(), player.GetRadius());
 	return RectangleDistanceAfterMovement(playerBody, _rectangle, wantedDistance, direction);
 }
 
