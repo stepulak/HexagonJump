@@ -19,11 +19,12 @@ public:
 	sf::Vector2f GetRealProportions() const { return sf::Vector2f(_realScreenWidth, _realScreenHeight); }
 	
 	float GetPosition() const { return _position; }
+	void SetPosition(float position) { _position = position; }
 	void Move(float distance) { _position += distance; }
 
 private:
 	
-	float _position;
+	float _position = 0.f;
 	float _virtualScreenWidth;
 	float _virtualScreenHeight;
 	float _realScreenWidth;

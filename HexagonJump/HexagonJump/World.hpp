@@ -14,7 +14,7 @@ public:
 	void AddObstacle(Obstacle::Ptr obstacle) { _obstacles.emplace_back(std::move(obstacle)); }
 	const ObstacleContainer& GetObstacles() const { return _obstacles; }
 
-	void Draw(const Camera& camera) const;
+	void Draw(sf::RenderWindow& window, const Camera& camera) const;
 
 private:
 

@@ -24,7 +24,10 @@ int main()
 	
 	Player player(100, 100, 50);
 	World world;
-	world.AddObstacle(std::make_unique<Platform>(Platform(50, 200, 300, 100)));
+	world.AddObstacle(std::make_unique<Platform>(50, 200, 300, 100));
+	world.AddObstacle(std::make_unique<Platform>(50, 0, 300, 80));
+	world.AddObstacle(std::make_unique<Platform>(300, 0, 20, 300));
+	//world.AddObstacle(std::make_unique<Platform>(10, 0, 20, 300));
 
 	while (window.isOpen())
 	{
@@ -71,10 +74,7 @@ int main()
 		circleShape.setRotation(RadiusToDegree(player.GetAngle()));
 		window.draw(circleShape);
 
-		auto plat = dynamic_cast<const Platform&>(*world.GetObstacles().front());
-		sf::RectangleShape rectShape(plat.GetSize());
-		rectShape.setPosition(plat.GetPosition());
-		window.draw(rectShape);
+		world.Draw(window, camera);
 
 		window.setView(camera.GetVirtualView());
 		window.display();
