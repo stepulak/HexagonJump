@@ -62,10 +62,11 @@ void Player::Draw(sf::RenderWindow& window, const Camera& camera) const
 	if (_exploded) {
 		return;
 	}
-	float alpha = 1.f;
-	for (const auto& record : _positionHistory) {
-		alpha *= HISTORY_RECORD_ALPHA_FADE_OFF;
+	float alpha = HISTORY_RECORD_ALPHA_INIT;
+	for (size_t i = _positionHistory.size(); i > 0; i--) {
+		const auto& record = _positionHistory[i - 1];
 		DrawBody(window, record.position, record.angle, alpha);
+		alpha *= HISTORY_RECORD_ALPHA_FADE_OFF;
 	}
 	DrawBody(window, _position, _angle, 1.f);
 }
@@ -136,12 +137,17 @@ void Player::StopRotating()
 
 void Player::Explode(ParticleSystem& particleSystem)
 {
+	_exploded = true;
+
 	for (size_t i = 0u; i < EXPLOSION_NUM_PARTICLES; i++) {
 		particleSystem.AddParticle()
 			.SetPosition(_position.x, _position.y)
 			.SetProportions(EXPLOSION_PARTICLE_SIZE, EXPLOSION_PARTICLE_SIZE)
 			.SetVelocity(EXPLOSION_PARTICLE_VELOCITY)
-			.SetDirectionAngle(std::fmod(static_cast<float>(rand()), 3.14f));
+			.SetDirectionAngle(static_cast<float>(i) / EXPLOSION_NUM_PARTICLES * 3.14f * 2)
+			.SetLiveTime(EXPLOSION_PARTICLE_LIVE_TIME)
+			.SetFadeTime(EXPLOSION_PARTICLE_FADE_TIME)
+			.SetFadeMode(Particle::FadeMode::FADE_OUT);
 	}
 }
 

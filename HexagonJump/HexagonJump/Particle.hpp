@@ -40,7 +40,7 @@ public:
 	Particle& SetBodyAngleVelocity(float vel) { _bodyAngleVelocity = vel; return *this; }
 	Particle& SetFadeMode(FadeMode mode) { _fadeMode = mode; return *this; }
 	Particle& SetFadeTime(float time) { _fadeTime = time; return *this; }
-	Particle& SetEndTime(float time) { _endTime = time; return *this; }
+	Particle& SetLiveTime(float time) { _liveTime = time; return *this; }
 	Particle& SetColor(sf::Color&& col) { _color = std::move(col); return *this; }
 	Particle& SetTexture(sf::Texture& tex) { _texture = std::make_optional(std::ref(tex)); return *this; }
 	Particle& Clear();
@@ -64,7 +64,7 @@ private:
 	float _bodyAngleVelocity;
 
 	float _timer;
-	float _endTime;
+	float _liveTime;
 	float _fadeTime;
 	FadeMode _fadeMode;
 

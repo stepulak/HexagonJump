@@ -28,7 +28,7 @@ void ParticleSystem::Update(float deltaTime)
 	}
 }
 
-void ParticleSystem::Draw(const Camera& camera, sf::RenderWindow& window)
+void ParticleSystem::Draw(sf::RenderWindow& window, const Camera& camera) const
 {
 	for (size_t i = 0u; i < _particleIndex; i++) {
 		_pool[i].Draw(camera, window);

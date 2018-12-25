@@ -43,16 +43,19 @@ private:
 		float angle;
 	};
 
-	static constexpr size_t NUM_POSITION_HISTORY_RECORDS = 10;
+	static constexpr size_t NUM_POSITION_HISTORY_RECORDS = 20;
 	static constexpr size_t EXPLOSION_NUM_PARTICLES = 20u;
 	static constexpr float TRY_TO_JUMP_TIMER_DEFAULT = .1f;
-	static constexpr float MOVEMENT_HISTORY_UPDATE_TIME = .005f * 10;
+	static constexpr float MOVEMENT_HISTORY_UPDATE_TIME = .01f;
 	static constexpr float HORIZONTAL_FRICTION = 800.f;
 	static constexpr float JUMP_INITIAL_VELOCITY = -250.f;
 	static constexpr float ROTATION_VELOCITY = 5.f;
-	static constexpr float EXPLOSION_PARTICLE_VELOCITY = 10.f;
+	static constexpr float EXPLOSION_PARTICLE_VELOCITY = 400.f;
 	static constexpr float EXPLOSION_PARTICLE_SIZE = 10.f;
-	static constexpr float HISTORY_RECORD_ALPHA_FADE_OFF = 0.5;
+	static constexpr float EXPLOSION_PARTICLE_LIVE_TIME = 0.14f;
+	static constexpr float EXPLOSION_PARTICLE_FADE_TIME = 0.08f;
+	static constexpr float HISTORY_RECORD_ALPHA_INIT = 0.4;
+	static constexpr float HISTORY_RECORD_ALPHA_FADE_OFF = 0.8;
 
 	bool IsFalling() const { return IsFallingSlow() || IsFallingFast(); }
 	bool IsJumping() const { return _verticalStatus == VerticalPositionStatus::JUMPING; }

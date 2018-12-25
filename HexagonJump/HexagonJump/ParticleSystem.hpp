@@ -13,7 +13,7 @@ public:
 	Particle& AddParticle();
 
 	void Update(float deltaTime);
-	void Draw(const Camera& camera, sf::RenderWindow& window);
+	void Draw(sf::RenderWindow& window, const Camera& camera) const;
 
 private:
 

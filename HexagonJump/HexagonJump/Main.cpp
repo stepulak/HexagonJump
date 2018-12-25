@@ -71,9 +71,12 @@ int main()
 		window.clear(sf::Color::Black);
 
 		player.Update(dt, 9.81f * 100, world, particleSystem);
+		particleSystem.Update(dt);
+
 		player.Draw(window, camera);
 
 		world.Draw(window, camera);
+		particleSystem.Draw(window, camera);
 
 		window.setView(camera.GetVirtualView());
 		window.display();

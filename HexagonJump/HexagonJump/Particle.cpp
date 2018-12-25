@@ -18,7 +18,7 @@ Particle& Particle::Clear()
 	_bodyAngleVelocity = 0.f;
 
 	_timer = 0.f;
-	_endTime = INFINITY_TIME;
+	_liveTime = INFINITY_TIME;
 	_fadeTime = 0.f;
 	_fadeMode = FadeMode::NO_FADE;
 
@@ -34,7 +34,7 @@ void Particle::Update(float deltaTime)
 {
 	// Update timer
 	_timer += deltaTime;
-	if (_endTime >= 0 && _timer >= _endTime) {
+	if (_liveTime >= 0 && _timer >= _liveTime) {
 		_isFree = true;
 		return;
 	}
@@ -63,8 +63,8 @@ void Particle::Draw(const Camera& camera, sf::RenderWindow& window) const
 	if (_fadeMode & FadeMode::FADE_IN && _timer < _fadeTime) {
 		alpha = _timer / _fadeTime;
 	}
-	else if (_fadeMode & FadeMode::FADE_OUT && _endTime >= 0 && _timer > _endTime - _fadeTime) {
-		alpha = 1.f - (_timer - (_endTime - _fadeTime)) / _fadeTime; // inverse
+	else if (_fadeMode & FadeMode::FADE_OUT && _liveTime >= 0 && _timer > _liveTime - _fadeTime) {
+		alpha = 1.f - (_timer - (_liveTime - _fadeTime)) / _fadeTime; // inverse
 	}
 
 	// Create body and fill necessary values
