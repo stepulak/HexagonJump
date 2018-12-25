@@ -1,6 +1,7 @@
 #pragma once
 
 #include "World.hpp"
+#include "ParticleSystem.hpp"
 
 #include <array>
 #include <SFML/Graphics.hpp>
@@ -14,9 +15,10 @@ public:
 
 	Player(float x, float y, float radius);
 
-	sf::Vector2f GetPosition() const { return sf::Vector2f(_x, _y); }
+	sf::Vector2f GetPosition() const { return _position; }
 	float GetRadius() const { return _radius; }
 	float GetAngle() const { return _angle; }
+	bool HasExploded() const { return _exploded; }
 
 	void StartMoving(float velocity, bool rightDirection);
 	void StopMoving();
@@ -24,8 +26,9 @@ public:
 	void TryToJump();
 	void TryToFallDownFast();
 
-	void Update(float deltaTime, float gravity, const World& world);
-	
+	void Update(float deltaTime, float gravity, const World& world, ParticleSystem& particleSystem);
+	void Draw(sf::RenderWindow& window, const Camera& camera) const;
+
 private:
 
 	enum class VerticalPositionStatus {
@@ -35,18 +38,21 @@ private:
 		ON_GROUND
 	};
 
-	struct PlayerPosition {
-		float x;
-		float y;
+	struct PositionHistoryRecord {
+		sf::Vector2f position;
 		float angle;
 	};
 
-	static constexpr size_t NUM_POSITION_HISTORY_ELEMS = 10;
+	static constexpr size_t NUM_POSITION_HISTORY_RECORDS = 10;
+	static constexpr size_t EXPLOSION_NUM_PARTICLES = 20u;
 	static constexpr float TRY_TO_JUMP_TIMER_DEFAULT = .1f;
-	static constexpr float MOVEMENT_HISTORY_UPDATE_TIME = .005f;
-	static constexpr float PLAYER_HORIZONTAL_FRICTION = 800.f;
-	static constexpr float PLAYER_JUMP_INITIAL_VELOCITY = -250.f;
-	static constexpr float PLAYER_ROTATION_VELOCITY = 5.f;
+	static constexpr float MOVEMENT_HISTORY_UPDATE_TIME = .005f * 10;
+	static constexpr float HORIZONTAL_FRICTION = 800.f;
+	static constexpr float JUMP_INITIAL_VELOCITY = -250.f;
+	static constexpr float ROTATION_VELOCITY = 5.f;
+	static constexpr float EXPLOSION_PARTICLE_VELOCITY = 10.f;
+	static constexpr float EXPLOSION_PARTICLE_SIZE = 10.f;
+	static constexpr float HISTORY_RECORD_ALPHA_FADE_OFF = 0.5;
 
 	bool IsFalling() const { return IsFallingSlow() || IsFallingFast(); }
 	bool IsJumping() const { return _verticalStatus == VerticalPositionStatus::JUMPING; }
@@ -60,9 +66,10 @@ private:
 	void TryToMove(float distX, float distY, const World& world);
 	void StartRotating();
 	void StopRotating();
-
+	void Explode(ParticleSystem& particleSystem);
+	
 	bool InCollisionWithSpike(const World& world) const;
-	float HorizontalMovementSaveDistance(float distance, const Obstacle::Ptr& obstacle) const;
+	std::pair<bool, float> HorizontalMovementSaveDistance(float distance, const Obstacle::Ptr& obstacle) const;
 	std::pair<bool, float> VerticalMovementSaveDistance(float distance, const Obstacle::Ptr& obstacle) const;
 
 	void UpdateTryToJumpCountdown(float deltaTime);
@@ -72,8 +79,9 @@ private:
 	void UpdateRotation(float deltaTime);
 	void UpdateMovementHistory(float deltaTime);
 
-	float _x;
-	float _y;
+	void DrawBody(sf::RenderWindow& window, sf::Vector2f position, float angle, float alpha) const;
+
+	sf::Vector2f _position;
 	float _radius;
 	float _angle = .0f;
 	float _rotationVelocity = .0f;
@@ -83,8 +91,9 @@ private:
 	float _verticalVelocity = .0f;
 	bool _isMoving = false;
 	bool _isMovingRight = false;
+	bool _exploded = false;
 	float _movementHistoryTimer = .0f;
 	VerticalPositionStatus _verticalStatus = VerticalPositionStatus::FALLING;
-	std::array<PlayerPosition, NUM_POSITION_HISTORY_ELEMS> _positionHistory;
+	std::array<PositionHistoryRecord, NUM_POSITION_HISTORY_RECORDS> _positionHistory;
 };
 }

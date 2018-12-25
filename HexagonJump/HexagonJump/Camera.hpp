@@ -16,7 +16,7 @@ public:
 	}
 
 	sf::View GetVirtualView() const { return sf::View(sf::FloatRect(0, 0, _virtualScreenWidth, _virtualScreenHeight)); }
-	sf::Vector2f GetRealProportions() const { return sf::Vector2f(_realScreenWidth, _realScreenHeight); }
+	sf::Vector2f GetRealProportions() const { return { _realScreenWidth, _realScreenHeight }; }
 	
 	float GetPosition() const { return _position; }
 	void SetPosition(float position) { _position = position; }

@@ -55,12 +55,12 @@ sf::ConvexShape CountTriangleCoords(float width, float height, Direction topVert
 
 float RectangleAbsoluteXDistance(const sf::FloatRect& rect1, const sf::FloatRect& rect2)
 {
-	return std::abs(rect1.left + rect1.width / 2 - (rect2.left + rect2.width / 2)) - rect1.width / 2 - rect2.width / 2;
+	return std::abs(rect1.left + rect1.width / 2 - (rect2.left + rect2.width / 2)) - rect1.width / 2 - rect2.width / 2 - 1;
 }
 
 float RectangleAbsoluteYDistance(const sf::FloatRect& rect1, const sf::FloatRect& rect2)
 {
-	return std::abs(rect1.top + rect1.height / 2 - (rect2.top + rect2.height / 2)) - rect1.height / 2 - rect2.height / 2;
+	return std::abs(rect1.top + rect1.height / 2 - (rect2.top + rect2.height / 2)) - rect1.height / 2 - rect2.height / 2 - 1;
 }
 
 float RectangleDistanceAfterMovement(sf::FloatRect dynamicRect, const sf::FloatRect& staticRect, float distance, Direction direction)

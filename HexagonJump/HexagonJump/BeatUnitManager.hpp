@@ -10,12 +10,11 @@ public:
 
 	BeatUnitManager(MusicVisualizationData data, double averageSampleValue);
 
-	size_t NumberOfBeatUnits() const { return _beatUnits.size(); }
-
 	BeatUnit& GetUnit(size_t index) { return _beatUnits[index]; }
 	const BeatUnit& GetUnit(size_t index) const { return _beatUnits[index]; }
 
-	size_t VisualizationDataIndex() const { return _visualizationDataIndex; }
+	size_t GetNumberOfBeatUnits() const { return _beatUnits.size(); }
+	size_t GetVisualizationDataIndex() const { return _visualizationDataIndex; }
 
 	void Start() { _active = true; }
 	void Stop() { _active = false; }
@@ -26,6 +25,8 @@ private:
 
 	static constexpr float SHUFFLE_TIME_DEFAULT = 2.f;
 	static constexpr float PASS_HIGHEST_BEAT_RATIO = 1.5f;
+	static constexpr double VISUALIZATION_DATA_POW = 1.6;
+	static constexpr double VISUALIZATION_DATA_RATIO = 6000.0;
 
 	float CurrentHighestBeat() const;
 	void ShuffleUnits();
