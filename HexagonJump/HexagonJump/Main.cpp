@@ -25,15 +25,9 @@ int main()
 	
 	BeatUnitManager manager(MusicVisualizationData(1, MusicVisualizationColumnData(8)), 1.0);
 	Player player(120, 150, 30);
-	ParticleSystem particleSystem;
-	World world;
+	World world(camera);
+	world.AddObstacle(std::make_unique<Platform>(0, 500, 1440, 10));
 
-	world.AddObstacle(std::make_unique<Platform>(50, 200, 300, 100));
-	world.AddObstacle(std::make_unique<Platform>(50, 0, 300, 60));
-	world.AddObstacle(std::make_unique<Platform>(300, 0, 20, 300));
-	world.AddObstacle(std::make_unique<Platform>(30, 0, 20, 300));
-	world.AddObstacle(std::make_unique<Spike>(250, 200, 40, 100, Direction::UP, manager.GetUnit(0))); 
-	
 	while (window.isOpen())
 	{
 		float dt = deltaClock.restart().asMilliseconds() / 1000.f;
@@ -50,11 +44,11 @@ int main()
 				}
 				if (event.key.code == sf::Keyboard::A) {
 					keyleft = true;
-					player.StartMoving(100, false);
+					player.StartMoving(500, false);
 				}
 				if (event.key.code == sf::Keyboard::D) {
 					keyright = true;
-					player.StartMoving(100, true);
+					player.StartMoving(500, true);
 				}
 			}
 			if (event.type == sf::Event::KeyReleased) {
@@ -70,13 +64,12 @@ int main()
 		}
 		window.clear(sf::Color::Black);
 
-		player.Update(dt, 9.81f * 100, world, particleSystem);
-		particleSystem.Update(dt);
+		camera.Move(7.f);
 
+		player.Update(dt, 9.81f * 100, world);
 		player.Draw(window, camera);
 
-		world.Draw(window, camera);
-		particleSystem.Draw(window, camera);
+		world.Draw(window);
 
 		window.setView(camera.GetVirtualView());
 		window.display();

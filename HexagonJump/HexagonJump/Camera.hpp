@@ -16,15 +16,20 @@ public:
 	}
 
 	sf::View GetVirtualView() const { return sf::View(sf::FloatRect(0, 0, _virtualScreenWidth, _virtualScreenHeight)); }
+	sf::Vector2f GetVirtualProportions() const { return { _virtualScreenWidth, _virtualScreenHeight }; }
 	sf::Vector2f GetRealProportions() const { return { _realScreenWidth, _realScreenHeight }; }
 	
 	float GetPosition() const { return _position; }
 	void SetPosition(float position) { _position = position; }
 	void Move(float distance) { _position += distance; }
 
+	float GetSpeed() const { return _speed; }
+	void SetSpeed(float speed) { _speed = speed; }
+	
 private:
 	
 	float _position = 0.f;
+	float _speed = 0.f;
 	float _virtualScreenWidth;
 	float _virtualScreenHeight;
 	float _realScreenWidth;

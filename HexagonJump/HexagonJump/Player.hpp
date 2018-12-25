@@ -26,7 +26,7 @@ public:
 	void TryToJump();
 	void TryToFallDownFast();
 
-	void Update(float deltaTime, float gravity, const World& world, ParticleSystem& particleSystem);
+	void Update(float deltaTime, float gravity, World& world);
 	void Draw(sf::RenderWindow& window, const Camera& camera) const;
 
 private:
@@ -62,9 +62,11 @@ private:
 	bool IsOnGround() const { return _verticalStatus == VerticalPositionStatus::ON_GROUND; }
 	bool IsFallingSlow() const { return _verticalStatus == VerticalPositionStatus::FALLING; }
 	bool IsFallingFast() const { return _verticalStatus == VerticalPositionStatus::FALLING_FAST; }
+	bool StandingOnSurface(const World& world);
 
 	void ImmediateJump();
 	void StopJumping();
+	void StartFalling();
 	void StopFalling();
 	void TryToMove(float distX, float distY, const World& world);
 	void StartRotating();

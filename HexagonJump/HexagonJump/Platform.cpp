@@ -9,6 +9,11 @@ Platform::Platform(float leftX, float topY, float width, float height)
 {
 }
 
+void Platform::Move(float horizontalDistance)
+{
+	_rectangle.left += horizontalDistance;
+}
+
 bool Platform::InCollision(const Player& player) const
 {
 	return CreateRectangleFromCircleBody(player.GetPosition(), player.GetRadius()).intersects(_rectangle);

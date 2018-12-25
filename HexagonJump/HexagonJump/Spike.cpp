@@ -13,6 +13,11 @@ Spike::Spike(float x, float y, float width, float maximumHeight, Direction direc
 {
 }
 
+void Spike::Move(float horizontalDistance)
+{
+	_position.x += horizontalDistance;
+}
+
 bool Spike::InCollision(const Player& player) const
 {
 	return CheckCollisionWithPlayer(player.GetPosition(), player.GetRadius());

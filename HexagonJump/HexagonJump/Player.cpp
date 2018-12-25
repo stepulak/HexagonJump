@@ -38,7 +38,7 @@ void Player::TryToFallDownFast()
 	}
 }
 
-void Player::Update(float deltaTime, float gravity, const World& world, ParticleSystem& particleSystem)
+void Player::Update(float deltaTime, float gravity, World& world)
 {
 	if (_exploded) {
 		return;
@@ -49,9 +49,15 @@ void Player::Update(float deltaTime, float gravity, const World& world, Particle
 	UpdateVerticalVelocity(deltaTime, gravity);
 	UpdateHorizontalVelocity(deltaTime);
 	UpdateMovementHistory(deltaTime);
-
+	
 	if (InCollisionWithSpike(world)) {
-		Explode(particleSystem);
+		Explode(world.GetParticleSystem());
+	}
+
+	auto onSurface = StandingOnSurface(world);
+	if (!onSurface && !IsFalling() && !IsJumping()) {
+		StartFalling();
+		// TODO FIX
 	}
 
 	TryToMove(_horizontalVelocity * deltaTime * (_isMovingRight ? 1.f : -1.f), _verticalVelocity * deltaTime, world);
@@ -62,13 +68,33 @@ void Player::Draw(sf::RenderWindow& window, const Camera& camera) const
 	if (_exploded) {
 		return;
 	}
+	auto cameraPosition = sf::Vector2f(camera.GetPosition(), 0.f);
 	float alpha = HISTORY_RECORD_ALPHA_INIT;
+
 	for (size_t i = _positionHistory.size(); i > 0; i--) {
 		const auto& record = _positionHistory[i - 1];
-		DrawBody(window, record.position, record.angle, alpha);
+		DrawBody(window, record.position - cameraPosition, record.angle, alpha);
 		alpha *= HISTORY_RECORD_ALPHA_FADE_OFF;
 	}
-	DrawBody(window, _position, _angle, 1.f);
+	DrawBody(window, _position - cameraPosition, _angle, 1.f);
+}
+
+bool Player::StandingOnSurface(const World& world)
+{
+	if (!IsOnGround()) {
+		return false;
+	}
+
+	for (const auto& obstacle : world.GetObstacles()) {
+		if (obstacle->GetType() != Obstacle::Type::PLATFORM) {
+			continue;
+		}
+		auto[collision, distance] = VerticalMovementSaveDistance(World::GRAVITY, obstacle);
+		if (collision) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void Player::ImmediateJump()
@@ -87,9 +113,14 @@ void Player::StopJumping()
 	if (_verticalStatus != VerticalPositionStatus::JUMPING) {
 		return; // Cannot fall twice
 	}
+	StartFalling();
+	StopRotating();
+}
+
+void Player::StartFalling()
+{
 	_verticalStatus = VerticalPositionStatus::FALLING;
 	_verticalVelocity = 0;
-	StopRotating();
 }
 
 void Player::TryToMove(float distX, float distY, const World& world)
@@ -114,7 +145,7 @@ void Player::TryToMove(float distX, float distY, const World& world)
 			else if (IsFalling()) {
 				StopFalling();
 			}
-			distY = cutDistY;
+			distY = std::abs(cutDistY) < 1.f ? 0.f : cutDistY;
 		}
 	}
 	_position.x += distX;

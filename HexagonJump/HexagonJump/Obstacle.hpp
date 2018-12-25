@@ -24,6 +24,7 @@ public:
 
 	Type GetType() const { return _type; }
 	
+	virtual void Move(float horizontalDistance) = 0;
 	virtual bool InCollision(const Player& player) const = 0;
 	virtual float SaveDistanceToTravel(const Player& player, float wantedDistance, Direction direction) const = 0;
 	virtual void Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const = 0;
