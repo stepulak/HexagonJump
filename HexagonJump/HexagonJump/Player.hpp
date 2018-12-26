@@ -1,6 +1,6 @@
 #pragma once
 
-#include "World.hpp"
+#include "Obstacle.hpp"
 #include "ParticleSystem.hpp"
 
 #include <array>
@@ -9,13 +9,18 @@
 namespace hexagon {
 
 class Platform;
+class World;
 
 class Player {
 public:
 
-	Player(float x, float y, float radius);
+	static constexpr float PLAYER_RADIUS_DEFAULT = 25.f;
+
+	Player(float x, float y, float radius = PLAYER_RADIUS_DEFAULT);
 
 	sf::Vector2f GetPosition() const { return _position; }
+	void Move(float distX, float distY) { _position += sf::Vector2f(distX, distY); }
+
 	float GetRadius() const { return _radius; }
 	float GetAngle() const { return _angle; }
 	bool HasExploded() const { return _exploded; }
@@ -27,7 +32,7 @@ public:
 	void TryToFallDownFast();
 
 	void Update(float deltaTime, float gravity, World& world);
-	void Draw(sf::RenderWindow& window, const Camera& camera) const;
+	void Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const;
 
 private:
 
@@ -54,8 +59,9 @@ private:
 	static constexpr float EXPLOSION_PARTICLE_SIZE = 10.f;
 	static constexpr float EXPLOSION_PARTICLE_LIVE_TIME = 0.14f;
 	static constexpr float EXPLOSION_PARTICLE_FADE_TIME = 0.08f;
-	static constexpr float HISTORY_RECORD_ALPHA_INIT = 0.4;
-	static constexpr float HISTORY_RECORD_ALPHA_FADE_OFF = 0.8;
+	static constexpr float HISTORY_RECORD_ALPHA_INIT = 0.4f;
+	static constexpr float HISTORY_RECORD_ALPHA_FADE_OFF = 0.8f;
+	static constexpr float SURFACE_MAX_DISTANCE = 10.f;
 
 	bool IsFalling() const { return IsFallingSlow() || IsFallingFast(); }
 	bool IsJumping() const { return _verticalStatus == VerticalPositionStatus::JUMPING; }
@@ -84,7 +90,7 @@ private:
 	void UpdateRotation(float deltaTime);
 	void UpdateMovementHistory(float deltaTime);
 
-	void DrawBody(sf::RenderWindow& window, sf::Vector2f position, float angle, float alpha) const;
+	void DrawBody(sf::RenderWindow& window, sf::Vector2f position, float angle, const sf::Color& color) const;
 
 	sf::Vector2f _position;
 	float _radius;

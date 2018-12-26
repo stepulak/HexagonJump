@@ -1,7 +1,7 @@
 #include "Player.hpp"
-#include "Utils.hpp"
-#include <iostream>
 #include "Platform.hpp"
+#include "Utils.hpp"
+#include "World.hpp"
 
 namespace hexagon {
 
@@ -54,16 +54,14 @@ void Player::Update(float deltaTime, float gravity, World& world)
 		Explode(world.GetParticleSystem());
 	}
 
-	auto onSurface = StandingOnSurface(world);
-	if (!onSurface && !IsFalling() && !IsJumping()) {
+	if (!StandingOnSurface(world) && !IsFalling() && !IsJumping()) {
 		StartFalling();
-		// TODO FIX
 	}
 
 	TryToMove(_horizontalVelocity * deltaTime * (_isMovingRight ? 1.f : -1.f), _verticalVelocity * deltaTime, world);
 }
 
-void Player::Draw(sf::RenderWindow& window, const Camera& camera) const
+void Player::Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const
 {
 	if (_exploded) {
 		return;
@@ -72,11 +70,12 @@ void Player::Draw(sf::RenderWindow& window, const Camera& camera) const
 	float alpha = HISTORY_RECORD_ALPHA_INIT;
 
 	for (size_t i = _positionHistory.size(); i > 0; i--) {
+		auto bodyColor = sf::Color(color.r, color.g, color.b, static_cast<uint8_t>(color.a * alpha));
 		const auto& record = _positionHistory[i - 1];
-		DrawBody(window, record.position - cameraPosition, record.angle, alpha);
+		DrawBody(window, record.position - cameraPosition, record.angle, bodyColor);
 		alpha *= HISTORY_RECORD_ALPHA_FADE_OFF;
 	}
-	DrawBody(window, _position - cameraPosition, _angle, 1.f);
+	DrawBody(window, _position - cameraPosition, _angle, color);
 }
 
 bool Player::StandingOnSurface(const World& world)
@@ -84,12 +83,12 @@ bool Player::StandingOnSurface(const World& world)
 	if (!IsOnGround()) {
 		return false;
 	}
-
+	
 	for (const auto& obstacle : world.GetObstacles()) {
 		if (obstacle->GetType() != Obstacle::Type::PLATFORM) {
 			continue;
 		}
-		auto[collision, distance] = VerticalMovementSaveDistance(World::GRAVITY, obstacle);
+		auto[collision, _] = VerticalMovementSaveDistance(SURFACE_MAX_DISTANCE, obstacle);
 		if (collision) {
 			return true;
 		}
@@ -148,8 +147,7 @@ void Player::TryToMove(float distX, float distY, const World& world)
 			distY = std::abs(cutDistY) < 1.f ? 0.f : cutDistY;
 		}
 	}
-	_position.x += distX;
-	_position.y += distY;
+	Move(distX, distY);
 }
 
 void Player::StartRotating()
@@ -175,7 +173,7 @@ void Player::Explode(ParticleSystem& particleSystem)
 			.SetPosition(_position.x, _position.y)
 			.SetProportions(EXPLOSION_PARTICLE_SIZE, EXPLOSION_PARTICLE_SIZE)
 			.SetVelocity(EXPLOSION_PARTICLE_VELOCITY)
-			.SetDirectionAngle(static_cast<float>(i) / EXPLOSION_NUM_PARTICLES * 3.14f * 2)
+			.SetDirectionAngle(static_cast<float>(i) / EXPLOSION_NUM_PARTICLES * PI * 2)
 			.SetLiveTime(EXPLOSION_PARTICLE_LIVE_TIME)
 			.SetFadeTime(EXPLOSION_PARTICLE_FADE_TIME)
 			.SetFadeMode(Particle::FadeMode::FADE_OUT);
@@ -292,12 +290,12 @@ void Player::UpdateMovementHistory(float deltaTime)
 	}
 }
 
-void Player::DrawBody(sf::RenderWindow& window, sf::Vector2f position, float angle, float alpha) const
+void Player::DrawBody(sf::RenderWindow& window, sf::Vector2f position, float angle, const sf::Color& color) const
 {
 	auto radius = 2 * _radius - _radius * 0.866f;
 	auto body = sf::CircleShape(radius, 6);
 	body.setPosition(position);
-	body.setFillColor({ 255, 255, 255, static_cast<uint8_t>(255 * alpha) });
+	body.setFillColor(color);
 	body.setOrigin(radius, radius);
 	body.setRotation(30 + RadiusToDegree(angle));
 	window.draw(body);

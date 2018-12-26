@@ -19,6 +19,9 @@ public:
 	sf::Vector2f GetVirtualProportions() const { return { _virtualScreenWidth, _virtualScreenHeight }; }
 	sf::Vector2f GetRealProportions() const { return { _realScreenWidth, _realScreenHeight }; }
 	
+	float GetVirtualWidth() const { return _virtualScreenWidth; }
+	float GetVirtualHeight() const { return _virtualScreenHeight; }
+
 	float GetPosition() const { return _position; }
 	void SetPosition(float position) { _position = position; }
 	void Move(float distance) { _position += distance; }

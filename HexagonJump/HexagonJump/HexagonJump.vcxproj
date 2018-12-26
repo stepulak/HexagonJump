@@ -149,6 +149,7 @@
     <ClInclude Include="ParticleSystem.hpp" />
     <ClInclude Include="Platform.hpp" />
     <ClInclude Include="Player.hpp" />
+    <ClInclude Include="Runnable.hpp" />
     <ClInclude Include="Spike.hpp" />
     <ClInclude Include="Utils.hpp" />
     <ClInclude Include="World.hpp" />
