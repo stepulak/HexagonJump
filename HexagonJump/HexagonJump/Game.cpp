@@ -4,8 +4,8 @@
 
 namespace hexagon {
 
-Game::Game(Camera& camera, Difficulty difficulty)
-	: _world(camera)
+Game::Game(Camera& camera, BeatUnitManager& manager, Difficulty difficulty)
+	: _world(camera, manager)
 {
 	camera.SetSpeed(CameraSpeedAccordingToDifficulty(camera.GetVirtualProportions().x, difficulty));
 }

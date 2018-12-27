@@ -137,6 +137,7 @@
     <ClCompile Include="Spike.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="World.cpp" />
+    <ClCompile Include="WorldSetCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BeatUnit.hpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="Spike.hpp" />
     <ClInclude Include="Utils.hpp" />
     <ClInclude Include="World.hpp" />
+    <ClInclude Include="WorldSetCreator.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

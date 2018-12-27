@@ -18,6 +18,11 @@ void Spike::Move(float horizontalDistance)
 	_position.x += horizontalDistance;
 }
 
+bool Spike::PassedCamera(const Camera& camera) const
+{
+	return _position.x + std::max(_maxHeight, _width / 2.f) - camera.GetPosition() <= 0.f;
+}
+
 bool Spike::InCollision(const Player& player) const
 {
 	return CheckCollisionWithPlayer(player.GetPosition(), player.GetRadius());

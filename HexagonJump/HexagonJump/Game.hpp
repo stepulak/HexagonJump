@@ -15,7 +15,7 @@ public:
 		PRO
 	};
 
-	Game(Camera& camera, Difficulty difficulty);
+	Game(Camera& camera, BeatUnitManager& manager, Difficulty difficulty);
 
 	void KeyPressed(sf::Keyboard::Key key) override;
 	void KeyReleased(sf::Keyboard::Key key) override;

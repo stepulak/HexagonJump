@@ -23,6 +23,8 @@ public:
 
 private:
 
+	using BeatUnitContainer = std::vector<BeatUnit>;
+
 	static constexpr float SHUFFLE_TIME_DEFAULT = 2.f;
 	static constexpr float PASS_HIGHEST_BEAT_RATIO = 1.5f;
 	static constexpr double VISUALIZATION_DATA_POW = 1.6;
@@ -33,7 +35,7 @@ private:
 	void SetNewHeights();
 	void UpdateBeatAndShuffle(float deltaTime, float gameTimerate);
 
-	std::vector<BeatUnit> _beatUnits;
+	BeatUnitContainer _beatUnits;
 	MusicVisualizationData _visualizationData;
 	double _averageSampleValue;
 	size_t _visualizationDataIndex = 0u;

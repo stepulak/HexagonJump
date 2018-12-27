@@ -68,10 +68,10 @@ void Particle::Draw(const Camera& camera, sf::RenderWindow& window) const
 	}
 
 	// Create body and fill necessary values
-	sf::RectangleShape shape(sf::Vector2f(_width, _height));
-	shape.setPosition(sf::Vector2f(_x, _y));
+	sf::RectangleShape shape({ _width, _height });
+	shape.setPosition({ _x - camera.GetPosition(), _y });
 	shape.setRotation(RadiusToDegree(_bodyAngle));
-	shape.setOrigin(sf::Vector2f(_width / 2.f, _height / 2.f));
+	shape.setOrigin({ _width / 2.f, _height / 2.f });
 	
 	if (_texture) {
 		shape.setTexture(&_texture->get());

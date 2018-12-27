@@ -53,7 +53,7 @@ private:
 	static constexpr float TRY_TO_JUMP_TIMER_DEFAULT = .1f;
 	static constexpr float MOVEMENT_HISTORY_UPDATE_TIME = .01f;
 	static constexpr float HORIZONTAL_FRICTION = 800.f;
-	static constexpr float JUMP_INITIAL_VELOCITY = -250.f;
+	static constexpr float JUMP_INITIAL_VELOCITY = -800.f;
 	static constexpr float ROTATION_VELOCITY = 5.f;
 	static constexpr float EXPLOSION_PARTICLE_VELOCITY = 400.f;
 	static constexpr float EXPLOSION_PARTICLE_SIZE = 10.f;

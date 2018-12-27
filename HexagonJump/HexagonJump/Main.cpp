@@ -21,7 +21,7 @@ int main()
 	bool keyright = false;
 	
 	BeatUnitManager manager(MusicVisualizationData(1, MusicVisualizationColumnData(8)), 1.0);
-	Game game(camera, Game::Difficulty::EASY);
+	Game game(camera, manager, Game::Difficulty::EASY);
 
 	while (window.isOpen())
 	{

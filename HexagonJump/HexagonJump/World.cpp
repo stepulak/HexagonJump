@@ -6,8 +6,9 @@
 
 namespace hexagon {
 
-World::World(Camera& camera)
+World::World(Camera& camera, BeatUnitManager& manager)
 	: _camera(camera)
+	, _beatUnitManager(manager)
 	, _player(camera.GetVirtualWidth() * PLAYER_SPAWN_POS_X_RATIO, camera.GetVirtualHeight() * PLAYER_SPAWN_POS_Y_RATIO)
 {
 	ExtendSurface();
@@ -20,14 +21,17 @@ void World::Update(float deltaTime)
 	_particleSystem.Update(deltaTime);
 
 	if (ShouldSpawnAnotherObstacleSet()) {
+		auto setArea = sf::FloatRect(_surfaceEnd, 0.f, GetSurfaceWidth(), _camera.GetVirtualHeight() - GetSurfaceHeight());
+		_worldSetCreator.CreateRandomSet(*this, setArea);
 		ExtendSurface();
-		SpawnRandomObstacleSet();
 	}
-	TryToCutPositionOffset();
+	TryToCutObstaclesPosition();
+	RemoveObstaclesPassedCamera();
 }
 
 void World::Draw(sf::RenderWindow& window) const
 {
+	_particleSystem.Draw(window, _camera);
 	auto obstaclesAndPlayerColor = sf::Color(255, 255, 255, 255);
 	for (const auto& obstacle : _obstacles) {
 		obstacle->Draw(window, _camera, obstaclesAndPlayerColor);
@@ -35,33 +39,21 @@ void World::Draw(sf::RenderWindow& window) const
 	_player.Draw(window, _camera, obstaclesAndPlayerColor);
 }
 
-bool World::ShouldSpawnAnotherObstacleSet() const
-{
-	return _surfaceEnd - _camera.GetPosition() < _camera.GetVirtualWidth() * SURFACE_WIDTH_RATIO;
-}
-
-void World::SpawnRandomObstacleSet() const
-{
-	// TODO
-}
-
 void World::ExtendSurface()
 {
-	auto virtualCameraSize = _camera.GetVirtualProportions();
-	auto surfaceWidth = SURFACE_WIDTH_RATIO * virtualCameraSize.x;
-	auto surfaceHeight = SURFACE_HEIGHT_RATIO * virtualCameraSize.y;
-	AddObstacle(std::make_unique<Platform>(_surfaceEnd, virtualCameraSize.y - surfaceHeight, surfaceWidth, surfaceHeight));
+	auto surfaceWidth = GetSurfaceWidth();
+	auto surfaceHeight = GetSurfaceHeight();
+	AddObstacle(std::make_unique<Platform>(_surfaceEnd, _camera.GetVirtualHeight() - surfaceHeight, surfaceWidth, surfaceHeight));
 	_surfaceEnd += surfaceWidth;
 }
 
-void World::TryToCutPositionOffset()
+void World::TryToCutObstaclesPosition()
 {
 	auto cutOffset = _camera.GetVirtualWidth() * 2.f;
 
 	if (_camera.GetPosition() < cutOffset) {
 		return;
 	}
-
 	_camera.Move(-cutOffset);
 	_surfaceEnd -= cutOffset;
 	
@@ -69,6 +61,13 @@ void World::TryToCutPositionOffset()
 		obstacle->Move(-cutOffset);
 	}
 	_player.Move(-cutOffset, 0.f);
+}
+
+void World::RemoveObstaclesPassedCamera()
+{
+	_obstacles.erase(std::remove_if(_obstacles.begin(), _obstacles.end(), [&](auto& obstacle) {
+		return obstacle->PassedCamera(_camera);
+	}), _obstacles.end());
 }
 
 }
