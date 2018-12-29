@@ -12,7 +12,7 @@ World::World(Camera& camera, BeatUnitManager& manager)
 	, _player(camera.GetVirtualWidth() * PLAYER_SPAWN_POS_X_RATIO, camera.GetVirtualHeight() * PLAYER_SPAWN_POS_Y_RATIO)
 {
 	ExtendSurface();
-	_nextBackgroundColor = sf::Color(rand() % 255, rand() % 255, rand() % 255);
+	_backgroundColor = sf::Color(Random(0, 255), Random(0, 255), Random(0, 255));
 }
 
 void World::Update(float deltaTime)
@@ -28,6 +28,7 @@ void World::Update(float deltaTime)
 	}
 	TryToCutObstaclesPosition();
 	RemoveObstaclesPassedCamera();
+	ProcessBackgroundColorChange(deltaTime);
 }
 
 void World::Draw(sf::RenderWindow& window) const
@@ -79,20 +80,33 @@ void World::ProcessBackgroundColorChange(float deltaTime)
 	}
 	else {
 		_backgroundColorChangeTimer += deltaTime;
-
-		// TODO BEAT
+		_backgroundColorChangeTimer += _beatUnitManager.CurrentHighestBeatRatio() * deltaTime;
 
 		if (_backgroundColorChangeTimer >= BACKGROUND_COLOR_CHANGE_TIME) {
 			_backgroundColorChangeTimer = 0.f;
-			_nextBackgroundColor = sf::Color(rand() % 255, rand() % 255, rand() % 255);
+			_nextBackgroundColor = sf::Color(Random(0, 255), Random(0, 255), Random(0, 255));
 		}
 	}
+}
+
+void World::DrawStripes(sf::RenderWindow& window) const
+{
+}
+
+void World::DrawBeatFlash(sf::RenderWindow& window) const
+{
 }
 
 void World::DrawBackground(sf::RenderWindow& window) const
 {
 	sf::RectangleShape background(_camera.GetVirtualProportions());
-	background.setFillColor(MixColors(_nextBackgroundColor.value(), _backgroundColor, _nextBackgroundColorRatio));
+
+	if (_nextBackgroundColor) {
+		background.setFillColor(MixColors(_nextBackgroundColor.value(), _backgroundColor, _nextBackgroundColorRatio));
+	}
+	else {
+		background.setFillColor(_backgroundColor);
+	}
 	window.draw(background);
 }
 

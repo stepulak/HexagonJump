@@ -24,6 +24,11 @@ void BeatUnitManager::Update(float deltaTime, float gameTimerate)
 	}
 }
 
+float BeatUnitManager::CurrentHighestBeatRatio() const
+{
+	return (CurrentHighestBeat() - BeatUnit::MIN_HEIGHT) / (BeatUnit::MAX_HEIGHT - BeatUnit::MIN_HEIGHT);
+}
+
 float BeatUnitManager::CurrentHighestBeat() const
 {
 	float maxHeight = 0.f;

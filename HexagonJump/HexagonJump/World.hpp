@@ -55,6 +55,8 @@ private:
 	void RemoveObstaclesPassedCamera();
 	void ProcessBackgroundColorChange(float deltaTime);
 
+	void DrawStripes(sf::RenderWindow& window) const;
+	void DrawBeatFlash(sf::RenderWindow& window) const;
 	void DrawBackground(sf::RenderWindow& window) const;
 	void DrawForeground(sf::RenderWindow& window) const;
 

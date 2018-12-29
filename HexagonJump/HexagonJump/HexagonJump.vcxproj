@@ -125,6 +125,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BackgroundStripe.cpp" />
+    <ClCompile Include="BackgroundStripeManager.cpp" />
     <ClCompile Include="BeatUnit.cpp" />
     <ClCompile Include="BeatUnitManager.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -140,6 +142,7 @@
     <ClCompile Include="WorldSetCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BackgroundStripeManager.hpp" />
     <ClInclude Include="BeatUnit.hpp" />
     <ClInclude Include="BeatUnitManager.hpp" />
     <ClInclude Include="Camera.hpp" />
@@ -152,6 +155,7 @@
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Runnable.hpp" />
     <ClInclude Include="Spike.hpp" />
+    <ClInclude Include="BackgroundStripe.hpp" />
     <ClInclude Include="Utils.hpp" />
     <ClInclude Include="World.hpp" />
     <ClInclude Include="WorldSetCreator.hpp" />

@@ -20,6 +20,7 @@ public:
 	void Stop() { _active = false; }
 
 	void Update(float deltaTime, float gameTimerate);
+	float CurrentHighestBeatRatio() const;
 
 private:
 
