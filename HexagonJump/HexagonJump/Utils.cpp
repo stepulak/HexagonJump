@@ -115,4 +115,15 @@ int Random(int from, int to)
 	return std::uniform_int_distribution<>(from, to)(eng);
 }
 
+sf::Color MixColors(const sf::Color & c1, const sf::Color & c2, float ratio)
+{
+	auto oneMinusRatio = 1.f - ratio;
+	return { 
+		c1.r * ratio + c2.r * oneMinusRatio,
+		c1.g * ratio + c2.g * oneMinusRatio,
+		c1.b * ratio + c2.b * oneMinusRatio,
+		c1.a * ratio + c2.a * oneMinusRatio,
+	};
+}
+
 }

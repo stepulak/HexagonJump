@@ -44,6 +44,7 @@ private:
 	static constexpr float POSITION_CUT_RATIO = 10.f;
 	static constexpr float PLAYER_SPAWN_POS_X_RATIO = 0.2f;
 	static constexpr float PLAYER_SPAWN_POS_Y_RATIO = 0.5f;
+	static constexpr float BACKGROUND_COLOR_CHANGE_TIME = 10.f;
 
 	float GetSurfaceWidth() const { return _camera.GetVirtualWidth() * SURFACE_WIDTH_RATIO; }
 	float GetSurfaceHeight() const { return _camera.GetVirtualHeight() * SURFACE_HEIGHT_RATIO; }
@@ -52,6 +53,10 @@ private:
 	void ExtendSurface();
 	void TryToCutObstaclesPosition();
 	void RemoveObstaclesPassedCamera();
+	void ProcessBackgroundColorChange(float deltaTime);
+
+	void DrawBackground(sf::RenderWindow& window) const;
+	void DrawForeground(sf::RenderWindow& window) const;
 
 	Camera& _camera;
 	BeatUnitManager& _beatUnitManager;
@@ -60,6 +65,10 @@ private:
 	Player _player;
 	WorldSetCreator _worldSetCreator;
 	float _surfaceEnd = 0.f;
+	sf::Color _backgroundColor;
+	std::optional<sf::Color> _nextBackgroundColor;
+	float _backgroundColorChangeTimer = 0.f;
+	float _nextBackgroundColorRatio = 0.f;
 };
 
 }

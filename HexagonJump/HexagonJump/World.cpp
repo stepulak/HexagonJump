@@ -12,6 +12,7 @@ World::World(Camera& camera, BeatUnitManager& manager)
 	, _player(camera.GetVirtualWidth() * PLAYER_SPAWN_POS_X_RATIO, camera.GetVirtualHeight() * PLAYER_SPAWN_POS_Y_RATIO)
 {
 	ExtendSurface();
+	_nextBackgroundColor = sf::Color(rand() % 255, rand() % 255, rand() % 255);
 }
 
 void World::Update(float deltaTime)
@@ -31,12 +32,8 @@ void World::Update(float deltaTime)
 
 void World::Draw(sf::RenderWindow& window) const
 {
-	_particleSystem.Draw(window, _camera);
-	auto obstaclesAndPlayerColor = sf::Color(255, 255, 255, 255);
-	for (const auto& obstacle : _obstacles) {
-		obstacle->Draw(window, _camera, obstaclesAndPlayerColor);
-	}
-	_player.Draw(window, _camera, obstaclesAndPlayerColor);
+	DrawBackground(window);
+	DrawForeground(window);
 }
 
 void World::ExtendSurface()
@@ -68,6 +65,45 @@ void World::RemoveObstaclesPassedCamera()
 	_obstacles.erase(std::remove_if(_obstacles.begin(), _obstacles.end(), [&](auto& obstacle) {
 		return obstacle->PassedCamera(_camera);
 	}), _obstacles.end());
+}
+
+void World::ProcessBackgroundColorChange(float deltaTime)
+{
+	if (_nextBackgroundColor) {
+		_nextBackgroundColorRatio += deltaTime;
+		if (_nextBackgroundColorRatio >= 1.f) {
+			_nextBackgroundColorRatio = 0.f;
+			_backgroundColor = _nextBackgroundColor.value();
+			_nextBackgroundColor.reset();
+		}
+	}
+	else {
+		_backgroundColorChangeTimer += deltaTime;
+
+		// TODO BEAT
+
+		if (_backgroundColorChangeTimer >= BACKGROUND_COLOR_CHANGE_TIME) {
+			_backgroundColorChangeTimer = 0.f;
+			_nextBackgroundColor = sf::Color(rand() % 255, rand() % 255, rand() % 255);
+		}
+	}
+}
+
+void World::DrawBackground(sf::RenderWindow& window) const
+{
+	sf::RectangleShape background(_camera.GetVirtualProportions());
+	background.setFillColor(MixColors(_nextBackgroundColor.value(), _backgroundColor, _nextBackgroundColorRatio));
+	window.draw(background);
+}
+
+void World::DrawForeground(sf::RenderWindow& window) const
+{
+	_particleSystem.Draw(window, _camera);
+	auto obstaclesAndPlayerColor = sf::Color(255, 255, 255, 255);
+	for (const auto& obstacle : _obstacles) {
+		obstacle->Draw(window, _camera, obstaclesAndPlayerColor);
+	}
+	_player.Draw(window, _camera, obstaclesAndPlayerColor);
 }
 
 }
