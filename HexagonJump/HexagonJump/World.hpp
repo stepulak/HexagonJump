@@ -1,10 +1,11 @@
 #pragma once
 
+#include "BeatUnitManager.hpp"
+#include "BackgroundStripeManager.hpp"
 #include "Obstacle.hpp"
 #include "ParticleSystem.hpp"
 #include "Player.hpp"
 #include "WorldSetCreator.hpp"
-#include "BeatUnitManager.hpp"
 
 #include <vector>
 
@@ -51,17 +52,17 @@ private:
 	bool ShouldSpawnAnotherObstacleSet() const { return _surfaceEnd - _camera.GetPosition() < GetSurfaceWidth(); }
 
 	void ExtendSurface();
-	void TryToCutObstaclesPosition();
+	void TryToCutPositionAllElements();
 	void RemoveObstaclesPassedCamera();
 	void ProcessBackgroundColorChange(float deltaTime);
 
-	void DrawStripes(sf::RenderWindow& window) const;
 	void DrawBeatFlash(sf::RenderWindow& window) const;
 	void DrawBackground(sf::RenderWindow& window) const;
 	void DrawForeground(sf::RenderWindow& window) const;
 
 	Camera& _camera;
 	BeatUnitManager& _beatUnitManager;
+	BackgroundStripeManager _backgroundStripeManager;
 	ObstacleContainer _obstacles;
 	ParticleSystem _particleSystem;
 	Player _player;

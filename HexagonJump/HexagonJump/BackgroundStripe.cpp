@@ -1,5 +1,6 @@
 #include "BackgroundStripe.hpp"
 #include "Utils.hpp"
+#include <iostream>
 
 namespace hexagon {
 
@@ -10,7 +11,7 @@ BackgroundStripe::BackgroundStripe(float x, float y)
 
 bool BackgroundStripe::PassedCamera(const Camera& camera) const
 {
-	return _position.x + WIDTH <= camera.GetPosition() || _position.y + HEIGHT <= camera.GetVirtualHeight();
+	return _position.y >= camera.GetVirtualHeight();
 }
 
 void BackgroundStripe::Update(float deltaTime)

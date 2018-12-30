@@ -10,18 +10,29 @@
 
 using namespace hexagon;
 
+static constexpr auto MUSIC_FILENAME = "D:\\Git\\HexagonJump\\HexagonJump\\x64\\Debug\\DontBeSoShy.ogg";
+static constexpr size_t NUM_COLUMNS = 8u;
+
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(800, 600), "My window");
 	Camera camera(960.f, 540.f, 800, 600);
+	
+	sf::SoundBuffer buffer;
+	buffer.loadFromFile(MUSIC_FILENAME);
+	
+	sf::Music music;
+	music.openFromFile(MUSIC_FILENAME);
+
+	std::cout << "Loading started" << std::endl;
+	auto musicData = CountMusicVisualizationData(buffer, Game::TIMERATE, NUM_COLUMNS);
+	std::cout << "Loading ended" << std::endl;
+
+	BeatUnitManager manager(musicData.first, musicData.second);
+	Game game(music, camera, manager, Game::Difficulty::EASY);
 
 	sf::Clock deltaClock;
-	float time = 0.f;
-	bool keyleft = false;
-	bool keyright = false;
-	
-	BeatUnitManager manager(MusicVisualizationData(1, MusicVisualizationColumnData(8)), 1.0);
-	Game game(camera, manager, Game::Difficulty::EASY);
+	game.Start();
 
 	while (window.isOpen())
 	{

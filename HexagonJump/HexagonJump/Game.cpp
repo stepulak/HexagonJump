@@ -4,10 +4,26 @@
 
 namespace hexagon {
 
-Game::Game(Camera& camera, BeatUnitManager& manager, Difficulty difficulty)
-	: _world(camera, manager)
+Game::Game(sf::Music& music, Camera& camera, BeatUnitManager& manager, Difficulty difficulty)
+	: _music(music)
+	, _beatUnitManager(manager)
+	, _world(camera, manager)
 {
 	camera.SetSpeed(CameraSpeedAccordingToDifficulty(camera.GetVirtualProportions().x, difficulty));
+}
+
+void Game::Start()
+{
+	_stopped = false;
+	_beatUnitManager.Start();
+	_music.play();
+}
+
+void Game::Stop()
+{
+	_stopped = true;
+	_beatUnitManager.Stop();
+	_music.pause();
 }
 
 void Game::KeyPressed(sf::Keyboard::Key key)
@@ -31,6 +47,14 @@ void Game::KeyPressed(sf::Keyboard::Key key)
 		player.StopMoving();
 		player.StartMoving(camera.GetSpeed() * 2.f, true);
 		break;
+	case PAUSE_KEY:
+		if (_stopped) {
+			Start();
+		}
+		else {
+			Stop();
+		}
+		break;
 	default:
 		break;
 	}
@@ -52,7 +76,12 @@ void Game::KeyReleased(sf::Keyboard::Key key)
 
 void Game::Update(float deltaTime)
 {
+	if (_stopped) {
+		return; // skip
+	}
 	_world.Update(deltaTime);
+	_beatUnitManager.Update(deltaTime, Game::TIMERATE);
+	SyncMusicAndBeatManager(deltaTime);
 }
 
 void Game::Draw(sf::RenderWindow& window) const
@@ -73,6 +102,15 @@ float Game::CameraSpeedAccordingToDifficulty(float virtualWidth, Difficulty dif)
 		return virtualWidth * CAMERA_SPEED_LOWEST_DIFFICULTY * std::pow(CAMERA_SPEED_DIFFICULTY_MULTIPLIER, 3);
 	}
 	return 0.f;
+}
+
+void Game::SyncMusicAndBeatManager(float deltaTime)
+{
+	_musicBeatManagerSyncTimer += deltaTime;
+	if (_musicBeatManagerSyncTimer >= MUSIC_WITH_BEAT_MANAGER_SYNC_TIME) {
+		_musicBeatManagerSyncTimer -= MUSIC_WITH_BEAT_MANAGER_SYNC_TIME;
+		// TODO SYNC
+	}
 }
 
 }

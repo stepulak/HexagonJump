@@ -10,6 +10,8 @@ public:
 
 	BackgroundStripe(float x, float y);
 
+	void Move(float horizontalDist) { _position.x += horizontalDist; }
+
 	bool PassedCamera(const Camera& camera) const;
 	void Update(float deltaTime);
 	void Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const;

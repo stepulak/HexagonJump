@@ -20,13 +20,14 @@ void World::Update(float deltaTime)
 	_camera.Move(_camera.GetSpeed() * deltaTime);
 	_player.Update(deltaTime, GRAVITY, *this);
 	_particleSystem.Update(deltaTime);
-
+	_backgroundStripeManager.Update(_camera, deltaTime);
+	
 	if (ShouldSpawnAnotherObstacleSet()) {
 		auto setArea = sf::FloatRect(_surfaceEnd, 0.f, GetSurfaceWidth(), _camera.GetVirtualHeight() - GetSurfaceHeight());
 		_worldSetCreator.CreateRandomSet(*this, setArea);
 		ExtendSurface();
 	}
-	TryToCutObstaclesPosition();
+	TryToCutPositionAllElements();
 	RemoveObstaclesPassedCamera();
 	ProcessBackgroundColorChange(deltaTime);
 }
@@ -45,20 +46,21 @@ void World::ExtendSurface()
 	_surfaceEnd += surfaceWidth;
 }
 
-void World::TryToCutObstaclesPosition()
+void World::TryToCutPositionAllElements()
 {
-	auto cutOffset = _camera.GetVirtualWidth() * 2.f;
-
+	auto cutOffset = _camera.GetVirtualWidth() * POSITION_CUT_RATIO;
+	
 	if (_camera.GetPosition() < cutOffset) {
-		return;
+		return; // no cut
 	}
 	_camera.Move(-cutOffset);
 	_surfaceEnd -= cutOffset;
+	_player.Move(-cutOffset, 0.f);
+	_backgroundStripeManager.Move(-cutOffset);
 	
 	for (auto& obstacle : _obstacles) {
 		obstacle->Move(-cutOffset);
 	}
-	_player.Move(-cutOffset, 0.f);
 }
 
 void World::RemoveObstaclesPassedCamera()
@@ -89,10 +91,6 @@ void World::ProcessBackgroundColorChange(float deltaTime)
 	}
 }
 
-void World::DrawStripes(sf::RenderWindow& window) const
-{
-}
-
 void World::DrawBeatFlash(sf::RenderWindow& window) const
 {
 }
@@ -108,6 +106,8 @@ void World::DrawBackground(sf::RenderWindow& window) const
 		background.setFillColor(_backgroundColor);
 	}
 	window.draw(background);
+
+	_backgroundStripeManager.Draw(window, _camera, sf::Color(255, 255, 255, 64));
 }
 
 void World::DrawForeground(sf::RenderWindow& window) const

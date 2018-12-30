@@ -7,7 +7,7 @@ namespace hexagon {
 
 WorldSetCreator::WorldSetCreator()
 {
-	/*_setCreators.emplace_back([&](auto& world, const auto& area) {
+	_setCreators.emplace_back([&](auto& world, const auto& area) {
 		auto spikeWidth = GetSpikeWidth(area);
 		auto spikeHeight = GetSpikeHeight(area);
 		size_t numSpikeGroups = 3u;
@@ -19,9 +19,9 @@ WorldSetCreator::WorldSetCreator()
 				AddSpike(world, area, groupOffset + i * groupOffset + j * spikeWidth + spikeWidth / 2, area.height, Direction::UP);
 			}
 		}
-	});*/
+	});
 
-	/*_setCreators.emplace_back([&](auto& world, const auto& area) {
+	_setCreators.emplace_back([&](auto& world, const auto& area) {
 		auto spikeWidth = GetSpikeWidth(area);
 		auto spikeHeight = GetSpikeHeight(area);
 		size_t numSpikesOnPlatform = 3u;
@@ -42,7 +42,7 @@ WorldSetCreator::WorldSetCreator()
 		for (size_t i = 0u; i < numSpikesOnGround; i++) {
 			AddSpike(world, area, spikesOnGroundX + spikeWidth / 2.f + i * spikeWidth, area.height, Direction::UP);
 		}
-	});*/
+	});
 
 	_setCreators.emplace_back([&](auto& world, const auto& area) {
 		auto spikeWidth = GetSpikeWidth(area);
