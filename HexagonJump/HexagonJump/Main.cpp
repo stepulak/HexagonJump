@@ -4,6 +4,7 @@
 #include "Game.hpp"
 
 #include <iostream>
+#include <fstream>
 #include <thread>
 #include <chrono>
 #include <SFML/Audio.hpp>
@@ -28,8 +29,18 @@ int main()
 	auto musicData = CountMusicVisualizationData(buffer, Game::TIMERATE, NUM_COLUMNS);
 	std::cout << "Loading ended" << std::endl;
 
-	BeatUnitManager manager(musicData.first, musicData.second);
-	Game game(music, camera, manager, Game::Difficulty::EASY);
+	/*std::fstream file("save.txt", std::ios_base::out);
+	file << musicData.second << std::endl;
+	for (auto& column : musicData.first) {
+		for (auto& val : column) {
+			file << val << ',';
+		}
+		file << std::endl;
+	}
+	file.close();*/
+
+
+	Game game(music, musicData, camera, Game::Difficulty::EASY);
 
 	sf::Clock deltaClock;
 	game.Start();

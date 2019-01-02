@@ -1,9 +1,6 @@
-#include "MusicVisualization.hpp"
-#include "Utils.hpp"
-#include <iostream>
+#include "MusicVisualizationManager.hpp"
 
 namespace hexagon {
-
 namespace {
 
 void BinaryReverseTwoArrays(std::vector<double>& x, std::vector<double>& y)
@@ -75,8 +72,13 @@ void FFT(std::vector<double>& real, std::vector<double>& imaginary)
 
 } // namespace
 
-std::pair<MusicVisualizationData, double> CountMusicVisualizationData(const sf::SoundBuffer& buffer, float gameTimerate, uint8_t spectrumColumns)
+MusicVisulizationManager::MusicVisulizationManager()
 {
+}
+
+MusicVisulizationManager::MusicVisualization MusicVisulizationManager::CountMusicVisualizationData(const sf::SoundBuffer& buffer, float gameTimerate, uint8_t spectrumColumns)
+{
+	// TODO SIMPLIFY
 	auto samples = buffer.getSamples();
 	auto sampleRate = buffer.getSampleRate();
 	auto sampleCount = buffer.getSampleCount();
@@ -95,8 +97,8 @@ std::pair<MusicVisualizationData, double> CountMusicVisualizationData(const sf::
 			if (sampleIndex >= sampleCount) {
 				break;
 			}
-			samplesReal[i] = samples[sampleIndex];
-			samplesImaginary[i] = samples[sampleIndex + 1];
+			samplesReal[i] = samples[sampleIndex] / 32768.0;
+			samplesImaginary[i] = samples[sampleIndex + 1] / 32768.0;
 			sampleIndex += 2;
 		}
 
@@ -122,7 +124,7 @@ std::pair<MusicVisualizationData, double> CountMusicVisualizationData(const sf::
 		std::fill(samplesImaginary.begin(), samplesImaginary.end(), 0.0);
 	}
 
-	return { visualizationData, avgSampleValue };
+	return { visualizationData, avgSampleValue / (sampleCount * spectrumColumns * samplesPerColumn) };
 }
 
 }

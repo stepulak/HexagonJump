@@ -17,7 +17,7 @@ public:
 
 	static constexpr float TIMERATE = 1 / 20.f;
 
-	Game(sf::Music& music, Camera& camera, BeatUnitManager& manager, Difficulty difficulty);
+	Game(sf::Music& music, std::pair<MusicVisualizationData, double>& musicData, Camera& camera, Difficulty difficulty);
 
 	void Start();
 	void Stop();
@@ -43,7 +43,7 @@ private:
 	void SyncMusicAndBeatManager(float deltaTime);
 
 	sf::Music& _music;
-	BeatUnitManager& _beatUnitManager;
+	BeatUnitManager _beatUnitManager;
 	World _world;
 	bool _stopped = true;
 	float _musicBeatManagerSyncTimer = 0.f;

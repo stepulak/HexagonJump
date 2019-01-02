@@ -4,10 +4,10 @@
 
 namespace hexagon {
 
-Game::Game(sf::Music& music, Camera& camera, BeatUnitManager& manager, Difficulty difficulty)
+Game::Game(sf::Music& music, std::pair<MusicVisualizationData, double>& musicData, Camera& camera, Difficulty difficulty)
 	: _music(music)
-	, _beatUnitManager(manager)
-	, _world(camera, manager)
+	, _beatUnitManager(musicData.first, musicData.second, TIMERATE)
+	, _world(camera, _beatUnitManager)
 {
 	camera.SetSpeed(CameraSpeedAccordingToDifficulty(camera.GetVirtualProportions().x, difficulty));
 }
@@ -80,7 +80,7 @@ void Game::Update(float deltaTime)
 		return; // skip
 	}
 	_world.Update(deltaTime);
-	_beatUnitManager.Update(deltaTime, Game::TIMERATE);
+	_beatUnitManager.Update(deltaTime);
 	SyncMusicAndBeatManager(deltaTime);
 }
 
@@ -109,7 +109,7 @@ void Game::SyncMusicAndBeatManager(float deltaTime)
 	_musicBeatManagerSyncTimer += deltaTime;
 	if (_musicBeatManagerSyncTimer >= MUSIC_WITH_BEAT_MANAGER_SYNC_TIME) {
 		_musicBeatManagerSyncTimer -= MUSIC_WITH_BEAT_MANAGER_SYNC_TIME;
-		// TODO SYNC
+		_beatUnitManager.SyncTimingWithMusic(_music.getPlayingOffset().asMilliseconds());
 	}
 }
 

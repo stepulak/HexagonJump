@@ -8,7 +8,7 @@ namespace hexagon {
 class BeatUnitManager {
 public:
 
-	BeatUnitManager(MusicVisualizationData data, double averageSampleValue);
+	BeatUnitManager(MusicVisualizationData data, double averageSampleValue, float gameTimerate);
 
 	BeatUnit& GetUnit(size_t index) { return _beatUnits[index]; }
 	const BeatUnit& GetUnit(size_t index) const { return _beatUnits[index]; }
@@ -19,8 +19,9 @@ public:
 	void Start() { _active = true; }
 	void Stop() { _active = false; }
 
-	void Update(float deltaTime, float gameTimerate);
+	void Update(float deltaTime);
 	float CurrentHighestBeatRatio() const;
+	void SyncTimingWithMusic(float musicTime);
 
 private:
 
@@ -28,17 +29,19 @@ private:
 
 	static constexpr float SHUFFLE_TIME_DEFAULT = 2.f;
 	static constexpr float PASS_HIGHEST_BEAT_RATIO = 1.5f;
-	static constexpr double VISUALIZATION_DATA_POW = 1.6;
-	static constexpr double VISUALIZATION_DATA_RATIO = 6000.0;
+	static constexpr double VISUALIZATION_DATA_POW = 1.5;
+	static constexpr double VISUALIZATION_DATA_RATIO = 0.00015;
 
 	float CurrentHighestBeat() const;
 	void ShuffleUnits();
 	void SetNewHeights();
-	void UpdateBeatAndShuffle(float deltaTime, float gameTimerate);
+	void UpdateBeat(float deltaTime);
+	void UpdateShuffle(float deltaTime);
 
 	BeatUnitContainer _beatUnits;
 	MusicVisualizationData _visualizationData;
-	double _averageSampleValue;
+	const double _averageSampleValue;
+	const float _gameTimerate;
 	size_t _visualizationDataIndex = 0u;
 	bool _active = false;
 	float _beatTimer = 0.f;
