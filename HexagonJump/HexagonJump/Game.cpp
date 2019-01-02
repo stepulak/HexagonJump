@@ -4,9 +4,9 @@
 
 namespace hexagon {
 
-Game::Game(sf::Music& music, std::pair<MusicVisualizationData, double>& musicData, Camera& camera, Difficulty difficulty)
+Game::Game(sf::Music& music, MusicVisualization&& visualization, size_t numBeatUnits, Camera& camera, Difficulty difficulty)
 	: _music(music)
-	, _beatUnitManager(musicData.first, musicData.second, TIMERATE)
+	, _beatUnitManager(std::move(visualization), numBeatUnits, TIMERATE)
 	, _world(camera, _beatUnitManager)
 {
 	camera.SetSpeed(CameraSpeedAccordingToDifficulty(camera.GetVirtualProportions().x, difficulty));

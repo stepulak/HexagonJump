@@ -1,42 +1,50 @@
 #pragma once
 
-#include <vector>
+#include "MusicVisualization.hpp"
+
 #include <string>
 #include <SFML/Audio.hpp>
 
 namespace hexagon {
 
+struct MusicStats {
+	size_t bestScore;
+	float bestTime;
+};
+
+struct MusicData {
+	std::string name;
+	MusicStats stats;
+	MusicVisualization visulization;
+};
+
 class MusicVisulizationManager {
 public:
 
-	using MusicNamesContainer = std::vector<std::string>;
-	using MusicVisualizationColumnData = std::vector<double>;
-	using MusicVisualizationData = std::vector<MusicVisualizationColumnData>;
+	using MusicContainer = std::map<std::string, MusicStats>;
 
-	struct MusicVisualization {
-		MusicVisualizationData data;
-		double averageSampleValue;
-	};
+	MusicVisulizationManager(size_t spectrumColumns);
 
-	struct MusicData {
-		std::string name;
-		size_t bestScore;
-		size_t bestTime;
-		MusicVisualization visulization;
-	};
+	const MusicContainer& GetMusic() const { return _music; }
 
-	MusicVisulizationManager();
-
-	const MusicNamesContainer& GetMusicNames() const { _musicNames; }
-	std::string AddMusic(const std::string& path);
-	MusicData OpenMusic(const std::string& musicName) const;
-	void UpdateStatsIfBetter(const std::string& musicName, size_t bestScore, size_t bestTime);
+	std::string AddNewMusic(const std::string& path, float gameTimerate);
+	MusicData LoadMusic(const std::string& musicName) const;
+	void UpdateStatsIfBetter(const std::string& musicName, const MusicStats& stats);
 
 private:
 
-	static MusicVisualization CountMusicVisualizationData(const sf::SoundBuffer& buffer, float gameTimerate, uint8_t spectrumColumns);
+	static constexpr auto MUSIC_LIST_FILENAME = "musiclist.txt";
+	static constexpr auto STATS_FILE_SUFFIX = ".stats";
+	static constexpr auto DATA_FILE_SUFFIX = ".data";
 
-	MusicNamesContainer _musicNames;
+	static MusicVisualization LoadMusicVisualizationFromFile(const std::string& filename, size_t spectrumColumns);
+	static void SaveMusicVisualizationToFile(const MusicVisualization& visualization, const std::string& filename);
+	static MusicStats LoadMusicStats(const std::string& filename);
+	static void SaveMusicStats(const MusicStats& stats, const std::string& filename);
+
+	std::string _applicationDataPath;
+	const size_t _spectrumColumns;
+	MusicContainer _music;
 };
 
 }

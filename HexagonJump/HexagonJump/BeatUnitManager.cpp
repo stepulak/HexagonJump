@@ -7,10 +7,9 @@
 
 namespace hexagon {
 
-BeatUnitManager::BeatUnitManager(MusicVisualizationData data, double averageSampleValue, float gameTimerate)
-	: _beatUnits(data.size() > 0 ? data.front().size() : throw std::runtime_error("Visualization data is empty"))
-	, _visualizationData(std::move(data))
-	, _averageSampleValue(averageSampleValue)
+BeatUnitManager::BeatUnitManager(MusicVisualization&& visualization, size_t numBeatUnits, float gameTimerate)
+	: _beatUnits(numBeatUnits > 0 ? numBeatUnits : throw std::runtime_error("Number of beat units cannot be zero"))
+	, _musicVisualization(std::move(visualization))
 	, _gameTimerate(gameTimerate)
 {
 }
@@ -55,12 +54,12 @@ void BeatUnitManager::ShuffleUnits()
 
 void BeatUnitManager::SetNewHeights()
 {
-	if (_visualizationDataIndex >= _visualizationData.size()) {
+	if (_visualizationDataIndex >= _musicVisualization.data.size()) {
 		return;
 	}
-	const auto& data = _visualizationData[_visualizationDataIndex];
+	const auto& data = _musicVisualization.data[_visualizationDataIndex];
 	for (size_t i = 0u; i < data.size(); i++) {
-		_beatUnits[i].SetHeight(std::pow(data[i], VISUALIZATION_DATA_POW) * VISUALIZATION_DATA_RATIO / _averageSampleValue);
+		_beatUnits[i].SetHeight(std::pow(data[i], VISUALIZATION_DATA_POW) * VISUALIZATION_DATA_RATIO / _musicVisualization.averageSampleValue);
 	}
 }
 
@@ -68,7 +67,7 @@ void BeatUnitManager::UpdateBeat(float deltaTime)
 {
 	_beatTimer += deltaTime;
 	
-	if (_beatTimer < _gameTimerate || _visualizationDataIndex >= _visualizationData.size()) {
+	if (_beatTimer < _gameTimerate || _visualizationDataIndex >= _musicVisualization.data.size()) {
 		return;
 	}
 	while (_beatTimer >= _gameTimerate) {

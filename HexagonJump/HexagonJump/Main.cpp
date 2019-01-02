@@ -1,5 +1,5 @@
 #include "Utils.hpp"
-#include "MusicVisualization.hpp"
+#include "MusicVisualizationManager.hpp"
 #include "BeatUnitManager.hpp"
 #include "Game.hpp"
 
@@ -26,7 +26,8 @@ int main()
 	music.openFromFile(MUSIC_FILENAME);
 
 	std::cout << "Loading started" << std::endl;
-	auto musicData = CountMusicVisualizationData(buffer, Game::TIMERATE, NUM_COLUMNS);
+	MusicVisulizationManager manager;
+	//auto musicData = CountMusicVisualizationData(buffer, Game::TIMERATE, NUM_COLUMNS);
 	std::cout << "Loading ended" << std::endl;
 
 	/*std::fstream file("save.txt", std::ios_base::out);
@@ -39,8 +40,7 @@ int main()
 	}
 	file.close();*/
 
-
-	Game game(music, musicData, camera, Game::Difficulty::EASY);
+	Game game(music, MusicVisualization{}, NUM_COLUMNS, camera, Game::Difficulty::EASY);
 
 	sf::Clock deltaClock;
 	game.Start();

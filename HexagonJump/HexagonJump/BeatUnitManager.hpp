@@ -8,7 +8,7 @@ namespace hexagon {
 class BeatUnitManager {
 public:
 
-	BeatUnitManager(MusicVisualizationData data, double averageSampleValue, float gameTimerate);
+	BeatUnitManager(MusicVisualization&& visualization, size_t numBeatUnits, float gameTimerate);
 
 	BeatUnit& GetUnit(size_t index) { return _beatUnits[index]; }
 	const BeatUnit& GetUnit(size_t index) const { return _beatUnits[index]; }
@@ -39,8 +39,7 @@ private:
 	void UpdateShuffle(float deltaTime);
 
 	BeatUnitContainer _beatUnits;
-	MusicVisualizationData _visualizationData;
-	const double _averageSampleValue;
+	MusicVisualization _musicVisualization;
 	const float _gameTimerate;
 	size_t _visualizationDataIndex = 0u;
 	bool _active = false;

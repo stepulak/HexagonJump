@@ -2,6 +2,7 @@
 
 #include "Runnable.hpp"
 #include "World.hpp"
+#include "MusicVisualizationManager.hpp"
 
 namespace hexagon {
 
@@ -16,8 +17,8 @@ public:
 	};
 
 	static constexpr float TIMERATE = 1 / 20.f;
-
-	Game(sf::Music& music, std::pair<MusicVisualizationData, double>& musicData, Camera& camera, Difficulty difficulty);
+	
+	Game(sf::Music& music, MusicVisualization&& visualization, size_t numBeatUnits, Camera& camera, Difficulty difficulty);
 
 	void Start();
 	void Stop();
@@ -39,7 +40,7 @@ private:
 	static constexpr auto PLAYER_KEY_MOVE_LEFT = sf::Keyboard::A;
 	static constexpr auto PLAYER_KEY_MOVE_RIGHT = sf::Keyboard::D;
 	static constexpr auto PAUSE_KEY = sf::Keyboard::P;
-
+	
 	void SyncMusicAndBeatManager(float deltaTime);
 
 	sf::Music& _music;

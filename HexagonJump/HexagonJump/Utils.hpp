@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <random>
+#include <filesystem>
 
 namespace hexagon {
 
@@ -49,6 +50,10 @@ static bool operator&(TEnum m1, TEnum m2)
 {
 	using UType = typename std::underlying_type<TEnum>::type;
 	return static_cast<bool>(static_cast<UType>(m1) & static_cast<UType>(m2));
+}
+
+static std::string FilenameWithoutExtension(const std::string& path) {
+	return std::filesystem::path(path).stem().string();
 }
 
 }

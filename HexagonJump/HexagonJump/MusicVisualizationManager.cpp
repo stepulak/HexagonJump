@@ -1,130 +1,141 @@
 #include "MusicVisualizationManager.hpp"
+#include "Utils.hpp"
+#include "AppInfo.hpp"
+
+#include <fstream>
+#include <sstream>
+
+#ifndef _WIN32
+#include <pwd.h>
+#include <unistd.h>
+#include <sys/types.h>
+#else
+#pragma warning(disable:4996) // use getenv without error
+#endif
 
 namespace hexagon {
-namespace {
 
-void BinaryReverseTwoArrays(std::vector<double>& x, std::vector<double>& y)
+MusicVisulizationManager::MusicVisulizationManager(size_t spectrumColumns)
+	: _spectrumColumns(spectrumColumns)
 {
-	if (x.size() != y.size())
-	{
-		throw std::runtime_error("x.size() != y.size()");
-	}
-	size_t j = 0u, n1, n2 = x.size() / 2;
-	for (size_t i = 1u; i <= x.size() - 2; i++)
-	{
-		n1 = n2;
-		while (j >= n1)
-		{
-			j -= n1;
-			n1 /= 2;
-		}
-		j += n1;
-		if (i < j)
-		{
-			std::swap(x[i], x[j]);
-			std::swap(y[i], y[j]);
-		}
-	}
+#ifdef _WIN32
+	_applicationDataPath = getenv("APPDATA");
+#else
+	auto homeFolder = getenv("HOME");
+	_applicationDataPath = homeFolder != nullptr ? homeFolder : getpwuid(getuid())->pw_dir;
+#endif
+	_applicationDataPath += std::string("\\") + APP_NAME + "\\";
+	std::filesystem::create_directory(_applicationDataPath);
 }
 
-void Radix2InPlace(std::vector<double>& real, std::vector<double>& imaginary, int exponent)
+std::string MusicVisulizationManager::AddNewMusic(const std::string& path, float gameTimerate)
 {
-	size_t m = 1;
-	for (int i = 0; i < exponent; i++)
-	{
-		double a = 0.0;
-		size_t n = m;
-		m *= 2;
-
-		for (size_t j = 0; j < n; j++)
-		{
-			auto c = std::cos(a);
-			auto s = std::sin(a);
-			a += -2 * PI / m;
-			for (size_t k = j; k < real.size(); k = k + m)
-			{
-				auto t1 = c * real[k + n] - s * imaginary[k + n];
-				auto t2 = s * real[k + n] + c * imaginary[k + n];
-				real[k + n] = real[k] - t1;
-				imaginary[k + n] = imaginary[k] - t2;
-				real[k] += t1;
-				imaginary[k] += t2;
-			}
-		}
+	sf::SoundBuffer buffer;
+	if (!buffer.loadFromFile(path)) {
+		throw std::runtime_error("Unable to load music: " + path);
 	}
+
+	auto musicName = FilenameWithoutExtension(path);
+	auto musicPath = _applicationDataPath + musicName;
+	auto visualizationData = CountMusicVisualizationData(buffer, gameTimerate, _spectrumColumns);
+
+	SaveMusicVisualizationToFile(visualizationData, musicPath + DATA_FILE_SUFFIX);
+	SaveMusicStats({ 0, 0.f }, musicPath + STATS_FILE_SUFFIX);
+
+	return musicName;
 }
 
-void FFT(std::vector<double>& real, std::vector<double>& imaginary)
+MusicData MusicVisulizationManager::LoadMusic(const std::string& musicName) const
 {
-	if (real.size() != imaginary.size())
-	{
-		throw std::runtime_error("real.size() != imaginary.size()");
-	}
-	auto exponent = std::log2f(static_cast<float>(real.size()));
-	float intpart;
-	if (std::modf(exponent, &intpart) != 0.f)
-	{
-		throw std::runtime_error("vectors's length is not power of two");
-	}
-	BinaryReverseTwoArrays(real, imaginary);
-	Radix2InPlace(real, imaginary, (int)exponent);
+	auto musicPath = _applicationDataPath + musicName;
+	auto musicVisualization = LoadMusicVisualizationFromFile(musicPath + DATA_FILE_SUFFIX, _spectrumColumns);
+	auto musicStats = LoadMusicStats(musicPath + STATS_FILE_SUFFIX);
+	return { musicName, musicStats, musicVisualization };
 }
 
-} // namespace
-
-MusicVisulizationManager::MusicVisulizationManager()
+void MusicVisulizationManager::UpdateStatsIfBetter(const std::string& musicName, const MusicStats& stats)
 {
+	auto statsFilename = _applicationDataPath + musicName + STATS_FILE_SUFFIX;
+	auto oldStats = LoadMusicStats(statsFilename);
+	MusicStats newStats { std::max(stats.bestScore, oldStats.bestScore), std::max(stats.bestTime, oldStats.bestTime) };
+	
+	SaveMusicStats(newStats, statsFilename);
+	_music[musicName] = newStats;
 }
 
-MusicVisulizationManager::MusicVisualization MusicVisulizationManager::CountMusicVisualizationData(const sf::SoundBuffer& buffer, float gameTimerate, uint8_t spectrumColumns)
+MusicVisualization MusicVisulizationManager::LoadMusicVisualizationFromFile(const std::string& filename, size_t spectrumColumns)
 {
-	// TODO SIMPLIFY
-	auto samples = buffer.getSamples();
-	auto sampleRate = buffer.getSampleRate();
-	auto sampleCount = buffer.getSampleCount();
-	auto samplesPerTick = static_cast<size_t>(gameTimerate * sampleRate);
-	auto samplesPerTickPowerOfTwo = static_cast<size_t>(std::pow(2, static_cast<int>(std::log2(samplesPerTick) + 1)));
-	auto samplesPerColumn = samplesPerTick / spectrumColumns;
-	double avgSampleValue = 0;
-	std::vector<double> samplesReal(samplesPerTickPowerOfTwo), samplesImaginary(samplesPerTickPowerOfTwo);
+	std::fstream file(filename, std::ios_base::in);
+	if (!file.good()) {
+		throw std::runtime_error("Unable to open music visualization data file: " + filename);
+	}
+
+	double averageSampleValue;
+	file >> averageSampleValue;
+
+	size_t dataSize;
+	file >> dataSize;
+
 	MusicVisualizationData visualizationData;
-	visualizationData.reserve((sampleCount / samplesPerTick));
+	visualizationData.reserve(dataSize);
 
-	for (size_t sampleIndex = 0u; sampleIndex < sampleCount;)
-	{
-		// Fetch samples
-		for (size_t i = 0u; i < samplesPerTick; i++) {
-			if (sampleIndex >= sampleCount) {
-				break;
-			}
-			samplesReal[i] = samples[sampleIndex] / 32768.0;
-			samplesImaginary[i] = samples[sampleIndex + 1] / 32768.0;
-			sampleIndex += 2;
+	for (size_t i = 0u; i < dataSize; i++) {
+		std::string line;
+		std::getline(file, line);
+		std::istringstream stream(line);
+		MusicVisualizationColumnData columnData(spectrumColumns);
+		char sep;
+
+		for (size_t j = 0u; j < spectrumColumns; j++) {
+			stream >> columnData[j] >> sep;
 		}
-
-		// Count spectrum
-		MusicVisualizationColumnData visualizationColumnData(spectrumColumns);
-
-		for (size_t i = 0u; i < spectrumColumns; i++) {
-			double columnResult = 0;
-			for (size_t j = 0u; j < samplesPerColumn; j++) {
-				size_t index = j + i * samplesPerColumn;
-				auto sampleResult = std::sqrt(samplesReal[index] * samplesReal[index] + samplesImaginary[index] * samplesImaginary[index]);
-				columnResult += sampleResult;
-				avgSampleValue += sampleResult;
-			}
-			visualizationColumnData[i] = columnResult / samplesPerColumn;
-		}
-
-		// Save it
-		visualizationData.emplace_back(std::move(visualizationColumnData));
-
-		// Clear for further use
-		std::fill(samplesReal.begin(), samplesReal.end(), 0.0);
-		std::fill(samplesImaginary.begin(), samplesImaginary.end(), 0.0);
+		visualizationData.emplace_back(std::move(columnData));
 	}
 
-	return { visualizationData, avgSampleValue / (sampleCount * spectrumColumns * samplesPerColumn) };
+	return { visualizationData, averageSampleValue };
+}
+
+void MusicVisulizationManager::SaveMusicVisualizationToFile(const MusicVisualization& visualization, const std::string& filename)
+{
+	std::fstream file(filename, std::ios_base::out);
+	if (!file.good()) {
+		throw std::runtime_error("Unable to save music visualization data file: " + filename);
+	}
+
+	file << visualization.averageSampleValue << std::endl;
+	file << visualization.data.size() << std::endl;
+
+	for (const auto& column : visualization.data) {
+		for (const auto& value : column) {
+			file << value << ',';
+		}
+		file << std::endl;
+	}
+}
+
+MusicStats MusicVisulizationManager::LoadMusicStats(const std::string& filename)
+{
+	std::fstream file(filename, std::ios_base::in);
+	if (!file.good()) {
+		throw std::runtime_error("Unable to open music stats file: " + filename);
+	}
+
+	MusicStats stats;
+	file >> stats.bestScore;
+	file >> stats.bestTime;
+
+	return stats;
+}
+
+void MusicVisulizationManager::SaveMusicStats(const MusicStats& stats, const std::string& filename)
+{
+	std::fstream file(filename, std::ios_base::out);
+	if (!file.good()) {
+		throw std::runtime_error("Unable to save music stats file: " + filename);
+	}
+
+	file << stats.bestScore << std::endl;
+	file << stats.bestTime << std::endl;
 }
 
 }

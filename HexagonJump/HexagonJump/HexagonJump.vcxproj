@@ -131,6 +131,7 @@
     <ClCompile Include="BeatUnitManager.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MusicVisualization.cpp" />
     <ClCompile Include="MusicVisualizationManager.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
@@ -142,11 +143,13 @@
     <ClCompile Include="WorldSetCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AppInfo.hpp" />
     <ClInclude Include="BackgroundStripeManager.hpp" />
     <ClInclude Include="BeatUnit.hpp" />
     <ClInclude Include="BeatUnitManager.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="Game.hpp" />
+    <ClInclude Include="MusicVisualization.hpp" />
     <ClInclude Include="MusicVisualizationManager.hpp" />
     <ClInclude Include="Obstacle.hpp" />
     <ClInclude Include="Particle.hpp" />
