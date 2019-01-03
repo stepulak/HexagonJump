@@ -9,16 +9,9 @@ namespace hexagon {
 class Game final : public Runnable {
 public:
 
-	enum class Difficulty {
-		EASY,
-		MEDIUM,
-		HARD,
-		PRO
-	};
-
 	static constexpr float TIMERATE = 1 / 20.f;
 	
-	Game(sf::Music& music, MusicVisualization&& visualization, size_t numBeatUnits, Camera& camera, Difficulty difficulty);
+	Game(sf::Music& music, MusicVisualization&& visualization, size_t numBeatUnits, Camera& camera);
 
 	void Start();
 	void Stop();
@@ -27,14 +20,11 @@ public:
 	void KeyReleased(sf::Keyboard::Key key) override;
 	void Update(float deltaTime) override;
 	void Draw(sf::RenderWindow& window) const override;
-
-	static float CameraSpeedAccordingToDifficulty(float virtualWidth, Difficulty dif);
-
+	
 private:
 
 	static constexpr float MUSIC_WITH_BEAT_MANAGER_SYNC_TIME = 5.f;
-	static constexpr float CAMERA_SPEED_LOWEST_DIFFICULTY = 0.2f;
-	static constexpr float CAMERA_SPEED_DIFFICULTY_MULTIPLIER = 2.f;
+	static constexpr float CAMERA_VELOCITY = 700.f;
 	static constexpr auto PLAYER_KEY_JUMP = sf::Keyboard::Space;
 	static constexpr auto PLAYER_KEY_FALL_DOWN_FAST = sf::Keyboard::C;
 	static constexpr auto PLAYER_KEY_MOVE_LEFT = sf::Keyboard::A;

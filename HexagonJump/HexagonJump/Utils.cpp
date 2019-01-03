@@ -118,12 +118,20 @@ int Random(int from, int to)
 sf::Color MixColors(const sf::Color& c1, const sf::Color& c2, float ratio)
 {
 	auto oneMinusRatio = 1.f - ratio;
-	return { 
+	return {
 		static_cast<uint8_t>(c1.r * ratio + c2.r * oneMinusRatio),
 		static_cast<uint8_t>(c1.g * ratio + c2.g * oneMinusRatio),
 		static_cast<uint8_t>(c1.b * ratio + c2.b * oneMinusRatio),
 		static_cast<uint8_t>(c1.a * ratio + c2.a * oneMinusRatio),
 	};
+}
+
+void DrawRectangle(sf::RenderWindow& window, const sf::FloatRect& rectangle, const sf::Color& color)
+{
+	sf::RectangleShape shape({ rectangle.width, rectangle.height });
+	shape.setPosition({ rectangle.left, rectangle.top });
+	shape.setFillColor(color);
+	window.draw(shape);
 }
 
 }

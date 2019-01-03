@@ -133,6 +133,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MusicVisualization.cpp" />
     <ClCompile Include="MusicVisualizationManager.cpp" />
+    <ClCompile Include="ObstacleManager.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="Platform.cpp" />
@@ -140,6 +141,7 @@
     <ClCompile Include="Spike.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="World.cpp" />
+    <ClCompile Include="WorldColorPalette.cpp" />
     <ClCompile Include="WorldSetCreator.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -152,15 +154,18 @@
     <ClInclude Include="MusicVisualization.hpp" />
     <ClInclude Include="MusicVisualizationManager.hpp" />
     <ClInclude Include="Obstacle.hpp" />
+    <ClInclude Include="ObstacleManager.hpp" />
     <ClInclude Include="Particle.hpp" />
     <ClInclude Include="ParticleSystem.hpp" />
     <ClInclude Include="Platform.hpp" />
     <ClInclude Include="Player.hpp" />
+    <ClInclude Include="Pool.hpp" />
     <ClInclude Include="Runnable.hpp" />
     <ClInclude Include="Spike.hpp" />
     <ClInclude Include="BackgroundStripe.hpp" />
     <ClInclude Include="Utils.hpp" />
     <ClInclude Include="World.hpp" />
+    <ClInclude Include="WorldColorPalette.hpp" />
     <ClInclude Include="WorldSetCreator.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -25,22 +25,12 @@ int main()
 	sf::Music music;
 	music.openFromFile(MUSIC_FILENAME);
 
-	std::cout << "Loading started" << std::endl;
-	MusicVisulizationManager manager;
-	//auto musicData = CountMusicVisualizationData(buffer, Game::TIMERATE, NUM_COLUMNS);
-	std::cout << "Loading ended" << std::endl;
-
-	/*std::fstream file("save.txt", std::ios_base::out);
-	file << musicData.second << std::endl;
-	for (auto& column : musicData.first) {
-		for (auto& val : column) {
-			file << val << ',';
-		}
-		file << std::endl;
+	MusicVisulizationManager manager(NUM_COLUMNS);
+	for (const auto& [f, s] : manager.GetMusicList()) {
+		std::cout << f << std::endl;
 	}
-	file.close();*/
 
-	Game game(music, MusicVisualization{}, NUM_COLUMNS, camera, Game::Difficulty::EASY);
+	Game game(music, manager.LoadMusic("DontBeSoShy").visulization, NUM_COLUMNS, camera);
 
 	sf::Clock deltaClock;
 	game.Start();

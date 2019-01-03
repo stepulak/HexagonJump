@@ -26,13 +26,13 @@ public:
 	void SetPosition(float position) { _position = position; }
 	void Move(float distance) { _position += distance; }
 
-	float GetSpeed() const { return _speed; }
-	void SetSpeed(float speed) { _speed = speed; }
+	float GetVelocity() const { return _velocity; }
+	void SetVelocity(float velocity) { _velocity = velocity; }
 	
 private:
 	
 	float _position = 0.f;
-	float _speed = 0.f;
+	float _velocity = 0.f;
 	float _virtualScreenWidth;
 	float _virtualScreenHeight;
 	float _realScreenWidth;

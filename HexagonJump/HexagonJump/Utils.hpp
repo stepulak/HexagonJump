@@ -37,6 +37,7 @@ static inline sf::FloatRect CreateRectangleFromCircleBody(const sf::Vector2f& po
 
 int Random(int from, int to);
 sf::Color MixColors(const sf::Color& c1, const sf::Color& c2, float ratio);
+void DrawRectangle(sf::RenderWindow& window, const sf::FloatRect& rectangle, const sf::Color& color);
 
 template<typename TEnum>
 static TEnum operator|(TEnum m1, TEnum m2)

@@ -50,15 +50,15 @@ void Player::Update(float deltaTime, float gravity, World& world)
 	UpdateHorizontalVelocity(deltaTime);
 	UpdateMovementHistory(deltaTime);
 	
-	if (InCollisionWithSpike(world)) {
+	if (InCollisionWithSpike(world.GetObstacleManager())) {
 		Explode(world.GetParticleSystem());
 	}
 
-	if (!StandingOnSurface(world) && !IsFalling() && !IsJumping()) {
+	if (!StandingOnSurface(world.GetObstacleManager()) && !IsFalling() && !IsJumping()) {
 		StartFalling();
 	}
 
-	TryToMove(_horizontalVelocity * deltaTime * (_isMovingRight ? 1.f : -1.f), _verticalVelocity * deltaTime, world);
+	TryToMove(_horizontalVelocity * deltaTime * (_isMovingRight ? 1.f : -1.f), _verticalVelocity * deltaTime, world.GetObstacleManager());
 }
 
 void Player::Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const
@@ -78,17 +78,21 @@ void Player::Draw(sf::RenderWindow& window, const Camera& camera, const sf::Colo
 	DrawBody(window, _position - cameraPosition, _angle, color);
 }
 
-bool Player::StandingOnSurface(const World& world)
+bool Player::StandingOnSurface(const ObstacleManager& manager) const
 {
 	if (!IsOnGround()) {
 		return false;
 	}
 	
-	for (const auto& obstacle : world.GetObstacles()) {
-		if (obstacle->GetType() != Obstacle::Type::PLATFORM) {
+	auto& pool = manager.GetObstaclePool();
+	for (size_t i = 0u; i < manager.GetObstaclePool().GetNumberOfElements(); i++) {
+		auto& obstacle = *manager.GetObstaclePool().At(i);
+
+		if (obstacle.GetType() != Obstacle::Type::PLATFORM) {
 			continue;
 		}
 		auto[collision, _] = VerticalMovementSaveDistance(SURFACE_MAX_DISTANCE, obstacle);
+
 		if (collision) {
 			return true;
 		}
@@ -122,15 +126,15 @@ void Player::StartFalling()
 	_verticalVelocity = 0;
 }
 
-void Player::TryToMove(float distX, float distY, const World& world)
+void Player::TryToMove(float distX, float distY, const ObstacleManager& manager)
 {
-	for (const auto& obstacle : world.GetObstacles()) {
+	for (const auto& obstacle : manager.GetObstaclePool()) {
 		if (obstacle->GetType() != Obstacle::Type::PLATFORM) {
 			continue;
 		}
 
-		auto [horizontalCollision, cutDistX] = HorizontalMovementSaveDistance(distX, obstacle);
-		auto [verticalCollision, cutDistY] = VerticalMovementSaveDistance(distY, obstacle);
+		auto [horizontalCollision, cutDistX] = HorizontalMovementSaveDistance(distX, *obstacle);
+		auto [verticalCollision, cutDistY] = VerticalMovementSaveDistance(distY, *obstacle);
 
 		if (horizontalCollision) {
 			// StopMoving();
@@ -189,9 +193,9 @@ void Player::StopFalling()
 	_verticalVelocity = 0;
 }
 
-bool Player::InCollisionWithSpike(const World& world) const
+bool Player::InCollisionWithSpike(const ObstacleManager& manager) const
 {
-	for (const auto& obstacle : world.GetObstacles()) {
+	for (const auto& obstacle : manager.GetObstaclePool()) {
 		if (obstacle->GetType() == Obstacle::Type::SPIKE && obstacle->InCollision(*this)) {
 			return true;
 		}
@@ -199,27 +203,27 @@ bool Player::InCollisionWithSpike(const World& world) const
 	return false;
 }
 
-std::pair<bool, float> Player::HorizontalMovementSaveDistance(float distance, const Obstacle::Ptr& obstacle) const
+std::pair<bool, float> Player::HorizontalMovementSaveDistance(float distance, const Obstacle& obstacle) const
 {
 	if (distance > 0) {
-		auto newDistance = obstacle->SaveDistanceToTravel(*this, distance, Direction::RIGHT);
+		auto newDistance = obstacle.SaveDistanceToTravel(*this, distance, Direction::RIGHT);
 		return { newDistance < distance, newDistance };
 	}
 	else if (distance < 0) {
-		auto newDistance = -obstacle->SaveDistanceToTravel(*this, -distance, Direction::LEFT);
+		auto newDistance = -obstacle.SaveDistanceToTravel(*this, -distance, Direction::LEFT);
 		return { newDistance > distance, newDistance };
 	}
 	return { false, 0.f };
 }
 
-std::pair<bool, float> Player::VerticalMovementSaveDistance(float distance, const Obstacle::Ptr& obstacle) const
+std::pair<bool, float> Player::VerticalMovementSaveDistance(float distance, const Obstacle& obstacle) const
 {
 	if (distance > 0) {
-		auto newDistance = obstacle->SaveDistanceToTravel(*this, distance, Direction::DOWN);
+		auto newDistance = obstacle.SaveDistanceToTravel(*this, distance, Direction::DOWN);
 		return { newDistance < distance, newDistance };
 	}
 	else if (distance < 0) {
-		auto newDistance = -obstacle->SaveDistanceToTravel(*this, -distance, Direction::UP);
+		auto newDistance = -obstacle.SaveDistanceToTravel(*this, -distance, Direction::UP);
 		return { newDistance > distance, newDistance };
 	}
 	return { false, 0.f };
@@ -292,7 +296,7 @@ void Player::UpdateMovementHistory(float deltaTime)
 
 void Player::DrawBody(sf::RenderWindow& window, sf::Vector2f position, float angle, const sf::Color& color) const
 {
-	auto radius = 2 * _radius - _radius * 0.866f;
+	auto radius = 2 * _radius - _radius * 0.866f + 3;
 	auto body = sf::CircleShape(radius, 6);
 	body.setPosition(position);
 	body.setFillColor(color);

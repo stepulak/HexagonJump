@@ -4,11 +4,6 @@
 
 namespace hexagon {
 
-BackgroundStripe::BackgroundStripe(float x, float y)
-	: _position(x, y)
-{
-}
-
 bool BackgroundStripe::PassedCamera(const Camera& camera) const
 {
 	return _position.y >= camera.GetVirtualHeight();

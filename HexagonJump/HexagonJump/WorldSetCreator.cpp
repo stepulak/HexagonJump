@@ -93,12 +93,12 @@ const BeatUnit& WorldSetCreator::GetRandomBeatUnit(World& world) const
 
 void WorldSetCreator::AddSpike(World& world, const sf::FloatRect& area, float xRelative, float yRelative, Direction direction) const
 {
-	world.AddObstacle(std::make_unique<Spike>(xRelative + area.left, yRelative + area.top, GetSpikeWidth(area), GetSpikeHeight(area), direction, GetRandomBeatUnit(world)));
+	world.GetObstacleManager().GetObstaclePool().Add(std::make_unique<Spike>(xRelative + area.left, yRelative + area.top, GetSpikeWidth(area), GetSpikeHeight(area), direction, GetRandomBeatUnit(world)));
 }
 
 void WorldSetCreator::AddPlatform(World& world, const sf::FloatRect& area, float xRelative, float yRelative, float width, float height) const
 {
-	world.AddObstacle(std::make_unique<Platform>(xRelative + area.left, yRelative + area.top, width, height));
+	world.GetObstacleManager().GetObstaclePool().Add(std::make_unique<Platform>(xRelative + area.left, yRelative + area.top, width, height));
 }
 
 }

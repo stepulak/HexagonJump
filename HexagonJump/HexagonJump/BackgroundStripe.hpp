@@ -8,8 +8,9 @@ namespace hexagon {
 class BackgroundStripe {
 public:
 
-	BackgroundStripe(float x, float y);
+	BackgroundStripe() = default; // we need default constructor for pool
 
+	void SetPosition(float x, float y) { _position = { x, y }; }
 	void Move(float horizontalDist) { _position.x += horizontalDist; }
 
 	bool PassedCamera(const Camera& camera) const;

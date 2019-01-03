@@ -1,15 +1,16 @@
 #include "Game.hpp"
 
 #include <cmath>
+#include <iostream>
 
 namespace hexagon {
 
-Game::Game(sf::Music& music, MusicVisualization&& visualization, size_t numBeatUnits, Camera& camera, Difficulty difficulty)
+Game::Game(sf::Music& music, MusicVisualization&& visualization, size_t numBeatUnits, Camera& camera)
 	: _music(music)
 	, _beatUnitManager(std::move(visualization), numBeatUnits, TIMERATE)
 	, _world(camera, _beatUnitManager)
 {
-	camera.SetSpeed(CameraSpeedAccordingToDifficulty(camera.GetVirtualProportions().x, difficulty));
+	camera.SetVelocity(CAMERA_VELOCITY);
 }
 
 void Game::Start()
@@ -40,12 +41,12 @@ void Game::KeyPressed(sf::Keyboard::Key key)
 		player.TryToFallDownFast();
 		break;
 	case PLAYER_KEY_MOVE_LEFT:
-		player.StopMoving();
-		player.StartMoving(camera.GetSpeed() * 2.f, false);
+		//player.StopMoving();
+		//player.StartMoving(camera.GetSpeed() * 2.f, false);
 		break;
 	case PLAYER_KEY_MOVE_RIGHT:
-		player.StopMoving();
-		player.StartMoving(camera.GetSpeed() * 2.f, true);
+		//player.StopMoving();
+		//player.StartMoving(camera.GetSpeed() * 2.f, true);
 		break;
 	case PAUSE_KEY:
 		if (_stopped) {
@@ -68,7 +69,7 @@ void Game::KeyReleased(sf::Keyboard::Key key)
 	{
 	case PLAYER_KEY_MOVE_LEFT:
 	case PLAYER_KEY_MOVE_RIGHT:
-		player.StopMoving();
+		//player.StopMoving();
 	default:
 		break;
 	}
@@ -79,6 +80,11 @@ void Game::Update(float deltaTime)
 	if (_stopped) {
 		return; // skip
 	}
+	// TODO simplify
+	auto& player = _world.GetPlayer();
+	auto& camera = _world.GetCamera();
+	player.StartMoving(camera.GetVelocity(), true);
+
 	_world.Update(deltaTime);
 	_beatUnitManager.Update(deltaTime);
 	SyncMusicAndBeatManager(deltaTime);
@@ -87,21 +93,6 @@ void Game::Update(float deltaTime)
 void Game::Draw(sf::RenderWindow& window) const
 {
 	_world.Draw(window);
-}
-
-float Game::CameraSpeedAccordingToDifficulty(float virtualWidth, Difficulty dif)
-{
-	switch (dif) {
-	case Difficulty::EASY:
-		return virtualWidth * CAMERA_SPEED_LOWEST_DIFFICULTY;
-	case Difficulty::MEDIUM:
-		return virtualWidth * CAMERA_SPEED_LOWEST_DIFFICULTY * CAMERA_SPEED_DIFFICULTY_MULTIPLIER;
-	case Difficulty::HARD:
-		return virtualWidth * CAMERA_SPEED_LOWEST_DIFFICULTY * std::pow(CAMERA_SPEED_DIFFICULTY_MULTIPLIER, 2);
-	case Difficulty::PRO:
-		return virtualWidth * CAMERA_SPEED_LOWEST_DIFFICULTY * std::pow(CAMERA_SPEED_DIFFICULTY_MULTIPLIER, 3);
-	}
-	return 0.f;
 }
 
 void Game::SyncMusicAndBeatManager(float deltaTime)

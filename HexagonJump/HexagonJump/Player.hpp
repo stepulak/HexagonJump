@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Obstacle.hpp"
+#include "ObstacleManager.hpp"
 #include "ParticleSystem.hpp"
 
 #include <array>
@@ -19,10 +19,14 @@ public:
 	Player(float x, float y, float radius = PLAYER_RADIUS_DEFAULT);
 
 	sf::Vector2f GetPosition() const { return _position; }
-	void Move(float distX, float distY) { _position += sf::Vector2f(distX, distY); }
+	void Move(float distX, float distY) { _position += { distX, distY }; }
 
 	float GetRadius() const { return _radius; }
 	float GetAngle() const { return _angle; }
+	
+	float GetVerticalVelocity() const { return _verticalVelocity; }
+	float GetHorizontalVelocity() const { return _horizontalVelocity; }
+
 	bool HasExploded() const { return _exploded; }
 
 	void StartMoving(float velocity, bool rightDirection);
@@ -53,7 +57,7 @@ private:
 	static constexpr float TRY_TO_JUMP_TIMER_DEFAULT = .1f;
 	static constexpr float MOVEMENT_HISTORY_UPDATE_TIME = .01f;
 	static constexpr float HORIZONTAL_FRICTION = 800.f;
-	static constexpr float JUMP_INITIAL_VELOCITY = -800.f;
+	static constexpr float JUMP_INITIAL_VELOCITY = -1200.f;
 	static constexpr float ROTATION_VELOCITY = 5.f;
 	static constexpr float EXPLOSION_PARTICLE_VELOCITY = 400.f;
 	static constexpr float EXPLOSION_PARTICLE_SIZE = 10.f;
@@ -68,20 +72,21 @@ private:
 	bool IsOnGround() const { return _verticalStatus == VerticalPositionStatus::ON_GROUND; }
 	bool IsFallingSlow() const { return _verticalStatus == VerticalPositionStatus::FALLING; }
 	bool IsFallingFast() const { return _verticalStatus == VerticalPositionStatus::FALLING_FAST; }
-	bool StandingOnSurface(const World& world);
+
+	bool StandingOnSurface(const ObstacleManager& manager) const;
 
 	void ImmediateJump();
 	void StopJumping();
 	void StartFalling();
 	void StopFalling();
-	void TryToMove(float distX, float distY, const World& world);
+	void TryToMove(float distX, float distY, const ObstacleManager& manager);
 	void StartRotating();
 	void StopRotating();
 	void Explode(ParticleSystem& particleSystem);
 	
-	bool InCollisionWithSpike(const World& world) const;
-	std::pair<bool, float> HorizontalMovementSaveDistance(float distance, const Obstacle::Ptr& obstacle) const;
-	std::pair<bool, float> VerticalMovementSaveDistance(float distance, const Obstacle::Ptr& obstacle) const;
+	bool InCollisionWithSpike(const ObstacleManager& manager) const;
+	std::pair<bool, float> HorizontalMovementSaveDistance(float distance, const Obstacle& obstacle) const;
+	std::pair<bool, float> VerticalMovementSaveDistance(float distance, const Obstacle& obstacle) const;
 
 	void UpdateTryToJumpCountdown(float deltaTime);
 	void UpdateJumping(float deltaTime);

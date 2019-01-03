@@ -24,11 +24,13 @@ MusicVisulizationManager::MusicVisulizationManager(size_t spectrumColumns)
 	auto homeFolder = getenv("HOME");
 	_applicationDataPath = homeFolder != nullptr ? homeFolder : getpwuid(getuid())->pw_dir;
 #endif
+
 	_applicationDataPath += std::string("\\") + APP_NAME + "\\";
 	std::filesystem::create_directory(_applicationDataPath);
+	LoadExistingMusicList();
 }
 
-std::string MusicVisulizationManager::AddNewMusic(const std::string& path, float gameTimerate)
+std::string MusicVisulizationManager::ConvertNewMusic(const std::string& path, float gameTimerate)
 {
 	sf::SoundBuffer buffer;
 	if (!buffer.loadFromFile(path)) {
@@ -61,6 +63,17 @@ void MusicVisulizationManager::UpdateStatsIfBetter(const std::string& musicName,
 	
 	SaveMusicStats(newStats, statsFilename);
 	_music[musicName] = newStats;
+}
+
+void MusicVisulizationManager::LoadExistingMusicList()
+{
+	for (const auto& filename : std::filesystem::directory_iterator(_applicationDataPath)) {
+		auto path = filename.path().string();
+		auto musicName = FilenameWithoutExtension(path);
+		if (_music.find(musicName) == _music.end()) {
+			_music[musicName] = LoadMusicStats(path);
+		}
+	}
 }
 
 MusicVisualization MusicVisulizationManager::LoadMusicVisualizationFromFile(const std::string& filename, size_t spectrumColumns)
