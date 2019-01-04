@@ -2,6 +2,7 @@
 
 #include "BeatUnit.hpp"
 #include "MusicVisualization.hpp"
+#include "Utils.hpp"
 
 namespace hexagon {
 
@@ -12,6 +13,8 @@ public:
 
 	BeatUnit& GetUnit(size_t index) { return _beatUnits[index]; }
 	const BeatUnit& GetUnit(size_t index) const { return _beatUnits[index]; }
+
+	const BeatUnit& GetRandomUnit() const { return _beatUnits[Random(0, _beatUnits.size() - 1)]; }
 
 	size_t GetNumberOfBeatUnits() const { return _beatUnits.size(); }
 	size_t GetVisualizationDataIndex() const { return _visualizationDataIndex; }

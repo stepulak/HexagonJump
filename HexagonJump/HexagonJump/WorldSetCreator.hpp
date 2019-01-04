@@ -26,8 +26,10 @@ private:
 	float GetSpikeHeight(const sf::FloatRect& setArea) const { return setArea.height * (1 / 8.f); }
 
 	const BeatUnit& GetRandomBeatUnit(World& world) const;
+	
 	void AddSpike(World& world, const sf::FloatRect& area, float xRelative, float yRelative, Direction direction) const;
 	void AddPlatform(World& world, const sf::FloatRect& area, float xRelative, float yRelative, float width, float height) const;
+	void AddSquareWithSpikes(World& world, const sf::FloatRect& area, float xRelative, float yRelative, bool skipBottom = false) const;
 
 	std::vector<SetCreator> _setCreators;
 };

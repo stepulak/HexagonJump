@@ -100,7 +100,7 @@ void Game::SyncMusicAndBeatManager(float deltaTime)
 	_musicBeatManagerSyncTimer += deltaTime;
 	if (_musicBeatManagerSyncTimer >= MUSIC_WITH_BEAT_MANAGER_SYNC_TIME) {
 		_musicBeatManagerSyncTimer -= MUSIC_WITH_BEAT_MANAGER_SYNC_TIME;
-		_beatUnitManager.SyncTimingWithMusic(_music.getPlayingOffset().asMilliseconds());
+		_beatUnitManager.SyncTimingWithMusic(static_cast<float>(_music.getPlayingOffset().asMilliseconds()));
 	}
 }
 

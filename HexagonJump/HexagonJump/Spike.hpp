@@ -17,7 +17,10 @@ public:
 	void Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const override;
 
 private:
+	
+	static const sf::Color BORDER_COLOR;
 
+	void DrawBorder(sf::RenderWindow& window, const sf::Vector2f& position, const sf::ConvexShape& body) const;
 	bool CheckCollisionWithPlayer(const sf::Vector2f& position, float radius) const;
 	sf::ConvexShape CountSpikeBody() const;
 

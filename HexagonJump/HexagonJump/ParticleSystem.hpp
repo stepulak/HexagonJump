@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Particle.hpp"
-#include <vector>
+#include "Pool.hpp"
 
 namespace hexagon {
 
@@ -19,8 +19,7 @@ private:
 
 	static constexpr size_t DEFAULT_POOL_SIZE = 128u;
 	
-	std::vector<Particle> _pool{ DEFAULT_POOL_SIZE };
-	size_t _particleIndex = 0u;
+	Pool<Particle> _pool{ DEFAULT_POOL_SIZE };
 };
 
 }

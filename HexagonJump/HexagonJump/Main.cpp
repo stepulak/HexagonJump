@@ -16,7 +16,11 @@ static constexpr size_t NUM_COLUMNS = 8u;
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(800, 600), "My window");
+	sf::ContextSettings settings;
+	settings.antialiasingLevel = 8;
+
+	sf::RenderWindow window(sf::VideoMode(800, 600), "My window", sf::Style::Default, settings);
+
 	Camera camera(960.f, 540.f, 800, 600);
 	
 	sf::SoundBuffer buffer;

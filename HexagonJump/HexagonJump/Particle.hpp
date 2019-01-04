@@ -46,7 +46,7 @@ public:
 	Particle& Clear();
 
 	void Update(float deltaTime);
-	void Draw(const Camera& camera, sf::RenderWindow& window) const;
+	void Draw(sf::RenderWindow& window, const Camera& camera) const;
 
 private:
 

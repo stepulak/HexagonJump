@@ -55,7 +55,7 @@ void Particle::Update(float deltaTime)
 	_velocity += _acceleration * deltaTime;
 }
 
-void Particle::Draw(const Camera& camera, sf::RenderWindow& window) const
+void Particle::Draw(sf::RenderWindow& window, const Camera& camera) const
 {
 	float alpha = 1.f;
 

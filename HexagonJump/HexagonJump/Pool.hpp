@@ -24,6 +24,10 @@ public:
 	T& At(size_t index) { return _pool[index]; }
 	const T& At(size_t index) const { return _pool[index]; }
 
+	T& Add() {
+		return AddImpl(_pool, T{}, _index);
+	}
+
 	T& Add(T& elem) {
 		return AddImpl(_pool, elem, _index);
 	}

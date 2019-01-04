@@ -18,7 +18,10 @@ void BackgroundStripeManager::Update(const Camera& camera, float deltaTime)
 	if (_stripeSpawnTimer >= _stripeSpawnTime) {
 		_stripeSpawnTimer = 0.f;
 		_stripeSpawnTime = Random(static_cast<int>(STRIPE_SPAWN_TIME_MIN) * 10, static_cast<int>(STRIPE_SPAWN_TIME_MAX) * 10) / 10.f + 0.1f;
-		SpawnStripe(camera.GetPosition() + camera.GetVirtualWidth(), Random(0, static_cast<int>(camera.GetVirtualHeight() / 2.f)));
+
+		auto x = camera.GetPosition() + camera.GetVirtualWidth();
+		auto y = static_cast<float>(Random(0, static_cast<int>(camera.GetVirtualHeight() / 2.f)));
+		SpawnStripe(x, y);
 	}
 }
 
@@ -31,7 +34,6 @@ void BackgroundStripeManager::Draw(sf::RenderWindow& window, const Camera& camer
 
 void BackgroundStripeManager::UpdateStripes(const Camera& camera, float deltaTime)
 {
-	//stripe.PassedCamera(camera)
 	for (auto& stripe : _pool) {
 		stripe.Update(deltaTime);
 	}
@@ -40,7 +42,7 @@ void BackgroundStripeManager::UpdateStripes(const Camera& camera, float deltaTim
 
 void BackgroundStripeManager::SpawnStripe(float x, float y)
 {
-	_pool.Add({}).SetPosition(x, y);
+	_pool.Add().SetPosition(x, y);
 }
 
 }

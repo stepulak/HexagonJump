@@ -1,7 +1,11 @@
 #include "Spike.hpp"
 #include "Player.hpp"
 
+#include <iostream>
+
 namespace hexagon {
+
+const sf::Color Spike::BORDER_COLOR = { 255,255,255 };
 
 Spike::Spike(float x, float y, float width, float maximumHeight, Direction direction, const BeatUnit& beatUnit)
 	: Obstacle(Obstacle::Type::SPIKE)
@@ -37,9 +41,24 @@ float Spike::SaveDistanceToTravel(const Player& player, float wantedDistance, Di
 void Spike::Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const
 {
 	auto body = CountSpikeBody();
+	auto position = _position - sf::Vector2f(camera.GetPosition(), 0.f);
 	body.setFillColor(color);
-	body.setPosition(_position - sf::Vector2f(camera.GetPosition(), 0.f));
+	body.setPosition(position);
 	window.draw(body);
+	DrawBorder(window, position, body);
+}
+
+void Spike::DrawBorder(sf::RenderWindow& window, const sf::Vector2f& position, const sf::ConvexShape& body) const
+{
+	sf::Vertex vertices[3] = {
+		body.getPoint(0) + position,
+		body.getPoint(2) + position,
+		body.getPoint(1) + position
+	};
+	for (auto& vertex : vertices) {
+		vertex.color = BORDER_COLOR;
+	}
+	window.draw(vertices, 3, sf::LinesStrip);
 }
 
 bool Spike::CheckCollisionWithPlayer(const sf::Vector2f& position, float radius) const

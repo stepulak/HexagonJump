@@ -45,7 +45,7 @@ sf::Color World::GetActualColor(ColorEntity entity) const
 {
 	auto activeColor = GetColor(_colorPalette, entity);
 	if (_nextColorPalette) {
-		MixColors(GetColor(_nextColorPalette.value(), entity), activeColor, _nextColorPaletteRatio);
+		return MixColors(GetColor(_nextColorPalette.value(), entity), activeColor, _nextColorPaletteRatio);
 	}
 	return activeColor;
 }

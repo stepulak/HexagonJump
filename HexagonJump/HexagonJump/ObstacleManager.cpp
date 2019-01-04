@@ -4,17 +4,21 @@ namespace hexagon {
 
 void ObstacleManager::Move(float horizontalDist)
 {
-	_pool.Iterate([&](auto& obstacle) { obstacle->Move(horizontalDist); });
+	for (auto& obstacle : _pool) {
+		obstacle->Move(horizontalDist);
+	}
 }
 
 void ObstacleManager::RemoveObstaclesPassedCamera(const Camera& camera)
 {
-	_pool.Iterate([&](auto& obstacle) { return obstacle->PassedCamera(camera); });
+	_pool.RemoveAll([&](const auto& obstacle) { return obstacle->PassedCamera(camera); });
 }
 
 void ObstacleManager::Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const
 {
-	_pool.Iterate([&](const auto& obstacle) { obstacle->Draw(window, camera, color); });
+	for (auto& obstacle : _pool) {
+		obstacle->Draw(window, camera, color);
+	}
 }
 
 }

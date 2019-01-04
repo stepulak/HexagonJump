@@ -5,33 +5,21 @@ namespace hexagon {
 
 Particle& ParticleSystem::AddParticle()
 {
-	if (_particleIndex >= _pool.size()) {
-		_pool.resize(_pool.size() * 2);
-	}
-	return _pool[_particleIndex++].Clear();
+	return _pool.Add().Clear();
 }
 
 void ParticleSystem::Update(float deltaTime)
 {
-	for (size_t i = 0u; i < _particleIndex;) {
-		auto& particle = _pool[i];
+	for (auto& particle : _pool) {
 		particle.Update(deltaTime);
-		if (particle.IsFree()) {
-			_particleIndex--;
-			if (i < _particleIndex) {
-				std::swap(_pool[i], _pool[_particleIndex]);
-			}
-		}
-		else {
-			i++;
-		}
 	}
+	_pool.RemoveAll([](auto& particle) { return particle.IsFree(); });
 }
 
 void ParticleSystem::Draw(sf::RenderWindow& window, const Camera& camera) const
 {
-	for (size_t i = 0u; i < _particleIndex; i++) {
-		_pool[i].Draw(camera, window);
+	for (auto& particle : _pool) {
+		particle.Draw(window, camera);
 	}
 }
 
