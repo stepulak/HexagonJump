@@ -84,7 +84,7 @@ void World::ProcessColorPaletteChange(float deltaTime)
 	}
 	else {
 		_nextColorPaletteTimer += deltaTime;
-		_nextColorPaletteTimer += _beatUnitManager.CurrentHighestBeatRatio() * deltaTime;
+		_nextColorPaletteTimer += _beatUnitManager.CurrentHighestBeatRatio() * COLOR_CHANGE_TIME_BEAT_MULTIPLIER * deltaTime;
 
 		if (_nextColorPaletteTimer >= COLOR_PALETTE_CHANGE_TIME) {
 			_nextColorPaletteTimer = 0.f;

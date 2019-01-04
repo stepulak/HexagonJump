@@ -93,7 +93,7 @@ WorldSetCreator::WorldSetCreator()
 		}
 	});*/
 
-	_setCreators.emplace_back([&](auto& world, const auto& area) {
+	/*_setCreators.emplace_back([&](auto& world, const auto& area) {
 		auto spikeWidth = GetSpikeWidth(area);
 		auto squareOffset = area.width * 0.25f;
 		auto square1Height = area.height - spikeWidth;
@@ -108,6 +108,64 @@ WorldSetCreator::WorldSetCreator()
 		for (size_t i = 0u; i < numSpikes; i++) {
 			AddSpike(world, area, area.width / 2.f - groupWidth / 2.f + spikeWidth * i + spikeWidth / 2.f, area.height, Direction::UP);
 		}
+	});*/
+
+	/*_setCreators.emplace_back([&](auto& world, const auto& area) {
+		auto spikeWidth = GetSpikeWidth(area);
+		auto spikeHeight = GetSpikeHeight(area);
+		auto platformX = area.width / 2.f - area.width * 0.35f;
+		auto platformWidth = spikeHeight * 3.f;
+		auto platformHeightBase = spikeWidth;
+		size_t numPlatforms = 3u;
+
+		for (size_t i = 0u; i < numPlatforms; i++) {
+			auto height = (i + 1) * platformHeightBase;
+			AddPlatform(world, area, platformX + i * platformWidth, area.height - height, platformWidth, height);
+			AddSpike(world, area, platformX + i * platformWidth, area.height - height + spikeWidth / 2.f, Direction::LEFT);
+		}
+		auto spikesX = area.width / 2.f + area.width * 0.18f;
+		size_t numSpikes = 3u;
+
+		for (size_t i = 0; i < numSpikes; i++) {
+			AddSpike(world, area, spikesX + i * spikeWidth + spikeWidth / 2.f, area.height, Direction::UP);
+		}
+	});*/
+
+	/*_setCreators.emplace_back([&](auto& world, const auto& area) {
+		auto spikeWidth = GetSpikeWidth(area);
+		auto spikeHeight = GetSpikeHeight(area);
+		auto spikesX = area.width / 2.f - area.width * 0.25f;
+		size_t numSpikes = 15u;
+
+		for (size_t i = 0u; i < numSpikes; i++) {
+			AddSpike(world, area, spikesX + i * spikeWidth + spikeWidth / 2.f, area.height, Direction::UP);
+		}
+
+		auto platformWidth = spikeWidth * 1.5f;
+		auto platformHeight = platformWidth * 0.5f;
+		auto platformY = area.height - platformHeight - spikeHeight * 2u;
+		auto platformOffset = area.width * 0.1f;
+
+		AddPlatform(world, area, area.width / 2.f - platformOffset, platformY, platformWidth, platformHeight);
+		AddPlatform(world, area, area.width / 2.f + platformOffset, platformY, platformWidth, platformHeight);
+	});*/
+
+	_setCreators.emplace_back([&](auto& world, const auto& area) {
+		auto spikeWidth = GetSpikeWidth(area);
+		auto spikeHeight = GetSpikeHeight(area);
+		auto platformWidth = spikeWidth;
+		auto platformHeight = spikeHeight * 2u;
+		auto platformX = area.width / 2.f - platformWidth / 2.f;
+		size_t numSpikesAtOneSide = 4u;
+
+		AddPlatform(world, area, area.width / 2.f - platformWidth / 2.f, area.height - platformHeight, platformWidth, platformHeight);
+
+		for (size_t i = 0u; i < numSpikesAtOneSide; i++) {
+			AddSpike(world, area, platformX - i * spikeWidth - spikeWidth / 2.f, area.height, Direction::UP);
+			AddSpike(world, area, platformX + platformWidth + i * spikeWidth + spikeWidth / 2.f, area.height, Direction::UP);
+		}
+
+		AddSquareWithSpikes(world, area, platformX, area.height * 0.3f);
 	});
 }
 
