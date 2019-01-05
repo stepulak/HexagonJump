@@ -1,11 +1,11 @@
 #pragma once
 
-#include "BeatUnitManager.hpp"
 #include "BackgroundStripeManager.hpp"
+#include "BeatUnitManager.hpp"
+#include "ColorPaletteChanger.hpp"
 #include "ObstacleManager.hpp"
 #include "ParticleSystem.hpp"
 #include "Player.hpp"
-#include "WorldColorPalette.hpp"
 #include "WorldSetCreator.hpp"
 
 #include <vector>
@@ -39,24 +39,19 @@ public:
 
 private:
 
-	static constexpr float SURFACE_HEIGHT_RATIO = 0.1f;
-	static constexpr float SURFACE_WIDTH_RATIO = 1.5f;
 	static constexpr float POSITION_CUT_RATIO = 10.f;
 	static constexpr float PLAYER_SPAWN_POS_X = 200.f;
 	static constexpr float PLAYER_SPAWN_POS_Y = 400.f;
-	static constexpr float COLOR_PALETTE_CHANGE_TIME = 10.f;
-	static constexpr float COLOR_CHANGE_TIME_BEAT_MULTIPLIER = 10.f;
+	static constexpr float COLOR_CHANGE_TIME = 10.f;
+	static constexpr float COLOR_CHANGE_HIGHEST_BEAT_MULTIPLIER = 10.f;
 	static const sf::Color PLAYER_COLOR;
 
-	float GetSurfaceWidth() const { return _camera.GetVirtualWidth() * SURFACE_WIDTH_RATIO; }
-	float GetSurfaceHeight() const { return _camera.GetVirtualHeight() * SURFACE_HEIGHT_RATIO; }
-	bool ShouldSpawnAnotherObstacleSet() const { return _surfaceEnd - _camera.GetPosition() < GetSurfaceWidth(); }
-
-	sf::Color GetActualColor(ColorEntity entity) const;
+	static constexpr float GetSurfaceWidth() { return 1440.f; }
+	static constexpr float GetSurfaceHeight() { return 54.f; }
 
 	void ExtendSurface();
 	void TryToCutPositionAllElements();
-	void ProcessColorPaletteChange(float deltaTime);
+	void TryToSpawnAnotherObstacleSet();
 
 	void DrawBeatFlash(sf::RenderWindow& window) const;
 	void DrawBackground(sf::RenderWindow& window) const;
@@ -67,13 +62,10 @@ private:
 	BackgroundStripeManager _backgroundStripeManager;
 	ObstacleManager _obstacleManager;
 	ParticleSystem _particleSystem;
-	Player _player;
 	WorldSetCreator _worldSetCreator;
+	Player _player{ PLAYER_SPAWN_POS_X, PLAYER_SPAWN_POS_Y };
+	ColorPaletteChanger _colorPaletteChanger{ COLOR_CHANGE_TIME };
 	float _surfaceEnd = 0.f;
-	ColorPalette _colorPalette;
-	std::optional<ColorPalette> _nextColorPalette;
-	float _nextColorPaletteTimer = 0.f;
-	float _nextColorPaletteRatio = 0.f;
 };
 
 }

@@ -29,6 +29,8 @@ public:
 
 	bool HasExploded() const { return _exploded; }
 
+	void CutPosition(float negativeDistance);
+
 	void StartMoving(float velocity, bool rightDirection);
 	void StopMoving();
 

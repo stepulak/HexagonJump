@@ -11,10 +11,8 @@ const sf::Color World::PLAYER_COLOR = { 255, 255, 255 };
 World::World(Camera& camera, BeatUnitManager& manager)
 	: _camera(camera)
 	, _beatUnitManager(manager)
-	, _player(PLAYER_SPAWN_POS_X, PLAYER_SPAWN_POS_Y)
 {
 	ExtendSurface();
-	_colorPalette = GetRandomColorPalette();
 }
 
 void World::Update(float deltaTime)
@@ -25,13 +23,11 @@ void World::Update(float deltaTime)
 	_backgroundStripeManager.Update(_camera, deltaTime);
 	_obstacleManager.RemoveObstaclesPassedCamera(_camera);
 
-	if (ShouldSpawnAnotherObstacleSet()) {
-		auto setArea = sf::FloatRect(_surfaceEnd, 0.f, GetSurfaceWidth(), _camera.GetVirtualHeight() - GetSurfaceHeight());
-		_worldSetCreator.CreateRandomSet(*this, setArea);
-		ExtendSurface();
-	}
+	auto skipTime = _beatUnitManager.CurrentHighestBeatRatio() * COLOR_CHANGE_HIGHEST_BEAT_MULTIPLIER;
+	_colorPaletteChanger.Update(deltaTime, skipTime);
+
+	TryToSpawnAnotherObstacleSet();
 	TryToCutPositionAllElements();
-	ProcessColorPaletteChange(deltaTime);
 }
 
 void World::Draw(sf::RenderWindow& window) const
@@ -41,20 +37,16 @@ void World::Draw(sf::RenderWindow& window) const
 	DrawBeatFlash(window);
 }
 
-sf::Color World::GetActualColor(ColorEntity entity) const
-{
-	auto activeColor = GetColor(_colorPalette, entity);
-	if (_nextColorPalette) {
-		return MixColors(GetColor(_nextColorPalette.value(), entity), activeColor, _nextColorPaletteRatio);
-	}
-	return activeColor;
-}
-
 void World::ExtendSurface()
 {
 	auto surfaceWidth = GetSurfaceWidth();
 	auto surfaceHeight = GetSurfaceHeight();
-	_obstacleManager.GetObstaclePool().Add(std::make_unique<Platform>(_surfaceEnd, _camera.GetVirtualHeight() - surfaceHeight, surfaceWidth, surfaceHeight));
+	auto surface = std::make_unique<Platform>(_surfaceEnd,
+		_camera.GetVirtualHeight() - surfaceHeight,
+		surfaceWidth,
+		surfaceHeight);
+
+	_obstacleManager.GetObstaclePool().Add(std::move(surface));
 	_surfaceEnd += surfaceWidth;
 }
 
@@ -65,60 +57,55 @@ void World::TryToCutPositionAllElements()
 	if (_camera.GetPosition() < cutOffset) {
 		return; // no cut
 	}
+
 	_camera.Move(-cutOffset);
 	_surfaceEnd -= cutOffset;
-	_player.Move(-cutOffset, 0.f);
 	_backgroundStripeManager.Move(-cutOffset);
 	_obstacleManager.Move(-cutOffset);
+	_player.CutPosition(-cutOffset);
 }
 
-void World::ProcessColorPaletteChange(float deltaTime)
+void World::TryToSpawnAnotherObstacleSet()
 {
-	if (_nextColorPalette) {
-		_nextColorPaletteRatio += deltaTime;
-		if (_nextColorPaletteRatio >= 1.f) {
-			_nextColorPaletteRatio = 0.f;
-			_colorPalette = _nextColorPalette.value();
-			_nextColorPalette.reset();
-		}
+	if (_surfaceEnd - _camera.GetPosition() >= GetSurfaceWidth()) {
+		return; // no spawn yet
 	}
-	else {
-		_nextColorPaletteTimer += deltaTime;
-		_nextColorPaletteTimer += _beatUnitManager.CurrentHighestBeatRatio() * COLOR_CHANGE_TIME_BEAT_MULTIPLIER * deltaTime;
+	
+	auto setArea = sf::FloatRect(_surfaceEnd, 0.f,
+		GetSurfaceWidth(),
+		_camera.GetVirtualHeight() - GetSurfaceHeight());
 
-		if (_nextColorPaletteTimer >= COLOR_PALETTE_CHANGE_TIME) {
-			_nextColorPaletteTimer = 0.f;
-			_nextColorPalette = GetRandomColorPalette();
-		}
-	}
+	_worldSetCreator.SpawnRandomSet(*this, setArea);
+	ExtendSurface();
 }
 
 void World::DrawBeatFlash(sf::RenderWindow& window) const
 {
-	auto color = GetActualColor(ColorEntity::FLASH);
 	auto colorRatio = _beatUnitManager.CurrentHighestBeatRatio();
-	color.r *= colorRatio;
-	color.g *= colorRatio;
-	color.b *= colorRatio;
+	auto color = _colorPaletteChanger.GetActiveColor(ColorEntity::FLASH);
 
-	sf::RectangleShape flash(_camera.GetVirtualProportions());
-	flash.setFillColor(color);
-	window.draw(flash);
+	color.r = static_cast<uint8_t>(color.r * colorRatio);
+	color.g = static_cast<uint8_t>(color.g * colorRatio);
+	color.b = static_cast<uint8_t>(color.b * colorRatio);
+
+	auto cameraSize = _camera.GetVirtualProportions();
+
+	DrawRectangle(window, { 0.f, 0.f, cameraSize.x, cameraSize.y }, color);
 }
 
 void World::DrawBackground(sf::RenderWindow& window) const
 {
-	sf::RectangleShape background(_camera.GetVirtualProportions());
-	background.setFillColor(GetActualColor(ColorEntity::BACKGROUND));
-	window.draw(background);
+	auto cameraSize = _camera.GetVirtualProportions();
+	auto color = _colorPaletteChanger.GetActiveColor(ColorEntity::BACKGROUND);
 
-	_backgroundStripeManager.Draw(window, _camera, GetActualColor(ColorEntity::STRIPE));
+	DrawRectangle(window, { 0.f, 0.f, cameraSize.x, cameraSize.y }, color);
+	_backgroundStripeManager.Draw(window, _camera, _colorPaletteChanger.GetActiveColor(ColorEntity::STRIPE));
 }
 
 void World::DrawForeground(sf::RenderWindow& window) const
 {
 	_particleSystem.Draw(window, _camera);
-	_obstacleManager.Draw(window, _camera, GetActualColor(ColorEntity::OBSTACLE));
+	_obstacleManager.Draw(window, _camera, _colorPaletteChanger.GetActiveColor(ColorEntity::OBSTACLE));
 	_player.Draw(window, _camera, PLAYER_COLOR);
 }
 

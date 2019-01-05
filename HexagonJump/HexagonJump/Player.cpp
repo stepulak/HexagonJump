@@ -11,6 +11,14 @@ Player::Player(float x, float y, float radius)
 {
 }
 
+void Player::CutPosition(float distance)
+{
+	Move(distance, 0.f);
+	for (auto& position : _positionHistory) {
+		position.position += { distance, 0.f };
+	}
+}
+
 void Player::StartMoving(float velocity, bool rightDirection)
 {
 	_horizontalVelocity = velocity;

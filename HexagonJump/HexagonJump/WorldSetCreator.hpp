@@ -16,20 +16,46 @@ public:
 
 	WorldSetCreator();
 	
-	void CreateRandomSet(World& world, const sf::FloatRect& setArea) const;
+	void SpawnRandomSet(World& world, const sf::FloatRect& setArea) const;
 
 private:
 	
 	using SetCreator = std::function<void(World& world, const sf::FloatRect& setArea)>;
 
-	float GetSpikeWidth(const sf::FloatRect& setArea) const { return setArea.width * (1 / 25.f); }
-	float GetSpikeHeight(const sf::FloatRect& setArea) const { return setArea.height * (1 / 8.f); }
-
-	const BeatUnit& GetRandomBeatUnit(World& world) const;
+	static constexpr float GetSpikeWidth() { return 58.f; }
+	static constexpr float GetSpikeHeight() { return 67.f; }
 	
-	void AddSpike(World& world, const sf::FloatRect& area, float xRelative, float yRelative, Direction direction) const;
-	void AddPlatform(World& world, const sf::FloatRect& area, float xRelative, float yRelative, float width, float height) const;
-	void AddSquareWithSpikes(World& world, const sf::FloatRect& area, float xRelative, float yRelative, bool skipBottom = false) const;
+	static void AddSpike(World& world,
+		const sf::FloatRect& area,
+		float xCenterRelative, 
+		float yCenterRelative, 
+		Direction direction);
+
+	static void AddPlatform(World& world, 
+		const sf::FloatRect& area,
+		float xLeftRelative, 
+		float yTopRelative,
+		float width, 
+		float height);
+
+	static void AddSquareWithSpikes(World& world,
+		const sf::FloatRect& area, 
+		float xLeftRelative, 
+		float yTopRelative, 
+		bool skipBottom = false);
+
+	// Ugly, but necessary solution
+	void InitSet1();
+	void InitSet2();
+	void InitSet3();
+	void InitSet4();
+	void InitSet5();
+	void InitSet6();
+	void InitSet7();
+	void InitSet8();
+	void InitSet9();
+	void InitSet10();
+	void InitSet11();
 
 	std::vector<SetCreator> _setCreators;
 };
