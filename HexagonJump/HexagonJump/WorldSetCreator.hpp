@@ -22,9 +22,9 @@ private:
 	
 	using SetCreator = std::function<void(World& world, const sf::FloatRect& setArea)>;
 
-	static constexpr float GetSpikeWidth() { return 58.f; }
-	static constexpr float GetSpikeHeight() { return 67.f; }
-	
+	static constexpr float SPIKE_WIDTH = 58.f;
+	static constexpr float SPIKE_HEIGHT = 67.f;
+
 	static void AddSpike(World& world,
 		const sf::FloatRect& area,
 		float xCenterRelative, 

@@ -104,7 +104,7 @@ private:
 	float _angle = .0f;
 	float _rotationVelocity = .0f;
 	bool _isRotating = false;
-	float _tryToJumpTimer = TRY_TO_JUMP_TIMER_DEFAULT;
+	float _tryToJumpTimer = 0.f;
 	float _horizontalVelocity = .0f;
 	float _verticalVelocity = .0f;
 	bool _isMoving = false;

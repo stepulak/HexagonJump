@@ -15,9 +15,8 @@ World::World(Camera& camera, BeatUnitManager& manager)
 	ExtendSurface();
 }
 
-void World::Update(float deltaTime)
+void World::Update(float deltaTime, bool skipObstacles)
 {
-	_camera.Move(_camera.GetVelocity() * deltaTime);
 	_player.Update(deltaTime, GRAVITY, *this);
 	_particleSystem.Update(deltaTime);
 	_backgroundStripeManager.Update(_camera, deltaTime);
@@ -26,7 +25,9 @@ void World::Update(float deltaTime)
 	auto skipTime = _beatUnitManager.CurrentHighestBeatRatio() * COLOR_CHANGE_HIGHEST_BEAT_MULTIPLIER;
 	_colorPaletteChanger.Update(deltaTime, skipTime);
 
-	TryToSpawnAnotherObstacleSet();
+	if (!skipObstacles) {
+		TryToSpawnAnotherObstacleSet();
+	}
 	TryToCutPositionAllElements();
 }
 

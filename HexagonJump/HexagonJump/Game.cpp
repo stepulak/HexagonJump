@@ -8,9 +8,10 @@ namespace hexagon {
 Game::Game(sf::Music& music, MusicVisualization&& visualization, size_t numBeatUnits, Camera& camera)
 	: _music(music)
 	, _beatUnitManager(std::move(visualization), numBeatUnits, TIMERATE)
-	, _world(camera, _beatUnitManager)
+	, _camera(camera)
 {
 	camera.SetVelocity(CAMERA_VELOCITY);
+	Reset();
 }
 
 void Game::Start()
@@ -29,8 +30,7 @@ void Game::Stop()
 
 void Game::KeyPressed(sf::Keyboard::Key key)
 {
-	auto& player = _world.GetPlayer();
-	auto& camera = _world.GetCamera();
+	auto& player = _world->GetPlayer();
 
 	switch (key)
 	{
@@ -63,7 +63,7 @@ void Game::KeyPressed(sf::Keyboard::Key key)
 
 void Game::KeyReleased(sf::Keyboard::Key key)
 {
-	auto& player = _world.GetPlayer();
+	auto& player = _world->GetPlayer();
 
 	switch (key)
 	{
@@ -80,19 +80,47 @@ void Game::Update(float deltaTime)
 	if (_stopped) {
 		return; // skip
 	}
-	// TODO simplify
-	auto& player = _world.GetPlayer();
-	auto& camera = _world.GetCamera();
-	player.StartMoving(camera.GetVelocity(), true);
-
-	_world.Update(deltaTime);
+	if (_world->PlayerDied()) {
+		ResolvePlayerDeath(deltaTime);
+	}
+	else {
+		MoveCameraAndPlayer(deltaTime);
+	}
+	_world->Update(deltaTime, false);
 	_beatUnitManager.Update(deltaTime);
 	SyncMusicAndBeatManager(deltaTime);
 }
 
 void Game::Draw(sf::RenderWindow& window) const
 {
-	_world.Draw(window);
+	_world->Draw(window);
+}
+
+void Game::Reset()
+{
+	_music.stop();
+	_musicBeatManagerSyncTimer = 0.f;
+	_playerDeathWaitTimer = 0.f;
+	_world.reset();
+	_world = std::make_unique<World>(_camera, _beatUnitManager);
+	_camera.SetPosition(0.f);
+	_beatUnitManager.Reset();
+	Start();
+}
+
+void Game::ResolvePlayerDeath(float deltaTime)
+{
+	_playerDeathWaitTimer += deltaTime;
+	if (_playerDeathWaitTimer >= PLAYER_DEATH_WAIT_TIME) {
+		Reset();
+	}
+}
+
+void Game::MoveCameraAndPlayer(float deltaTime)
+{
+	auto cameraVelocity = _camera.GetVelocity();
+	_camera.Move(cameraVelocity * deltaTime);
+	_world->GetPlayer().StartMoving(cameraVelocity, true);
 }
 
 void Game::SyncMusicAndBeatManager(float deltaTime)

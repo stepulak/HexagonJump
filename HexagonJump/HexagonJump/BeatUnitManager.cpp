@@ -12,6 +12,7 @@ BeatUnitManager::BeatUnitManager(MusicVisualization&& visualization, size_t numB
 	, _musicVisualization(std::move(visualization))
 	, _gameTimerate(gameTimerate)
 {
+	Reset();
 }
 
 void BeatUnitManager::Update(float deltaTime)
@@ -33,6 +34,14 @@ float BeatUnitManager::CurrentHighestBeatRatio() const
 void BeatUnitManager::SyncTimingWithMusic(float musicTime)
 {
 	_visualizationDataIndex = static_cast<size_t>(musicTime / 1000.f / _gameTimerate);
+}
+
+void BeatUnitManager::Reset()
+{
+	_visualizationDataIndex = 0u;
+	_beatTimer = 0.f;
+	_shuffleTimer = 0.f;
+	_lastHighestBeat = 0.f;
 }
 
 float BeatUnitManager::CurrentHighestBeat() const

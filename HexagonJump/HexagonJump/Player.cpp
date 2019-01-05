@@ -3,6 +3,8 @@
 #include "Utils.hpp"
 #include "World.hpp"
 
+#include <iostream>
+
 namespace hexagon {
 
 Player::Player(float x, float y, float radius)

@@ -25,6 +25,7 @@ public:
 	void Update(float deltaTime);
 	float CurrentHighestBeatRatio() const;
 	void SyncTimingWithMusic(float musicTime);
+	void Reset();
 
 private:
 
@@ -44,11 +45,11 @@ private:
 	BeatUnitContainer _beatUnits;
 	MusicVisualization _musicVisualization;
 	const float _gameTimerate;
-	size_t _visualizationDataIndex = 0u;
 	bool _active = false;
-	float _beatTimer = 0.f;
-	float _shuffleTimer = 0.f;
-	float _lastHighestBeat = 0.f;
+	size_t _visualizationDataIndex;
+	float _beatTimer;
+	float _shuffleTimer;
+	float _lastHighestBeat;
 };
 
 }

@@ -30,14 +30,20 @@ private:
 	static constexpr auto PLAYER_KEY_MOVE_LEFT = sf::Keyboard::A;
 	static constexpr auto PLAYER_KEY_MOVE_RIGHT = sf::Keyboard::D;
 	static constexpr auto PAUSE_KEY = sf::Keyboard::P;
-	
+	static constexpr float PLAYER_DEATH_WAIT_TIME = 3.f;
+
+	void Reset();
+	void ResolvePlayerDeath(float deltaTime);
+	void MoveCameraAndPlayer(float deltaTime);
 	void SyncMusicAndBeatManager(float deltaTime);
 
 	sf::Music& _music;
+	Camera& _camera;
 	BeatUnitManager _beatUnitManager;
-	World _world;
+	std::unique_ptr<World> _world;
 	bool _stopped = true;
-	float _musicBeatManagerSyncTimer = 0.f;
+	float _musicBeatManagerSyncTimer;
+	float _playerDeathWaitTimer;
 };
 
 }
