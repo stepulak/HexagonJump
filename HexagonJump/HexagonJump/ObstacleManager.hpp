@@ -25,7 +25,7 @@ private:
 
 	static constexpr size_t OBSTACLES_POOL_DEFAULT_SIZE = 32u;
 
-	Pool<Obstacle::Ptr> _pool{ OBSTACLES_POOL_DEFAULT_SIZE };
+	ObstaclePool _pool{ OBSTACLES_POOL_DEFAULT_SIZE };
 };
 
 }
