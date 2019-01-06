@@ -95,8 +95,8 @@ bool Player::StandingOnSurface(const ObstacleManager& manager) const
 	}
 	
 	auto& pool = manager.GetObstaclePool();
-	for (size_t i = 0u; i < manager.GetObstaclePool().GetNumberOfElements(); i++) {
-		auto& obstacle = *manager.GetObstaclePool().At(i);
+	for (size_t i = 0u; i < manager.GetObstaclePool().Size(); i++) {
+		auto& obstacle = *manager.GetObstaclePool()[i];
 
 		if (obstacle.GetType() != Obstacle::Type::PLATFORM) {
 			continue;

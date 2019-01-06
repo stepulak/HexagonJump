@@ -19,17 +19,20 @@ public:
 
 	virtual ~Pool() = default;
 
-	size_t GetNumberOfElements() const { return _index; }
+	size_t Size() const { return _index; }
 
 	T& At(size_t index) { return _pool[index]; }
 	const T& At(size_t index) const { return _pool[index]; }
+
+	T& operator[](size_t index) { return _pool[index]; }
+	const T& operator[](size_t index) const { return _pool[index]; }
 
 	T& Add() {
 		return AddImpl(_pool, T{}, _index);
 	}
 
-	T& Add(T& elem) {
-		return AddImpl(_pool, elem, _index);
+	T& Add(const T& elem) {
+		return const_cast<T&>(AddImpl(_pool, elem, _index));
 	}
 
 	T& Add(T&& elem) {
@@ -62,6 +65,15 @@ public:
 	typename PoolContainer::const_iterator begin() const { return _pool.begin(); }
 	typename PoolContainer::iterator end() { return _pool.begin() + _index; }
 	typename PoolContainer::const_iterator end() const { return _pool.begin() + _index; }
+
+	typename PoolContainer::reverse_iterator rbegin() { 
+		return _pool.rbegin() + (_pool.size() - _index); 
+	}
+	typename PoolContainer::const_reverse_iterator rbegin() const {
+		return _pool.rbegin() + (_pool.size() - _index);
+	}
+	typename PoolContainer::reverse_iterator rend() { return _pool.rend(); }
+	typename PoolContainer::const_reverse_iterator rend() const { return _pool.rend(); }
 
 protected:
 
