@@ -60,6 +60,8 @@ int main()
 	listbox->AddElement("option6");
 	listbox->AddElement("option7");
 	gui.AddGuiElement(std::move(listbox));
+	//const std::string& text, const sf::FloatRect& area, float fontSize, const Callback& callback
+	gui.AddGuiElement(std::make_unique<YesNoDialog>("BLABLABLA?", sf::FloatRect{ 100, 350, 300, 150 }, 40, [](bool yes) { std::cout << (yes ? "yes" : "no") << std::endl; }));
 
 	while (window.isOpen())
 	{

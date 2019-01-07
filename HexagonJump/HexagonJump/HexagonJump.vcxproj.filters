@@ -93,6 +93,9 @@
     <ClCompile Include="ListBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="YesNoDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BeatUnitManager.hpp">
@@ -180,6 +183,9 @@
       <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="ListBox.hpp">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="YesNoDialog.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
   </ItemGroup>

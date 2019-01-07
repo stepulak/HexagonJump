@@ -12,11 +12,17 @@ public:
 
 	virtual ~GuiElement() = default;
 
+	virtual bool IsPressable() const { return false; }
+	virtual bool IsMovable() const { return false; }
+	virtual bool IsInvokable() const { return false; }
+
 	virtual bool Press() { return false; }
 	virtual bool MoveUp() { return false; }
 	virtual bool MoveDown() { return false; }
+
 	virtual void Update(float deltaTime) {}
 	virtual void Draw(sf::RenderWindow& window, const sf::Font& font) const = 0;
+	virtual void DrawMarker(sf::RenderWindow& window) const {}
 };
 
 }

@@ -1,8 +1,8 @@
 #include "ListBox.hpp"
 
-namespace hexagon::gui {
+#include <iostream>
 
-const sf::Color ListBox::LISTBOX_COLOR = { 255, 255, 255 };
+namespace hexagon::gui {
 
 ListBox::ListBox(const sf::Vector2f& position,
 	float fontSize,
@@ -19,16 +19,18 @@ bool ListBox::MoveUp()
 {
 	if (_activeElementIndex > 0u) {
 		_activeElementIndex--;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool ListBox::MoveDown()
 {
 	if (_pool.Size() > 0u && _activeElementIndex < _pool.Size() - 1) {
-		_activeElementIndex--;
+		_activeElementIndex++;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool ListBox::Press()
@@ -42,12 +44,27 @@ bool ListBox::Press()
 void ListBox::Draw(sf::RenderWindow& window, const sf::Font& font) const
 {
 	auto position = _position;
+	size_t start = GetStartingIndexForDrawing();
 
-	for (size_t i = _activeElementIndex; i < _pool.Size() &&
-		i < _activeElementIndex + _numElementsScroll; i++) {
-		Label(_pool[i], LISTBOX_COLOR, position, _fontSize).Draw(window, font);
+	for (size_t i = start; i < start + _numElementsScroll; i++) {
+		Label(_pool[i], Button::COLOR, position, _fontSize).Draw(window, font);
 		position.y += _fontSize;
 	}
+}
+
+void ListBox::DrawMarker(sf::RenderWindow& window) const
+{
+	sf::Vector2f position = {
+		_position.x,
+		_position.y + (_activeElementIndex - GetStartingIndexForDrawing()) * _fontSize
+	};
+	Button(_pool[_activeElementIndex], position, _fontSize).DrawMarker(window);
+}
+
+size_t ListBox::GetStartingIndexForDrawing() const
+{
+	return (_pool.Size() - _activeElementIndex < _numElementsScroll)
+		? _pool.Size() - _numElementsScroll : _activeElementIndex;
 }
 
 }

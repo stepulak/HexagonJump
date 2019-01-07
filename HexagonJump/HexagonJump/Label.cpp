@@ -10,7 +10,7 @@ Label::Label(const std::string& text, const sf::Color& color, const sf::Vector2f
 {
 }
 
-void Label::Draw(sf::RenderWindow& window, const sf::Font& font) const
+sf::Text Label::CreateRenderText(const sf::Font& font) const
 {
 	sf::Text text;
 	text.setFont(font);
@@ -18,7 +18,12 @@ void Label::Draw(sf::RenderWindow& window, const sf::Font& font) const
 	text.setCharacterSize(_fontSize);
 	text.setFillColor(_color);
 	text.setPosition(_position);
-	window.draw(text);
+	return text;
+}
+
+void Label::Draw(sf::RenderWindow& window, const sf::Font& font) const
+{
+	window.draw(CreateRenderText(font));
 }
 
 }

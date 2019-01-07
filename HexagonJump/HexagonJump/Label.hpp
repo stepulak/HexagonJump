@@ -20,8 +20,9 @@ public:
 	const sf::Vector2f& GetPosition() const { return _position; }
 	float GetFontSize() const { return _fontSize; }
 	
+	sf::Text CreateRenderText(const sf::Font& font) const;
 	void Draw(sf::RenderWindow& window, const sf::Font& font) const override;
-
+	
 private:
 
 	std::string _text;

@@ -18,16 +18,21 @@ public:
 	const std::string& GetActiveElement() const { return _pool[_activeElementIndex]; }
 	void AddElement(const std::string& text) { _pool.Add(text); }
 
+	bool IsPressable() const override { return true; }
+	bool IsMovable() const override { return true; }
+
 	bool MoveUp() override;
 	bool MoveDown() override;
 	bool Press() override;
 
 	void Draw(sf::RenderWindow& window, const sf::Font& font) const override;
+	void DrawMarker(sf::RenderWindow& window) const override;
 
 private:
 
 	static constexpr size_t DEFAULT_POOL_SIZE = 16u;
-	static const sf::Color LISTBOX_COLOR;
+
+	size_t GetStartingIndexForDrawing() const;
 
 	const sf::Vector2f _position;
 	const float _fontSize;

@@ -14,10 +14,14 @@ GuiManager::GuiManager(const std::string& fontPath)
 
 void GuiManager::AddGuiElement(GuiElement::Ptr&& ptr)
 {
-	if (!GetActiveElement<Button>()) {
-		_activeElementIndex = _pool.Size();
-	}
 	_pool.Add(std::move(ptr));
+
+	// Set active element to first pressable element added
+	if (!GetActiveElement().IsPressable()) {
+		if (_pool[_pool.Size() - 1]->IsPressable()) {
+			_activeElementIndex = _pool.Size() - 1;
+		}
+	}
 }
 
 bool GuiManager::KeyPressed(sf::Keyboard::Key key)
@@ -25,18 +29,18 @@ bool GuiManager::KeyPressed(sf::Keyboard::Key key)
 	switch (key)
 	{
 	case KEY_BUTTON_PRESS:
-		if (auto button = GetActiveElement<Button>()) {
-			button->get().Press();
+		if (GetActiveElement().IsPressable()) {
+			return GetActiveElement().Press();
 		}
 		break;
 	case KEY_INVOKE_POP_UP:
 		// TODO
 		break;
 	case KEY_NEXT_BUTTON:
-		MoveToNextButton();
+		Move(false);
 		break;
 	case KEY_PREVIOUS_BUTTON:
-		MoveToPreviousButton();
+		Move(true);
 		break;
 	default:
 		return false;
@@ -56,61 +60,40 @@ void GuiManager::Draw(sf::RenderWindow& window)
 	for (auto& element : _pool) {
 		element->Draw(window, _font);
 	}
-	if (auto activeButton = GetActiveElement<Button>()) {
-		DrawMarkerNearButton(window, activeButton->get());
+
+	if (_pool.Size() > 0u) {
+		GetActiveElement().DrawMarker(window);
 	}
 }
 
-void GuiManager::MoveToNextButton()
+void GuiManager::Move(bool up)
 {
 	if (_pool.Size() == 0u) {
 		return; // do nothing
 	}
 
-	// Less code than using std::find_if with iterators...
-	size_t stop = _activeElementIndex;
-	do {
-		_activeElementIndex++;
-		_activeElementIndex %= _pool.Size();
-		if (GetActiveElement<Button>()) {
+	auto& activeElement = GetActiveElement();
+	if (activeElement.IsMovable()) {
+		if (up && activeElement.MoveUp()) {
 			return;
 		}
-	} while (stop != _activeElementIndex);
-}
-
-void GuiManager::MoveToPreviousButton()
-{
-	if (_pool.Size() == 0u) {
-		return; // do nothing
+		else if (!up && activeElement.MoveDown()) {
+			return;
+		}
 	}
 
-	// Less code than using std::find_if with reverse iterators...
+	// Less code than using std::find_if with (reverse) iterators...
 	size_t stop = _activeElementIndex;
 	do {
-		_activeElementIndex = (_activeElementIndex == 0u) 
-			? _pool.Size() - 1
-			: _activeElementIndex - 1;
-
-		if (GetActiveElement<Button>()) {
-			return;
+		if (up) {
+			_activeElementIndex = (_activeElementIndex == 0u)
+				? _pool.Size() - 1
+				: _activeElementIndex - 1;
 		}
-	} while (stop != _activeElementIndex);
-}
-
-void GuiManager::DrawMarkerNearButton(sf::RenderWindow& window, const Button& button) const
-{
-	auto& buttonPosition = button.GetLabel().GetPosition();
-	auto buttonSize = button.GetLabel().GetFontSize();
-	auto markerSize = buttonSize * ACTIVE_BUTTON_MARKER_SIZE_RATIO;
-	
-	sf::FloatRect area = { 
-		buttonPosition.x - buttonSize,
-		buttonPosition.y + (buttonSize - markerSize) * 0.8f,
-		markerSize, 
-		markerSize 
-	};
-
-	DrawRectangle(window, area, Button::BUTTON_COLOR);
+		else {
+			_activeElementIndex = (_activeElementIndex + 1) % _pool.Size();
+		}
+	} while (!GetActiveElement().IsPressable() && stop != _activeElementIndex);
 }
 
 }

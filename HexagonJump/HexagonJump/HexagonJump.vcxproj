@@ -149,6 +149,7 @@
     <ClCompile Include="World.cpp" />
     <ClCompile Include="WorldColorPalette.cpp" />
     <ClCompile Include="WorldSetCreator.cpp" />
+    <ClCompile Include="YesNoDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppInfo.hpp" />
@@ -180,6 +181,7 @@
     <ClInclude Include="World.hpp" />
     <ClInclude Include="WorldColorPalette.hpp" />
     <ClInclude Include="WorldSetCreator.hpp" />
+    <ClInclude Include="YesNoDialog.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
