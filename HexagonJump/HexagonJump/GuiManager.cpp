@@ -5,22 +5,31 @@
 
 namespace hexagon::gui {
 
-GuiManager::GuiManager(const std::string& fontPath) 
+GuiManager::GuiManager(const sf::Font& font)
+	: _font(font)
 {
-	if (!_font.loadFromFile(fontPath)) {
-		throw std::runtime_error("Unable to load font: " + fontPath);
-	}
 }
 
-void GuiManager::AddGuiElement(GuiElement::Ptr&& ptr)
+GuiElement::Ptr& GuiManager::AddGuiElement(GuiElement::Ptr&& ptr)
 {
-	_pool.Add(std::move(ptr));
+	auto& elem = _pool.Add(std::move(ptr));
 
 	// Set active element to first pressable element added
 	if (!GetActiveElement().IsPressable()) {
 		if (_pool[_pool.Size() - 1]->IsPressable()) {
 			_activeElementIndex = _pool.Size() - 1;
 		}
+	}
+	return elem;
+}
+
+void GuiManager::RemoveGuiElement(const GuiElement::Ptr& ptr)
+{
+	_pool.RemoveAll([&](const auto& elem) {
+		return elem.get() == ptr.get();
+	});
+	if (_activeElementIndex >= _pool.Size()) {
+		_activeElementIndex = 0u; // reset
 	}
 }
 
@@ -33,14 +42,14 @@ bool GuiManager::KeyPressed(sf::Keyboard::Key key)
 			return GetActiveElement().Press();
 		}
 		break;
-	case KEY_INVOKE_POP_UP:
-		// TODO
+	case KEY_INVOKE_YES_NO_DIALOG:
+		InvokeDialog();
 		break;
 	case KEY_NEXT_BUTTON:
-		Move(false);
+		MoveToNextPressableElement(false);
 		break;
 	case KEY_PREVIOUS_BUTTON:
-		Move(true);
+		MoveToNextPressableElement(true);
 		break;
 	default:
 		return false;
@@ -55,31 +64,23 @@ void GuiManager::Update(float deltaTime)
 	}
 }
 
-void GuiManager::Draw(sf::RenderWindow& window)
+void GuiManager::Draw(sf::RenderWindow& window) const
 {
 	for (auto& element : _pool) {
 		element->Draw(window, _font);
 	}
-
 	if (_pool.Size() > 0u) {
 		GetActiveElement().DrawMarker(window);
 	}
 }
 
-void GuiManager::Move(bool up)
+bool GuiManager::MoveToNextPressableElement(bool up)
 {
 	if (_pool.Size() == 0u) {
-		return; // do nothing
+		return false; // do nothing
 	}
-
-	auto& activeElement = GetActiveElement();
-	if (activeElement.IsMovable()) {
-		if (up && activeElement.MoveUp()) {
-			return;
-		}
-		else if (!up && activeElement.MoveDown()) {
-			return;
-		}
+	if (TryToMoveInElement(GetActiveElement(), up)) {
+		return true;
 	}
 
 	// Less code than using std::find_if with (reverse) iterators...
@@ -94,6 +95,31 @@ void GuiManager::Move(bool up)
 			_activeElementIndex = (_activeElementIndex + 1) % _pool.Size();
 		}
 	} while (!GetActiveElement().IsPressable() && stop != _activeElementIndex);
+
+	return GetActiveElement().IsPressable();
+}
+
+bool GuiManager::TryToMoveInElement(GuiElement& elem, bool up)
+{
+	if (elem.IsMovable()) {
+		if (up && elem.MoveUp()) {
+			return true;
+		}
+		else if (!up && elem.MoveDown()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void GuiManager::InvokeDialog()
+{
+	auto result = std::find_if(_pool.begin(), _pool.end(), [&](const auto& elem) {
+		return elem->IsInvokable();
+	});
+	if (result != _pool.end()) {
+		_invokedDialog = *result->get();
+	}
 }
 
 }

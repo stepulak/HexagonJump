@@ -7,6 +7,7 @@ namespace hexagon::gui {
 class Label : public GuiElement {
 public:
 
+	Label() = default;
 	Label(const std::string& text, const sf::Color& color, const sf::Vector2f& position, float fontSize);
 	~Label() = default;
 

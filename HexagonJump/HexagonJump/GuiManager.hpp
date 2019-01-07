@@ -12,25 +12,29 @@ namespace hexagon::gui {
 class GuiManager final {
 public:
 
-	GuiManager(const std::string& fontPath);
+	GuiManager(const sf::Font& font);
 
-	void AddGuiElement(GuiElement::Ptr&& ptr);
+	bool IsAnyDialogInvoked() const { return _invokedDialog.has_value(); }
+
+	GuiElement::Ptr& AddGuiElement(GuiElement::Ptr&& ptr);
+	void RemoveGuiElement(const GuiElement::Ptr& ptr);
+
 	bool KeyPressed(sf::Keyboard::Key key);
 	void Update(float deltaTime);
-	void Draw(sf::RenderWindow& window);
+	void Draw(sf::RenderWindow& window) const;
 
 private:
 
 	using GuiPool = Pool<GuiElement::Ptr>;
 
 	static constexpr auto KEY_BUTTON_PRESS = sf::Keyboard::Return;
-	static constexpr auto KEY_INVOKE_POP_UP = sf::Keyboard::Escape;
+	static constexpr auto KEY_INVOKE_YES_NO_DIALOG = sf::Keyboard::Escape;
 	static constexpr auto KEY_NEXT_BUTTON = sf::Keyboard::Down;
 	static constexpr auto KEY_PREVIOUS_BUTTON = sf::Keyboard::Up;
 	static constexpr size_t DEFAULT_POOL_SIZE = 32u;
 	
 	template<typename ElementType>
-	std::optional<std::reference_wrapper<ElementType>> CastActiveElement() {
+	std::optional<std::reference_wrapper<ElementType>> CastActiveElement() const {
 		if (_pool.Size() <= _activeElementIndex) {
 			return{};
 		}
@@ -42,11 +46,15 @@ private:
 	}
 
 	GuiElement& GetActiveElement() { return *_pool[_activeElementIndex]; }
+	const GuiElement& GetActiveElement() const { return *_pool[_activeElementIndex]; }
 
-	void Move(bool up);
+	bool MoveToNextPressableElement(bool up);
+	bool TryToMoveInElement(GuiElement& elem, bool up);
+	void InvokeDialog();
 
+	const sf::Font _font;
 	GuiPool _pool{ DEFAULT_POOL_SIZE };
-	sf::Font _font;
+	std::optional<std::reference_wrapper<GuiElement>> _invokedDialog;
 	size_t _activeElementIndex = 0u;
 };
 

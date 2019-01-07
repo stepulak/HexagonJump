@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GuiManager.hpp"
 #include "Runnable.hpp"
 #include "World.hpp"
 #include "MusicVisualizationManager.hpp"
@@ -11,13 +12,16 @@ public:
 
 	static constexpr float TIMERATE = 1 / 20.f;
 	
-	Game(sf::Music& music, MusicVisualization&& visualization, size_t numBeatUnits, Camera& camera);
+	Game(const sf::Font& font,
+		sf::Music& music,
+		MusicVisualization&& visualization, 
+		Camera& camera,
+		size_t numBeatUnits);
 
 	void Start();
 	void Stop();
 
 	void KeyPressed(sf::Keyboard::Key key) override;
-	void KeyReleased(sf::Keyboard::Key key) override;
 	void Update(float deltaTime) override;
 	void Draw(sf::RenderWindow& window) const override;
 	
@@ -27,20 +31,24 @@ private:
 	static constexpr float CAMERA_VELOCITY = 700.f;
 	static constexpr auto PLAYER_KEY_JUMP = sf::Keyboard::Space;
 	static constexpr auto PLAYER_KEY_FALL_DOWN_FAST = sf::Keyboard::C;
-	static constexpr auto PLAYER_KEY_MOVE_LEFT = sf::Keyboard::A;
-	static constexpr auto PLAYER_KEY_MOVE_RIGHT = sf::Keyboard::D;
 	static constexpr auto PAUSE_KEY = sf::Keyboard::P;
 	static constexpr float PLAYER_DEATH_WAIT_TIME = 3.f;
+	static constexpr float SECONDS_WITHOUT_OBSTACLES = 5.f;
 
 	void Reset();
 	void ResolvePlayerDeath(float deltaTime);
 	void MoveCameraAndPlayer(float deltaTime);
 	void SyncMusicAndBeatManager(float deltaTime);
 
+	bool ShouldSpawnObstacles() const;
+
+	const sf::Font& _font;
 	sf::Music& _music;
 	Camera& _camera;
 	BeatUnitManager _beatUnitManager;
 	std::unique_ptr<World> _world;
+	std::unique_ptr<gui::GuiManager> _guiManager;
+
 	bool _stopped = true;
 	float _musicBeatManagerSyncTimer;
 	float _playerDeathWaitTimer;

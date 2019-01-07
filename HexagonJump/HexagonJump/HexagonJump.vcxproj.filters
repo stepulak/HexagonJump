@@ -188,5 +188,8 @@
     <ClInclude Include="YesNoDialog.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
+    <ClInclude Include="InGameHUD.hpp">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -63,17 +63,14 @@ void YesNoDialog::DrawDialogText(sf::RenderWindow& window, const sf::Font& font)
 
 void YesNoDialog::DrawYesNoText(sf::RenderWindow& window, const sf::Font& font) const
 {
-	sf::Vector2f yesPosition = { 
+	sf::Vector2f position = { 
 		_area.left + YES_TEXT_HORIZONTAL_POSITION_RATIO * _area.width,
 		_area.top + (1.f - TEXT_VERTICAL_POSITION_RATIO) * _area.height
 	};
-	DrawOptionText(window, font, "Yes", yesPosition, _yesActive);
+	DrawOptionText(window, font, "Yes", position, _yesActive);
 
-	sf::Vector2f noPosition = {
-		_area.left + NO_TEXT_HORIZONTAL_POSITION_RATIO * _area.width,
-		_area.top + (1.f - TEXT_VERTICAL_POSITION_RATIO) * _area.height
-	};
-	DrawOptionText(window, font, "No", noPosition, !_yesActive);
+	position.x = _area.left + NO_TEXT_HORIZONTAL_POSITION_RATIO * _area.width;
+	DrawOptionText(window, font, "No", position, !_yesActive);
 }
 
 void YesNoDialog::DrawOptionText(sf::RenderWindow& window,

@@ -163,6 +163,7 @@
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="GuiElement.hpp" />
     <ClInclude Include="GuiManager.hpp" />
+    <ClInclude Include="InGameHUD.hpp" />
     <ClInclude Include="Label.hpp" />
     <ClInclude Include="ListBox.hpp" />
     <ClInclude Include="MusicVisualization.hpp" />
