@@ -134,8 +134,8 @@
     <ClCompile Include="ColorPaletteChanger.cpp" />
     <ClCompile Include="EndScreenHUD.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="GameStatsHUD.cpp" />
     <ClCompile Include="GuiManager.cpp" />
-    <ClCompile Include="GameStatsHud.cpp" />
     <ClCompile Include="Label.cpp" />
     <ClCompile Include="ListBox.cpp" />
     <ClCompile Include="Main.cpp" />

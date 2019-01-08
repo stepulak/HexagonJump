@@ -12,7 +12,7 @@ public:
 	GameStatsHUD() = default;
 	~GameStatsHUD() = default;
 
-	void UpdateStats(size_t musicTime) { _musicTime = musicTime; }
+	void UpdateStats(size_t score) { _score = score; }
 	void Draw(sf::RenderWindow& window, const sf::Font& font) const override;
 
 private:
@@ -22,7 +22,7 @@ private:
 	static constexpr float TEXT_SIZE = 40.f;
 	static const sf::Color TEXT_COLOR;
 
-	size_t _musicTime = 0.f;
+	size_t _score = 0.f;
 };
 
 }

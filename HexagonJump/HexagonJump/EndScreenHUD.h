@@ -2,19 +2,13 @@
 
 #include "GuiElement.hpp"
 #include "Camera.hpp"
-#include "BlinkingLabel.hpp"
 
 namespace hexagon::gui {
 
 class EndScreenHUD : public GuiElement {
 public:
 
-	enum class EndType {
-		WIN,
-		DEATH
-	};
-
-	EndScreenHUD(const Camera& camera, EndType type, size_t totalTime, const std::string& restartButton);
+	EndScreenHUD(const Camera& camera, size_t totalTime, const std::string& resultMessage, const std::string& restartKey);
 	~EndScreenHUD() = default;
 
 	void Update(float deltaTime) override;
@@ -27,11 +21,10 @@ private:
 	static const sf::Color INFO_MESSAGE_COLOR;
 
 	const Camera& _camera;
-	EndType _type;
 	size_t _totalTime;
-	Label _timeInfoMessage;
-	BlinkingLabel _resultMessage;
-	BlinkingLabel _restartInfoMessage;
+	GuiElement::Ptr _timeInfoMessage;
+	GuiElement::Ptr _resultMessage;
+	GuiElement::Ptr _restartInfoMessage;
 };
 
 }

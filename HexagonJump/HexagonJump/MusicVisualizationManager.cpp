@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #ifndef _WIN32
 #include <pwd.h>
@@ -42,8 +43,12 @@ std::string MusicVisulizationManager::ConvertNewMusic(const std::string& path, f
 	auto visualizationData = CountMusicVisualizationData(buffer, gameTimerate, _spectrumColumns);
 
 	SaveMusicVisualizationToFile(visualizationData, musicPath + DATA_FILE_SUFFIX);
-	SaveMusicStats({ 0, 0.f }, musicPath + STATS_FILE_SUFFIX);
+	SaveMusicScore(0u, musicPath + SCORE_FILE_SUFFIX);
 
+	// Copy the music into app's directory
+	std::filesystem::remove(musicPath);
+	std::filesystem::copy(path, musicPath);
+	
 	return musicName;
 }
 
@@ -51,18 +56,18 @@ MusicData MusicVisulizationManager::LoadMusic(const std::string& musicName) cons
 {
 	auto musicPath = _applicationDataPath + musicName;
 	auto musicVisualization = LoadMusicVisualizationFromFile(musicPath + DATA_FILE_SUFFIX, _spectrumColumns);
-	auto musicStats = LoadMusicStats(musicPath + STATS_FILE_SUFFIX);
-	return { musicName, musicStats, musicVisualization };
+	auto musicStats = LoadMusicScore(musicPath + SCORE_FILE_SUFFIX);
+	return { musicName, musicPath, musicStats, musicVisualization };
 }
 
-void MusicVisulizationManager::UpdateStatsIfBetter(const std::string& musicName, const MusicStats& stats)
+void MusicVisulizationManager::UpdateScoreIfBetter(const std::string& musicName, unsigned score)
 {
-	auto statsFilename = _applicationDataPath + musicName + STATS_FILE_SUFFIX;
-	auto oldStats = LoadMusicStats(statsFilename);
-	MusicStats newStats { std::max(stats.bestScore, oldStats.bestScore), std::max(stats.bestTime, oldStats.bestTime) };
-	
-	SaveMusicStats(newStats, statsFilename);
-	_music[musicName] = newStats;
+	auto statsFilename = _applicationDataPath + musicName + SCORE_FILE_SUFFIX;
+	auto oldScore = LoadMusicScore(statsFilename);
+	auto betterScore = std::max(score, oldScore);
+
+	_music[musicName] = betterScore;
+	SaveMusicScore(betterScore, statsFilename);
 }
 
 void MusicVisulizationManager::LoadExistingMusicList()
@@ -71,7 +76,7 @@ void MusicVisulizationManager::LoadExistingMusicList()
 		auto path = filename.path().string();
 		auto musicName = FilenameWithoutExtension(path);
 		if (_music.find(musicName) == _music.end()) {
-			_music[musicName] = LoadMusicStats(path);
+			_music[musicName] = LoadMusicScore(path);
 		}
 	}
 }
@@ -126,29 +131,27 @@ void MusicVisulizationManager::SaveMusicVisualizationToFile(const MusicVisualiza
 	}
 }
 
-MusicStats MusicVisulizationManager::LoadMusicStats(const std::string& filename)
+unsigned MusicVisulizationManager::LoadMusicScore(const std::string& filename)
 {
 	std::fstream file(filename, std::ios_base::in);
 	if (!file.good()) {
-		throw std::runtime_error("Unable to open music stats file: " + filename);
+		throw std::runtime_error("Unable to open file with music score: " + filename);
 	}
 
-	MusicStats stats;
-	file >> stats.bestScore;
-	file >> stats.bestTime;
+	unsigned score;
+	file >> score;
 
-	return stats;
+	return score;
 }
 
-void MusicVisulizationManager::SaveMusicStats(const MusicStats& stats, const std::string& filename)
+void MusicVisulizationManager::SaveMusicScore(unsigned score, const std::string& filename)
 {
 	std::fstream file(filename, std::ios_base::out);
 	if (!file.good()) {
-		throw std::runtime_error("Unable to save music stats file: " + filename);
+		throw std::runtime_error("Unable to save file with music score: " + filename);
 	}
 
-	file << stats.bestScore << std::endl;
-	file << stats.bestTime << std::endl;
+	file << score << std::endl;
 }
 
 }

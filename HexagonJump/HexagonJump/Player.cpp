@@ -15,9 +15,10 @@ Player::Player(float x, float y, float radius)
 
 void Player::Move(float distX, float distY)
 {
+	// bugfix
 	_position += { 
-		distX > MAX_DISTANCE_MOVE ? 0.f : distX,
-		distY > MAX_DISTANCE_MOVE ? 0.f : distY
+		distX >= MAX_DISTANCE_MOVE ? 0.f : distX,
+		distY >= MAX_DISTANCE_MOVE ? 0.f : distY
 	};
 }
 

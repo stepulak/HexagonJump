@@ -57,4 +57,8 @@ static std::string FilenameWithoutExtension(const std::string& path) {
 	return std::filesystem::path(path).stem().string();
 }
 
+static std::string FilenameWithExtension(const std::string& path) {
+	return std::filesystem::path(path).filename().string();
+}
+
 }

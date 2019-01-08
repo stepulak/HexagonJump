@@ -4,6 +4,7 @@
 #include "ListBox.hpp"
 #include "YesNoDialog.hpp"
 #include "GameStatsHUD.hpp"
+#include "EndScreenHUD.h"
 
 #include <optional>
 #include <functional>

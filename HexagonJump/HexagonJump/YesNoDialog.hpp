@@ -9,7 +9,7 @@ namespace hexagon::gui {
 class YesNoDialog : public GuiElement {
 public:
 
-	using Callback = std::function<void(bool yes)>;
+	using Callback = std::function<void(bool yesPressed)>;
 
 	YesNoDialog(const std::string& text, const sf::FloatRect& area, float fontSize, const Callback& callback);
 

@@ -13,7 +13,8 @@
 using namespace hexagon;
 using namespace hexagon::gui;
 
-static constexpr auto MUSIC_FILENAME = "D:\\Git\\HexagonJump\\HexagonJump\\x64\\Debug\\DontBeSoShy.ogg";
+//static constexpr auto MUSIC_FILENAME = "D:\\Git\\HexagonJump\\HexagonJump\\x64\\Debug\\DontBeSoShy.ogg";
+static constexpr auto MUSIC_FILENAME = "D:\\Git\\HexagonJump\\HexagonJump\\x64\\Debug\\Drums.ogg";//"C:\\Users\\stepan\\Downloads\\Example.ogg";
 static constexpr auto FONT_FILENAME = "font\\font.ttf";
 static constexpr size_t NUM_COLUMNS = 8u;
 
@@ -25,22 +26,17 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(800, 600), "My window", sf::Style::Default, settings);
 
 	Camera camera(960.f, 540.f, 800, 600);
-	
-	sf::SoundBuffer buffer;
-	buffer.loadFromFile(MUSIC_FILENAME);
-	
+
 	sf::Music music;
 	music.openFromFile(MUSIC_FILENAME);
 
 	MusicVisulizationManager manager(NUM_COLUMNS);
-	for (const auto& [f, s] : manager.GetMusicList()) {
-		std::cout << f << std::endl;
-	}
+	manager.ConvertNewMusic(MUSIC_FILENAME, Game::TIMERATE);
 
 	sf::Font font;
 	font.loadFromFile(FONT_FILENAME);
 
-	Game game(font, music, manager.LoadMusic("DontBeSoShy").visulization, camera, NUM_COLUMNS);
+	Game game(font, music, manager.LoadMusic("Drums").visualization, camera, NUM_COLUMNS);
 
 	sf::Clock deltaClock;
 	game.Start();

@@ -8,21 +8,17 @@
 
 namespace hexagon {
 
-struct MusicStats {
-	size_t bestScore;
-	float bestTime;
-};
-
 struct MusicData {
 	std::string name;
-	MusicStats stats;
-	MusicVisualization visulization;
+	std::string path;
+	unsigned bestScore;
+	MusicVisualization visualization;
 };
 
 class MusicVisulizationManager {
 public:
 
-	using MusicContainer = std::map<std::string, MusicStats>;
+	using MusicContainer = std::map<std::string, unsigned>;
 
 	MusicVisulizationManager(size_t spectrumColumns);
 
@@ -30,23 +26,22 @@ public:
 
 	std::string ConvertNewMusic(const std::string& path, float gameTimerate);
 	MusicData LoadMusic(const std::string& musicName) const;
-	void UpdateStatsIfBetter(const std::string& musicName, const MusicStats& stats);
+	void UpdateScoreIfBetter(const std::string& musicName, unsigned score);
 
 private:
 
-	static constexpr auto MUSIC_LIST_FILENAME = "musiclist.txt";
-	static constexpr auto STATS_FILE_SUFFIX = ".stats";
+	static constexpr auto SCORE_FILE_SUFFIX = ".score";
 	static constexpr auto DATA_FILE_SUFFIX = ".data";
 
 	void LoadExistingMusicList();
 
 	static MusicVisualization LoadMusicVisualizationFromFile(const std::string& filename, size_t spectrumColumns);
 	static void SaveMusicVisualizationToFile(const MusicVisualization& visualization, const std::string& filename);
-	static MusicStats LoadMusicStats(const std::string& filename);
-	static void SaveMusicStats(const MusicStats& stats, const std::string& filename);
+	static unsigned LoadMusicScore(const std::string& filename);
+	static void SaveMusicScore(unsigned score, const std::string& filename);
 
-	std::string _applicationDataPath;
 	const size_t _spectrumColumns;
+	std::string _applicationDataPath;
 	MusicContainer _music;
 };
 

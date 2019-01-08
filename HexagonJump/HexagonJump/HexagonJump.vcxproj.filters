@@ -96,11 +96,11 @@
     <ClCompile Include="YesNoDialog.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
-    <ClCompile Include="GameStatsHud.cpp">
-      <Filter>Source Files\gui</Filter>
-    </ClCompile>
     <ClCompile Include="EndScreenHUD.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStatsHUD.cpp">
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
