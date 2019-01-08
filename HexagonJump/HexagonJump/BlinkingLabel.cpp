@@ -5,8 +5,9 @@ namespace hexagon::gui {
 BlinkingLabel::BlinkingLabel(const std::string& text, 
 	const sf::Color& color,
 	const sf::Vector2f& position,
-	float fontSize)
-	: Label(text, color, position, fontSize)
+	float fontSize,
+	bool centered)
+	: Label(text, color, position, fontSize, centered)
 {
 }
 

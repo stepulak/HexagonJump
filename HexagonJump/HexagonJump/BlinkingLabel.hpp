@@ -10,7 +10,8 @@ public:
 	BlinkingLabel(const std::string& text, 
 		const sf::Color& color, 
 		const sf::Vector2f& position,
-		float fontSize);
+		float fontSize,
+		bool centered = false);
 
 	void Update(float deltaTime) override;
 	void Draw(sf::RenderWindow& window, const sf::Font& font) const override;

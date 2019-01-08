@@ -32,12 +32,13 @@ private:
 	static constexpr auto PLAYER_KEY_JUMP = sf::Keyboard::Space;
 	static constexpr auto PLAYER_KEY_FALL_DOWN_FAST = sf::Keyboard::C;
 	static constexpr auto PAUSE_KEY = sf::Keyboard::P;
-	static constexpr float PLAYER_DEATH_WAIT_TIME = 3.f;
-	static constexpr float SECONDS_WITHOUT_OBSTACLES = 5.f;
-
+	static constexpr float PLAYER_DEATH_WAIT_TIME = 1.f;
+	static constexpr float LAST_SECONDS_WITHOUT_OBSTACLES = 3.f;
+	
 	void Reset();
-	void ResolvePlayerDeath(float deltaTime);
-	void MoveCameraAndPlayer(float deltaTime);
+	void UpdatePlayerAndCamera(float deltaTime);
+	void UpdatePlayerDeath(float deltaTime);
+	void UpdateGui(float deltaTime);
 	void SyncMusicAndBeatManager(float deltaTime);
 
 	bool ShouldSpawnObstacles() const;
@@ -48,7 +49,7 @@ private:
 	BeatUnitManager _beatUnitManager;
 	std::unique_ptr<World> _world;
 	std::unique_ptr<gui::GuiManager> _guiManager;
-
+	std::optional<std::reference_wrapper<gui::GameStatsHUD>> _statsHUD;
 	bool _stopped = true;
 	float _musicBeatManagerSyncTimer;
 	float _playerDeathWaitTimer;

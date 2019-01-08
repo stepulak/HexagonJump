@@ -13,6 +13,14 @@ Player::Player(float x, float y, float radius)
 {
 }
 
+void Player::Move(float distX, float distY)
+{
+	_position += { 
+		distX > MAX_DISTANCE_MOVE ? 0.f : distX,
+		distY > MAX_DISTANCE_MOVE ? 0.f : distY
+	};
+}
+
 void Player::CutPosition(float distance)
 {
 	Move(distance, 0.f);

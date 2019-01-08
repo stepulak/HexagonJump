@@ -87,13 +87,19 @@
     <ClCompile Include="GuiManager.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
-    <ClCompile Include="BlinkingLabel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ListBox.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="BlinkingLabel.cpp">
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="YesNoDialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStatsHud.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="EndScreenHUD.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -188,7 +194,10 @@
     <ClInclude Include="YesNoDialog.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
-    <ClInclude Include="InGameHUD.hpp">
+    <ClInclude Include="GameStatsHUD.hpp">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="EndScreenHUD.h">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
   </ItemGroup>

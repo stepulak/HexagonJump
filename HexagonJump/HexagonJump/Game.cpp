@@ -67,14 +67,9 @@ void Game::Update(float deltaTime)
 	if (_stopped) {
 		return; // skip
 	}
-	if (_world->PlayerDied()) {
-		ResolvePlayerDeath(deltaTime);
-	}
-	else {
-		MoveCameraAndPlayer(deltaTime);
-	}
-	_world->Update(deltaTime, ShouldSpawnObstacles());
-	_guiManager->Update(deltaTime);
+	UpdatePlayerAndCamera(deltaTime);
+	UpdateGui(deltaTime);
+	_world->Update(deltaTime, !ShouldSpawnObstacles());
 	_beatUnitManager.Update(deltaTime);
 	SyncMusicAndBeatManager(deltaTime);
 }
@@ -87,35 +82,57 @@ void Game::Draw(sf::RenderWindow& window) const
 
 void Game::Reset()
 {
+	// Music
 	_music.stop();
 	_beatUnitManager.Reset();
 
+	// Stats
 	_camera.SetPosition(0.f);
 	_musicBeatManagerSyncTimer = 0.f;
 	_playerDeathWaitTimer = 0.f;
 
+	// World
 	_world.reset();
 	_world = std::make_unique<World>(_camera, _beatUnitManager);
 
+	// GUI
 	_guiManager.reset();
 	_guiManager = std::make_unique<gui::GuiManager>(_font);
+
+	auto& statsHud = _guiManager->AddGuiElement(std::make_unique<gui::GameStatsHUD>());
+	_statsHUD = std::ref(dynamic_cast<gui::GameStatsHUD&>(*statsHud));
 
 	Start();
 }
 
-void Game::ResolvePlayerDeath(float deltaTime)
+void Game::UpdatePlayerAndCamera(float deltaTime)
 {
-	_playerDeathWaitTimer += deltaTime;
-	if (_playerDeathWaitTimer >= PLAYER_DEATH_WAIT_TIME) {
-		Reset();
+	auto cameraVelocity = _camera.GetVelocity();
+
+	_camera.Move(cameraVelocity * deltaTime);
+
+	if (_world->PlayerDied()) {
+		UpdatePlayerDeath(deltaTime);
+	}
+	else {
+		_world->GetPlayer().StartMoving(cameraVelocity, true);
 	}
 }
 
-void Game::MoveCameraAndPlayer(float deltaTime)
+void Game::UpdatePlayerDeath(float deltaTime)
 {
-	auto cameraVelocity = _camera.GetVelocity();
-	_camera.Move(cameraVelocity * deltaTime);
-	_world->GetPlayer().StartMoving(cameraVelocity, true);
+	_playerDeathWaitTimer += deltaTime;
+	if (_playerDeathWaitTimer >= PLAYER_DEATH_WAIT_TIME) {
+		Reset(); // Reset game completely
+	}
+}
+
+void Game::UpdateGui(float deltaTime)
+{
+	_guiManager->Update(deltaTime);
+	if (!_world->PlayerDied()) {
+		_statsHUD->get().UpdateStats(static_cast<size_t>(_music.getPlayingOffset().asSeconds()));
+	}
 }
 
 void Game::SyncMusicAndBeatManager(float deltaTime)
@@ -132,7 +149,7 @@ bool Game::ShouldSpawnObstacles() const
 	if (_music.getStatus() == sf::Music::Playing) {
 		auto duration = _music.getDuration().asSeconds();
 		auto time = _music.getPlayingOffset().asSeconds();
-		return time > SECONDS_WITHOUT_OBSTACLES && time < duration - SECONDS_WITHOUT_OBSTACLES;
+		return time < duration - LAST_SECONDS_WITHOUT_OBSTACLES;
 	}
 	return false;
 }

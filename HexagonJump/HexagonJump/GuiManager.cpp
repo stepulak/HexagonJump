@@ -33,6 +33,12 @@ void GuiManager::RemoveGuiElement(const GuiElement::Ptr& ptr)
 	}
 }
 
+void GuiManager::RemoveAllGuiElements()
+{
+	_pool.RemoveAll([](const auto&) { return true; });
+	_activeElementIndex = 0u;
+}
+
 bool GuiManager::KeyPressed(sf::Keyboard::Key key)
 {
 	switch (key)

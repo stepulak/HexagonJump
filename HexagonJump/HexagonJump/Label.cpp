@@ -2,11 +2,16 @@
 
 namespace hexagon::gui {
 
-Label::Label(const std::string& text, const sf::Color& color, const sf::Vector2f& position, float fontSize)
+Label::Label(const std::string& text,
+	const sf::Color& color,
+	const sf::Vector2f& position,
+	float fontSize, 
+	bool centered)
 	: _text(text)
 	, _color(color)
 	, _position(position)
 	, _fontSize(fontSize)
+	, _centered(centered)
 {
 }
 
@@ -23,7 +28,14 @@ sf::Text Label::CreateRenderText(const sf::Font& font) const
 
 void Label::Draw(sf::RenderWindow& window, const sf::Font& font) const
 {
-	window.draw(CreateRenderText(font));
+	auto renderText = CreateRenderText(font);
+
+	if (_centered) {
+		auto labelWidth = renderText.getLocalBounds().width;
+		auto labelHeight = renderText.getLocalBounds().height;
+		renderText.setPosition(renderText.getPosition() - sf::Vector2f{ labelWidth / 2.f, labelHeight / 2.f });
+	}
+	window.draw(renderText);
 }
 
 }

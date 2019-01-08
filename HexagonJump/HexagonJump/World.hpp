@@ -53,9 +53,10 @@ private:
 	static constexpr float GetSurfaceWidth() { return 1440.f; }
 	static constexpr float GetSurfaceHeight() { return 54.f; }
 
-	void ExtendSurface();
 	void TryToCutPositionAllElements();
-	void TryToSpawnAnotherObstacleSet();
+	void UpdateObstaclesAndSurface(bool skipObstacles);
+	void SpawnAnotherObstacleSet();
+	void ExtendSurface();
 
 	void DrawBeatFlash(sf::RenderWindow& window) const;
 	void DrawBackground(sf::RenderWindow& window) const;

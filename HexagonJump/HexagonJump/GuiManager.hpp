@@ -3,6 +3,7 @@
 #include "BlinkingLabel.hpp"
 #include "ListBox.hpp"
 #include "YesNoDialog.hpp"
+#include "GameStatsHUD.hpp"
 
 #include <optional>
 #include <functional>
@@ -18,6 +19,7 @@ public:
 
 	GuiElement::Ptr& AddGuiElement(GuiElement::Ptr&& ptr);
 	void RemoveGuiElement(const GuiElement::Ptr& ptr);
+	void RemoveAllGuiElements();
 
 	bool KeyPressed(sf::Keyboard::Key key);
 	void Update(float deltaTime);

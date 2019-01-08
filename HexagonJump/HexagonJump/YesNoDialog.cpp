@@ -46,19 +46,11 @@ void YesNoDialog::Draw(sf::RenderWindow& window, const sf::Font& font) const
 
 void YesNoDialog::DrawDialogText(sf::RenderWindow& window, const sf::Font& font) const
 {
-	Label label(_text, TEXT_COLOR, {}, _fontSize);
-
-	auto renderText = label.CreateRenderText(font);
-	auto labelWidth = renderText.getLocalBounds().width;
-	auto labelHeight = renderText.getLocalBounds().height;
-
-	sf::Vector2f labelPosition = {
-		_area.left + (_area.width - labelWidth) / 2.f,
-		_area.top + (_area.height - labelHeight) * TEXT_VERTICAL_POSITION_RATIO
+	sf::Vector2f position = {
+		   _area.left + _area.width / 2.f,
+		   _area.top + _area.height * TEXT_VERTICAL_POSITION_RATIO
 	};
-
-	label.SetPosition(labelPosition);
-	label.Draw(window, font);
+	Label(_text, TEXT_COLOR, position, _fontSize, true).Draw(window, font);
 }
 
 void YesNoDialog::DrawYesNoText(sf::RenderWindow& window, const sf::Font& font) const

@@ -7,8 +7,11 @@ namespace hexagon::gui {
 class Label : public GuiElement {
 public:
 
-	Label() = default;
-	Label(const std::string& text, const sf::Color& color, const sf::Vector2f& position, float fontSize);
+	Label(const std::string& text,
+		const sf::Color& color,
+		const sf::Vector2f& position,
+		float fontSize,
+		bool centered = false);
 	~Label() = default;
 
 	void SetText(const std::string& text) { _text = text; }
@@ -30,6 +33,7 @@ private:
 	sf::Color _color;
 	sf::Vector2f _position;
 	float _fontSize;
+	bool _centered;
 };
 
 }

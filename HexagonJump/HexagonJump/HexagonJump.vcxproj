@@ -132,8 +132,10 @@
     <ClCompile Include="BlinkingLabel.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="ColorPaletteChanger.cpp" />
+    <ClCompile Include="EndScreenHUD.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GuiManager.cpp" />
+    <ClCompile Include="GameStatsHud.cpp" />
     <ClCompile Include="Label.cpp" />
     <ClCompile Include="ListBox.cpp" />
     <ClCompile Include="Main.cpp" />
@@ -160,10 +162,11 @@
     <ClInclude Include="Button.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="ColorPaletteChanger.hpp" />
+    <ClInclude Include="EndScreenHUD.h" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="GuiElement.hpp" />
     <ClInclude Include="GuiManager.hpp" />
-    <ClInclude Include="InGameHUD.hpp" />
+    <ClInclude Include="GameStatsHUD.hpp" />
     <ClInclude Include="Label.hpp" />
     <ClInclude Include="ListBox.hpp" />
     <ClInclude Include="MusicVisualization.hpp" />

@@ -19,7 +19,7 @@ public:
 	Player(float x, float y, float radius = PLAYER_RADIUS_DEFAULT);
 
 	sf::Vector2f GetPosition() const { return _position; }
-	void Move(float distX, float distY) { _position += { distX, distY }; }
+	void Move(float distX, float distY);
 
 	float GetRadius() const { return _radius; }
 	float GetAngle() const { return _angle; }
@@ -68,6 +68,7 @@ private:
 	static constexpr float HISTORY_RECORD_ALPHA_INIT = 0.4f;
 	static constexpr float HISTORY_RECORD_ALPHA_FADE_OFF = 0.8f;
 	static constexpr float SURFACE_MAX_DISTANCE = 10.f;
+	static constexpr float MAX_DISTANCE_MOVE = 100.f;
 
 	bool IsFalling() const { return IsFallingSlow() || IsFallingFast(); }
 	bool IsJumping() const { return _verticalStatus == VerticalPositionStatus::JUMPING; }

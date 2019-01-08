@@ -25,9 +25,7 @@ void World::Update(float deltaTime, bool skipObstacles)
 	auto skipTime = _beatUnitManager.CurrentHighestBeatRatio() * COLOR_CHANGE_HIGHEST_BEAT_MULTIPLIER;
 	_colorPaletteChanger.Update(deltaTime, skipTime);
 
-	if (!skipObstacles) {
-		TryToSpawnAnotherObstacleSet();
-	}
+	UpdateObstaclesAndSurface(skipObstacles);
 	TryToCutPositionAllElements();
 }
 
@@ -36,19 +34,6 @@ void World::Draw(sf::RenderWindow& window) const
 	DrawBackground(window);
 	DrawForeground(window);
 	DrawBeatFlash(window);
-}
-
-void World::ExtendSurface()
-{
-	auto surfaceWidth = GetSurfaceWidth();
-	auto surfaceHeight = GetSurfaceHeight();
-	auto surface = std::make_unique<Platform>(_surfaceEnd,
-		_camera.GetVirtualHeight() - surfaceHeight,
-		surfaceWidth,
-		surfaceHeight);
-
-	_obstacleManager.GetObstaclePool().Add(std::move(surface));
-	_surfaceEnd += surfaceWidth;
 }
 
 void World::TryToCutPositionAllElements()
@@ -66,18 +51,36 @@ void World::TryToCutPositionAllElements()
 	_player.CutPosition(-cutOffset);
 }
 
-void World::TryToSpawnAnotherObstacleSet()
+void World::UpdateObstaclesAndSurface(bool skipObstacles)
 {
-	if (_surfaceEnd - _camera.GetPosition() >= GetSurfaceWidth()) {
-		return; // no spawn yet
+	if (_surfaceEnd - _camera.GetPosition() < GetSurfaceWidth()) {
+		ExtendSurface();
+		if (!skipObstacles) {
+			SpawnAnotherObstacleSet();
+		}
 	}
-	
+}
+
+void World::SpawnAnotherObstacleSet()
+{
 	auto setArea = sf::FloatRect(_surfaceEnd, 0.f,
 		GetSurfaceWidth(),
 		_camera.GetVirtualHeight() - GetSurfaceHeight());
 
 	_worldSetCreator.SpawnRandomSet(*this, setArea);
-	ExtendSurface();
+}
+
+void World::ExtendSurface()
+{
+	auto surfaceWidth = GetSurfaceWidth();
+	auto surfaceHeight = GetSurfaceHeight();
+	auto surface = std::make_unique<Platform>(_surfaceEnd,
+		_camera.GetVirtualHeight() - surfaceHeight,
+		surfaceWidth,
+		surfaceHeight);
+
+	_obstacleManager.GetObstaclePool().Add(std::move(surface));
+	_surfaceEnd += surfaceWidth;
 }
 
 void World::DrawBeatFlash(sf::RenderWindow& window) const
