@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MusicVisualization.hpp"
+#include "ThreadSafeProgressBar.hpp"
 
 #include <map>
 #include <string>
@@ -24,7 +25,10 @@ public:
 
 	const MusicContainer& GetMusicList() const { return _music; }
 
-	std::string ConvertNewMusic(const std::string& path, float gameTimerate);
+	std::string ConvertNewMusic(const std::string& path,
+		float gameTimerate, 
+		gui::ThreadSafeProgressBar& progressBar);
+
 	MusicData LoadMusic(const std::string& musicName) const;
 	void UpdateScoreIfBetter(const std::string& musicName, unsigned score);
 

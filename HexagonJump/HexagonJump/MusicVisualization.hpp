@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ThreadSafeProgressBar.hpp"
+
 #include <vector>
 #include <SFML/Audio.hpp>
 
@@ -13,6 +15,9 @@ struct MusicVisualization {
 	double averageSampleValue;
 };
 
-MusicVisualization CountMusicVisualizationData(const sf::SoundBuffer& buffer, float gameTimerate, uint8_t spectrumColumns);
+MusicVisualization CountMusicVisualizationData(const sf::SoundBuffer& buffer,
+	float gameTimerate, 
+	uint8_t spectrumColumns,
+	gui::ThreadSafeProgressBar& progressBar);
 
 }

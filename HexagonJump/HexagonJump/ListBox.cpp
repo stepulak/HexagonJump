@@ -7,18 +7,24 @@ namespace hexagon::gui {
 ListBox::ListBox(const sf::Vector2f& position,
 	float fontSize,
 	size_t numElementsScroll,
-	const Callback& pressCallback)
+	const Callback& pressCallback,
+	const Callback& moveCallback)
 	: _position(position)
 	, _fontSize(fontSize)
 	, _numElementsScroll(numElementsScroll)
-	, _callback(pressCallback)
+	, _pressCallback(pressCallback)
+	, _moveCallback(moveCallback)
 {
+	if (numElementsScroll == 0u) {
+		throw std::runtime_error("Number of elements per scroll cannot be zero");
+	}
 }
 
 bool ListBox::MoveUp()
 {
 	if (_activeElementIndex > 0u) {
 		_activeElementIndex--;
+		_moveCallback(GetActiveElement());
 		return true;
 	}
 	return false;
@@ -28,6 +34,7 @@ bool ListBox::MoveDown()
 {
 	if (_pool.Size() > 0u && _activeElementIndex < _pool.Size() - 1) {
 		_activeElementIndex++;
+		_moveCallback(GetActiveElement());
 		return true;
 	}
 	return false;
@@ -35,8 +42,8 @@ bool ListBox::MoveDown()
 
 bool ListBox::Press()
 {
-	if (_pool.Size() > 0 && _callback) {
-		_callback(_pool[_activeElementIndex]);
+	if (_pool.Size() > 0 && _pressCallback) {
+		_pressCallback(GetActiveElement());
 	}
 	return true; // handled anyway
 }
@@ -63,8 +70,7 @@ void ListBox::DrawMarker(sf::RenderWindow& window) const
 
 size_t ListBox::GetStartingIndexForDrawing() const
 {
-	return (_pool.Size() - _activeElementIndex < _numElementsScroll)
-		? _pool.Size() - _numElementsScroll : _activeElementIndex;
+	return (_pool.Size() <= _numElementsScroll) ? 0u : _pool.Size() - _activeElementIndex;
 }
 
 }

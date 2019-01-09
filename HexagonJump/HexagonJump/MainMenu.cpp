@@ -1,6 +1,9 @@
 #include "MainMenu.hpp"
 #include "AppInfo.hpp"
 #include "Controls.hpp"
+#include "OpenFileDialog.hpp"
+
+#include <iostream>
 
 namespace hexagon {
 
@@ -9,9 +12,9 @@ MainMenu::MainMenu(const sf::Font& font, Camera& camera)
 	, _camera(camera)
 	, _musicVisualizationManager(Game::NUM_BEAT_UNITS)
 {
-	InitGUIMainLevel();
-	InitGUIControlsLevel();
-	InitGUIPlaylistLevel();
+	CreateMainLevelGUI();
+	CreateControlsLevelGUI();
+	CreatePlaylistLevelGUI();
 
 	for (size_t i = 0u; i < STRIPE_MANAGER_INIT_ITERATIONS; i++) {
 		_stripeManager.Update(_camera, Game::TIMERATE, true);
@@ -20,7 +23,17 @@ MainMenu::MainMenu(const sf::Font& font, Camera& camera)
 
 void MainMenu::KeyPressed(sf::Keyboard::Key key)
 {
-	GetActiveGUI().KeyPressed(key);
+	if (key == sf::Keyboard::Escape) {
+		if (_activeMenuLevel == MenuLevel::MAIN) {
+			_quit = true;
+		}
+		else {
+			_activeMenuLevel = MenuLevel::MAIN;
+		}
+	}
+	else {
+		GetActiveGUI().KeyPressed(key);
+	}
 }
 
 void MainMenu::Update(float deltaTime)
@@ -37,13 +50,13 @@ void MainMenu::Draw(sf::RenderWindow& window) const
 	GetActiveGUI().Draw(window);
 }
 
-void MainMenu::InitGUIMainLevel()
+void MainMenu::CreateMainLevelGUI()
 {
 	auto& gui = (_menuLevelsGuiManagers[MenuLevel::MAIN] = std::make_unique<gui::GuiManager>(_font));
 
 	sf::Vector2f titlePosition = {
-		GUI_HORIZONTAL_OFFSET,
-		TITLE_VERTICAL_OFFSET
+		GUI_HORIZONTAL_POSITION,
+		TITLE_VERTICAL_POSITION
 	};
 
 	gui->AddGuiElement(std::make_unique<gui::Label>(APP_NAME,
@@ -52,39 +65,52 @@ void MainMenu::InitGUIMainLevel()
 		TITLE_SIZE));
 
 	sf::Vector2f playButtonPosition = { 
-		GUI_HORIZONTAL_OFFSET, 
-		_camera.GetVirtualHeight() / 2.f - TEXT_SIZE * 2.f
+		GUI_HORIZONTAL_POSITION,
+		_camera.GetVirtualHeight() / 2.f - FONT_SIZE * 2.f
 	};
 	sf::Vector2f controlsButtonPosition = {
-		GUI_HORIZONTAL_OFFSET,
+		GUI_HORIZONTAL_POSITION,
 		_camera.GetVirtualHeight() / 2.f
 	};
 	sf::Vector2f quitButtonPosition = {
-		GUI_HORIZONTAL_OFFSET,
-		_camera.GetVirtualHeight() / 2.f + TEXT_SIZE * 4.f
+		GUI_HORIZONTAL_POSITION,
+		_camera.GetVirtualHeight() / 2.f + FONT_SIZE * 4.f
 	};
 
 	gui->AddGuiElement(std::make_unique<gui::Button>("Play", 
 		playButtonPosition, 
-		TEXT_SIZE, 
+		FONT_SIZE, 
 		[&] { _activeMenuLevel = MenuLevel::PLAYLIST; }));
 
 	gui->AddGuiElement(std::make_unique<gui::Button>("Controls",
 		controlsButtonPosition,
-		TEXT_SIZE,
+		FONT_SIZE,
 		[&] { _activeMenuLevel = MenuLevel::CONTROLS; }));
 
 	gui->AddGuiElement(std::make_unique<gui::Button>("Quit",
 		quitButtonPosition,
-		TEXT_SIZE,
+		FONT_SIZE,
 		[&] { _quit = true; }));
 }
 
-void MainMenu::InitGUIPlaylistLevel()
+void MainMenu::CreatePlaylistLevelGUI()
 {
+	auto& gui = (_menuLevelsGuiManagers[MenuLevel::PLAYLIST] = std::make_unique<gui::GuiManager>(_font));
+	
+	sf::Vector2f openMusicButtonPosition = {
+		GUI_HORIZONTAL_POSITION,
+		_camera.GetVirtualHeight() - OPEN_MUSIC_BUTTON_VERTICAL_OFFSET
+	};
+	gui->AddGuiElement(std::make_unique<gui::Button>("Open music",
+		openMusicButtonPosition,
+		FONT_SIZE,
+		[&] { AddMusic(RunOpenFileDialog()); }));
+
+	CreateScoreLabel();
+	CreateAndFillPlaylist();
 }
 
-void MainMenu::InitGUIControlsLevel()
+void MainMenu::CreateControlsLevelGUI()
 {
 	static const std::vector<std::pair<std::string, std::string>> controls = {
 		{ controls::PLAYER_JUMP_KEY_STR, "Jump" },
@@ -97,21 +123,61 @@ void MainMenu::InitGUIControlsLevel()
 
 	sf::Vector2f position = {
 		_camera.GetVirtualWidth() / 2.f,
-		_camera.GetVirtualHeight() / 2.f - TEXT_SIZE * controls.size() / 2.f
+		_camera.GetVirtualHeight() / 2.f - FONT_SIZE * controls.size() / 2.f
 	};
 
 	for (auto[key, action] : controls) {
 		auto text = key + " - " + action;
-		auto label = std::make_unique<gui::Label>(text, gui::Button::COLOR, position, TEXT_SIZE, true);
+		auto label = std::make_unique<gui::Label>(text, gui::Button::COLOR, position, FONT_SIZE, true);
 		gui->AddGuiElement(std::move(label));
-		position.y += TEXT_SIZE;
+		position.y += FONT_SIZE;
 	}
+}
 
-	// Back button
-	gui->AddGuiElement(std::make_unique<gui::Button>("Back",
-		position,
-		TEXT_SIZE,
-		[&] { _activeMenuLevel = MenuLevel::MAIN; }));
+void MainMenu::CreateScoreLabel()
+{
+	auto& gui = _menuLevelsGuiManagers[MenuLevel::PLAYLIST];
+	sf::Vector2f scorePosition = { GUI_HORIZONTAL_POSITION, SCORE_LABEL_VERTICAL_POSITION };
+
+	auto& scoreLabel = gui->AddGuiElement(std::make_unique<gui::Label>("",
+		gui::Button::COLOR,
+		scorePosition,
+		FONT_SIZE));
+
+	_scoreLabel = dynamic_cast<gui::Label&>(*scoreLabel);
+}
+
+void MainMenu::CreateAndFillPlaylist()
+{
+	auto& gui = _menuLevelsGuiManagers[MenuLevel::PLAYLIST];
+	sf::Vector2f playlistPosition = { GUI_HORIZONTAL_POSITION, PLAYLIST_VERTICAL_POSITION };
+
+	auto& playlist = *gui->AddGuiElement(std::make_unique<gui::ListBox>(playlistPosition,
+		FONT_SIZE,
+		PLAYLIST_NUM_ELEMENTS,
+		[&](const auto& elem) { StartGame(elem); },
+		[&](const auto& elem) { ShowScore(elem); }));
+
+	_playlist = dynamic_cast<gui::ListBox&>(playlist);
+
+	// Fill it with available music
+	for (const auto& [musicName, _] : _musicVisualizationManager.GetMusicList()) {
+		_playlist->get().AddElement(musicName);
+	}
+	auto activeelem = _playlist->get().GetActiveElement();
+}
+
+void MainMenu::StartGame(const std::string& musicName)
+{
+	std::cout << musicName << std::endl;
+}
+
+void MainMenu::ShowScore(const std::string& musicName)
+{
+}
+
+void MainMenu::AddMusic(const std::string & musicPath)
+{
 }
 
 }

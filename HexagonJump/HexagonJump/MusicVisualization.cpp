@@ -28,6 +28,12 @@ void BinaryReverseTwoArrays(std::vector<double>& x, std::vector<double>& y)
 	}
 }
 
+/**
+In place Radix2 FFT based on https://cnx.org/exports/ce67266a-1851-47e4-8bfc-82eb447212b4%407.pdf/decimation-in-time-dit-radix-2-fft-7.pdf
+Original author: Douglas L. Jones
+Creative Commons "Attribution" license 1.0 http://creativecommons.org/licenses/by/1.0/
+C++ implementation was done by me.
+*/
 void Radix2InPlace(std::vector<double>& real, std::vector<double>& imaginary, int exponent)
 {
 	size_t m = 1;
@@ -73,7 +79,10 @@ void FFT(std::vector<double>& real, std::vector<double>& imaginary)
 
 } // namespace
 
-MusicVisualization CountMusicVisualizationData(const sf::SoundBuffer& buffer, float gameTimerate, uint8_t spectrumColumns) 
+MusicVisualization CountMusicVisualizationData(const sf::SoundBuffer& buffer,
+	float gameTimerate, 
+	uint8_t spectrumColumns, 
+	gui::ThreadSafeProgressBar& progressBar)
 {
 	// TODO SIMPLIFY
 	auto samples = buffer.getSamples();
@@ -119,6 +128,9 @@ MusicVisualization CountMusicVisualizationData(const sf::SoundBuffer& buffer, fl
 		// Clear for further use
 		std::fill(samplesReal.begin(), samplesReal.end(), 0.0);
 		std::fill(samplesImaginary.begin(), samplesImaginary.end(), 0.0);
+
+		// Update progress bar
+		progressBar.UpdateProgress(static_cast<float>(sampleIndex) / sampleCount);
 	}
 
 	return { visualizationData, avgSampleValue / (sampleCount * spectrumColumns * samplesPerColumn) };

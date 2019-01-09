@@ -31,7 +31,9 @@ MusicVisulizationManager::MusicVisulizationManager(size_t spectrumColumns)
 	LoadExistingMusicList();
 }
 
-std::string MusicVisulizationManager::ConvertNewMusic(const std::string& path, float gameTimerate)
+std::string MusicVisulizationManager::ConvertNewMusic(const std::string& path, 
+	float gameTimerate, 
+	gui::ThreadSafeProgressBar& progressBar)
 {
 	sf::SoundBuffer buffer;
 	if (!buffer.loadFromFile(path)) {
@@ -40,7 +42,10 @@ std::string MusicVisulizationManager::ConvertNewMusic(const std::string& path, f
 
 	auto musicName = FilenameWithoutExtension(path);
 	auto musicPath = _applicationDataPath + musicName;
-	auto visualizationData = CountMusicVisualizationData(buffer, gameTimerate, _spectrumColumns);
+	auto visualizationData = CountMusicVisualizationData(buffer,
+		gameTimerate, 
+		_spectrumColumns,
+		progressBar);
 
 	SaveMusicVisualizationToFile(visualizationData, musicPath + DATA_FILE_SUFFIX);
 	SaveMusicScore(0u, musicPath + SCORE_FILE_SUFFIX);

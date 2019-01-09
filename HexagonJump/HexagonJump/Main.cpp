@@ -4,6 +4,9 @@
 #include "MusicVisualizationManager.hpp"
 #include "MainMenu.hpp"
 #include "Utils.hpp"
+#include "OpenFileDialog.hpp"
+
+#include <iostream>
 
 #include <thread>
 #include <chrono>
