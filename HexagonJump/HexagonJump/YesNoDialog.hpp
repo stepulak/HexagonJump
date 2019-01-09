@@ -9,17 +9,20 @@ namespace hexagon::gui {
 class YesNoDialog : public GuiElement {
 public:
 
-	using Callback = std::function<void(bool yesPressed)>;
+	using Callback = std::function<void()>;
 
 	YesNoDialog(const std::string& text, const sf::FloatRect& area, float fontSize, const Callback& callback);
 
 	bool IsPressable() const override { return true; }
 	bool IsMovable() const override { return true; }
 	bool IsInvokable() const override { return true; }
+	bool IsInvoked() const { return _invoked; }
 
 	bool MoveUp() override;
 	bool MoveDown() override;
 	bool Press() override;
+	void Invoke() override { _invoked = true; }
+	void Close() override { _invoked = false; }
 
 	void Draw(sf::RenderWindow& window, const sf::Font& font) const override;
 
@@ -45,6 +48,7 @@ private:
 	const sf::FloatRect _area;
 	const float _fontSize;
 	const Callback _callback;
+	bool _invoked = false;
 	bool _yesActive = false;
 };
 

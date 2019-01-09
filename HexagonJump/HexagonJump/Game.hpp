@@ -11,14 +11,14 @@ class Game final : public Runnable {
 public:
 
 	static constexpr float TIMERATE = 1 / 20.f;
-	
+	static constexpr size_t NUM_BEAT_UNITS = 8u;
+
 	Game(const sf::Font& font,
 		Camera& camera,
 		const std::string& musicName,
-		MusicVisulizationManager& manager,
-		size_t numBeatUnits);
+		MusicVisulizationManager& manager);
 
-	bool WantToQuit() const { return _quit; }
+	bool WantToQuit() const override { return _quit; }
 
 	void Start();
 	void Stop();
@@ -28,12 +28,6 @@ public:
 	void Draw(sf::RenderWindow& window) const override;
 	
 private:
-
-	static constexpr auto PLAYER_JUMP_KEY = sf::Keyboard::Space;
-	static constexpr auto PLAYER_FALL_DOWN_FAST_KEY = sf::Keyboard::C;
-	static constexpr auto PAUSE_KEY = sf::Keyboard::P;
-	static constexpr auto RESTART_KEY = sf::Keyboard::K;
-	static constexpr auto RESTART_KEY_STR = "K";
 
 	static constexpr float LAST_SECONDS_WITHOUT_OBSTACLES = 10.f;
 	static constexpr float MUSIC_BEAT_MANAGER_SYNC_TIME = 5.f;
@@ -45,10 +39,16 @@ private:
 	static constexpr auto PLAYER_WON_RESULT_MESSAGE = "You won!";
 
 	static constexpr auto QUIT_DIALOG_TEXT = "Man, you sure you wanna give up?";
-	static constexpr float QUIT_DIALOG_WIDTH = 400;
+	static constexpr float QUIT_DIALOG_WIDTH = 600;
 	static constexpr float QUIT_DIALOG_HEIGHT = 200;
 
-	float GetMusicTime() const { return _music.getPlayingOffset().asSeconds(); }
+	bool MusicEnded() const { return _music.getStatus() == sf::SoundSource::Stopped; }
+
+	void SaveScore() {
+		_musicVisualizationManager.UpdateScoreIfBetter(_musicName, static_cast<size_t>(GetMusicTime()));
+	}
+
+	float GetMusicTime() const;
 
 	void Reset();
 	void CreateGUI();
@@ -60,7 +60,6 @@ private:
 	void UpdatePlayerDeath(float deltaTime);
 	void SyncMusicAndBeatManager(float deltaTime);
 	void GameEnded(const std::string& resultMessage);
-	void SaveAndQuit();
 
 	bool ShouldSpawnObstacles() const;
 

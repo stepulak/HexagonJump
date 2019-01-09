@@ -16,8 +16,6 @@ public:
 
 	GuiManager(const sf::Font& font);
 
-	bool IsAnyDialogInvoked() const { return _invokedDialog.has_value(); }
-
 	GuiElement::Ptr& AddGuiElement(GuiElement::Ptr&& ptr);
 	void RemoveGuiElement(const GuiElement::Ptr& ptr);
 	void RemoveAllGuiElements();
@@ -29,11 +27,6 @@ public:
 private:
 
 	using GuiPool = Pool<GuiElement::Ptr>;
-
-	static constexpr auto KEY_BUTTON_PRESS = sf::Keyboard::Return;
-	static constexpr auto KEY_INVOKE_YES_NO_DIALOG = sf::Keyboard::Escape;
-	static constexpr auto KEY_NEXT_BUTTON = sf::Keyboard::Down;
-	static constexpr auto KEY_PREVIOUS_BUTTON = sf::Keyboard::Up;
 	static constexpr size_t DEFAULT_POOL_SIZE = 32u;
 	
 	template<typename ElementType>

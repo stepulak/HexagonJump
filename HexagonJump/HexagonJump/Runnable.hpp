@@ -7,6 +7,8 @@ namespace hexagon {
 class Runnable {
 public:
 
+	virtual bool WantToQuit() const { return false; }
+
 	virtual void KeyPressed(sf::Keyboard::Key key) {}
 	virtual void KeyReleased(sf::Keyboard::Key key) {}
 	virtual void Update(float deltaTime) = 0;

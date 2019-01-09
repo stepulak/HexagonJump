@@ -12,6 +12,7 @@ public:
 		const sf::Vector2f& position,
 		float fontSize,
 		bool centered = false);
+	
 	~Label() = default;
 
 	void SetText(const std::string& text) { _text = text; }

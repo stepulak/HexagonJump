@@ -11,7 +11,7 @@ public:
 	BackgroundStripeManager() = default;
 
 	void Move(float horizontalDist);
-	void Update(const Camera& camera, float deltaTime);
+	void Update(const Camera& camera, float deltaTime, bool spawnInsideCamera = false);
 	void Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const;
 
 private:
@@ -20,8 +20,10 @@ private:
 	static constexpr float STRIPE_SPAWN_TIME_MIN = 0.5f;
 	static constexpr float STRIPE_SPAWN_TIME_MAX = 1.0f;
 
+	sf::Vector2f CountSpawnPosition(const Camera& camera, bool spawnInsideCamera) const;
+
 	void UpdateStripes(const Camera& camera, float deltaTime);
-	void SpawnStripe(float x, float y);
+	void SpawnStripe(const sf::Vector2f& position);
 
 	Pool<BackgroundStripe> _pool{ STRIPES_DEFAULT_POOL_SIZE };
 	float _stripeSpawnTime = (STRIPE_SPAWN_TIME_MIN + STRIPE_SPAWN_TIME_MAX) / 2.f;

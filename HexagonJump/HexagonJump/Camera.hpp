@@ -15,7 +15,8 @@ public:
 		, _realScreenHeight(realScreenHeight) {
 	}
 
-	sf::View GetVirtualView() const { return sf::View(sf::FloatRect(0, 0, _virtualScreenWidth, _virtualScreenHeight)); }
+	sf::View GetVirtualView() const { return sf::View(GetVirtualViewRect()); }
+	sf::FloatRect GetVirtualViewRect() const { return sf::FloatRect(0, 0, _virtualScreenWidth, _virtualScreenHeight); }
 	sf::Vector2f GetVirtualProportions() const { return { _virtualScreenWidth, _virtualScreenHeight }; }
 	sf::Vector2f GetRealProportions() const { return { _realScreenWidth, _realScreenHeight }; }
 	

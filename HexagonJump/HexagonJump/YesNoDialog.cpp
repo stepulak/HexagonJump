@@ -4,7 +4,7 @@
 
 namespace hexagon::gui {
 
-const sf::Color YesNoDialog::BACKGROUND_COLOR = { 50, 50, 255 };
+const sf::Color YesNoDialog::BACKGROUND_COLOR = { 50, 50, 50, 128 };
 const sf::Color YesNoDialog::TEXT_COLOR = { 255, 255, 255 };
 
 YesNoDialog::YesNoDialog(const std::string& text, 
@@ -20,8 +20,11 @@ YesNoDialog::YesNoDialog(const std::string& text,
 
 bool YesNoDialog::MoveUp()
 {
-	_yesActive = !_yesActive;
-	return true;
+	if (_invoked) {
+		_yesActive = !_yesActive;
+		return true;
+	}
+	return false;
 }
 
 bool YesNoDialog::MoveDown()
@@ -31,14 +34,25 @@ bool YesNoDialog::MoveDown()
 
 bool YesNoDialog::Press()
 {
-	if (_callback) {
-		_callback(_yesActive);
+	if (!_invoked) {
+		return false;
+	}
+	if (_yesActive) {
+		if (_callback) {
+			_callback();
+		}
+	}
+	else {
+		Close();
 	}
 	return true; // handled anyway
 }
 
 void YesNoDialog::Draw(sf::RenderWindow& window, const sf::Font& font) const
 {
+	if (!_invoked) {
+		return;
+	}
 	DrawRectangle(window, _area, BACKGROUND_COLOR); // background
 	DrawDialogText(window, font);
 	DrawYesNoText(window, font);

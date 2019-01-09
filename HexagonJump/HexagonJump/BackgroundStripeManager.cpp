@@ -11,7 +11,7 @@ void BackgroundStripeManager::Move(float horizontalDist)
 	}
 }
 
-void BackgroundStripeManager::Update(const Camera& camera, float deltaTime)
+void BackgroundStripeManager::Update(const Camera& camera, float deltaTime, bool spawnInsideCamera)
 {
 	UpdateStripes(camera, deltaTime);
 	_stripeSpawnTimer += deltaTime;
@@ -19,9 +19,7 @@ void BackgroundStripeManager::Update(const Camera& camera, float deltaTime)
 		_stripeSpawnTimer = 0.f;
 		_stripeSpawnTime = Random(static_cast<int>(STRIPE_SPAWN_TIME_MIN) * 10, static_cast<int>(STRIPE_SPAWN_TIME_MAX) * 10) / 10.f + 0.1f;
 
-		auto x = camera.GetPosition() + camera.GetVirtualWidth();
-		auto y = static_cast<float>(Random(0, static_cast<int>(camera.GetVirtualHeight() / 2.f)));
-		SpawnStripe(x, y);
+		SpawnStripe(CountSpawnPosition(camera, spawnInsideCamera));
 	}
 }
 
@@ -32,6 +30,20 @@ void BackgroundStripeManager::Draw(sf::RenderWindow& window, const Camera& camer
 	}
 }
 
+sf::Vector2f BackgroundStripeManager::CountSpawnPosition(const Camera& camera, bool spawnInsideCamera) const
+{
+	if (spawnInsideCamera) {
+		return {
+			static_cast<float>(Random(0, static_cast<int>(camera.GetVirtualWidth()))),
+			-BackgroundStripe::HEIGHT
+		};
+	}
+	return {
+		camera.GetPosition() + camera.GetVirtualWidth(),
+		static_cast<float>(Random(0, static_cast<int>(camera.GetVirtualHeight() / 2.f)))
+	};
+}
+
 void BackgroundStripeManager::UpdateStripes(const Camera& camera, float deltaTime)
 {
 	for (auto& stripe : _pool) {
@@ -40,9 +52,9 @@ void BackgroundStripeManager::UpdateStripes(const Camera& camera, float deltaTim
 	_pool.RemoveAll([&](const auto& stripe) { return stripe.PassedCamera(camera); });
 }
 
-void BackgroundStripeManager::SpawnStripe(float x, float y)
+void BackgroundStripeManager::SpawnStripe(const sf::Vector2f& position)
 {
-	_pool.Add().SetPosition(x, y);
+	_pool.Add().SetPosition(position.x, position.y);
 }
 
 }

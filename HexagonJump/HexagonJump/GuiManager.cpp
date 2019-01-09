@@ -1,7 +1,6 @@
 #include "GuiManager.hpp"
+#include "Controls.hpp"
 #include "Utils.hpp"
-
-#include <iostream>
 
 namespace hexagon::gui {
 
@@ -43,18 +42,18 @@ bool GuiManager::KeyPressed(sf::Keyboard::Key key)
 {
 	switch (key)
 	{
-	case KEY_BUTTON_PRESS:
+	case controls::GUI_BUTTON_PRESS_KEY:
 		if (GetActiveElement().IsPressable()) {
 			return GetActiveElement().Press();
 		}
 		break;
-	case KEY_INVOKE_YES_NO_DIALOG:
+	case controls::GUI_INVOKE_DIALOG_KEY:
 		InvokeDialog();
 		break;
-	case KEY_NEXT_BUTTON:
+	case controls::GUI_NEXT_BUTTON_KEY:
 		MoveToNextPressableElement(false);
 		break;
-	case KEY_PREVIOUS_BUTTON:
+	case controls::GUI_PREVIOUS_BUTTON_KEY:
 		MoveToNextPressableElement(true);
 		break;
 	default:
@@ -67,6 +66,10 @@ void GuiManager::Update(float deltaTime)
 {
 	for (auto& element : _pool) {
 		element->Update(deltaTime);
+	}
+	if (_invokedDialog && !_invokedDialog->get().IsInvoked()) {
+		_invokedDialog = std::nullopt;
+		MoveToNextPressableElement(true);
 	}
 }
 
@@ -120,11 +123,19 @@ bool GuiManager::TryToMoveInElement(GuiElement& elem, bool up)
 
 void GuiManager::InvokeDialog()
 {
+	if (_invokedDialog) {
+		return;
+	}
+
 	auto result = std::find_if(_pool.begin(), _pool.end(), [&](const auto& elem) {
 		return elem->IsInvokable();
 	});
 	if (result != _pool.end()) {
-		_invokedDialog = *result->get();
+		auto& dialog = *result->get();
+		dialog.Invoke();
+		_invokedDialog = dialog;
+		std::swap(*result, _pool[_pool.Size() - 1]);
+		_activeElementIndex = _pool.Size() - 1;
 	}
 }
 
