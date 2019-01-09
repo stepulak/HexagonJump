@@ -31,7 +31,8 @@ MusicVisulizationManager::MusicVisulizationManager(size_t spectrumColumns)
 	LoadExistingMusicList();
 }
 
-std::string MusicVisulizationManager::ConvertNewMusic(const std::string& path, 
+MusicVisulizationManager::ConvertResult MusicVisulizationManager::ConvertNewMusicAsync(
+	const std::string& path,
 	float gameTimerate, 
 	gui::ThreadSafeProgressBar& progressBar)
 {
@@ -42,19 +43,22 @@ std::string MusicVisulizationManager::ConvertNewMusic(const std::string& path,
 
 	auto musicName = FilenameWithoutExtension(path);
 	auto musicPath = _applicationDataPath + musicName;
-	auto visualizationData = CountMusicVisualizationData(buffer,
-		gameTimerate, 
-		_spectrumColumns,
-		progressBar);
-
-	SaveMusicVisualizationToFile(visualizationData, musicPath + DATA_FILE_SUFFIX);
 	SaveMusicScore(0u, musicPath + SCORE_FILE_SUFFIX);
 
 	// Copy the music into app's directory
 	std::filesystem::remove(musicPath);
 	std::filesystem::copy(path, musicPath);
 	
-	return musicName;
+	// Don't block the main thread
+	return std::async(std::launch::async, [&, buffer, musicName, musicPath] {
+		auto visualizationData = CountMusicVisualizationData(buffer,
+			gameTimerate,
+			_spectrumColumns,
+			progressBar);
+		SaveMusicVisualizationToFile(visualizationData, musicPath + DATA_FILE_SUFFIX);
+		_music[musicName] = LoadMusicScore(musicPath + SCORE_FILE_SUFFIX);
+		return musicName; 
+	});
 }
 
 MusicData MusicVisulizationManager::LoadMusic(const std::string& musicName) const

@@ -10,11 +10,9 @@ const sf::Color ThreadSafeProgressBar::BAR_UNCOMPLETED_COLOR = { 50, 50, 50 };
 const sf::Color ThreadSafeProgressBar::TEXT_COLOR = { 255, 255, 255 };
 
 ThreadSafeProgressBar::ThreadSafeProgressBar(const sf::FloatRect& area,
-	float fontSize, 
-	const Callback& finishCallback)
+	float fontSize)
 	: _area(area)
 	, _fontSize(fontSize)
-	, _callback(finishCallback)
 {
 }
 
@@ -40,7 +38,7 @@ float ThreadSafeProgressBar::GetProgress() const
 void ThreadSafeProgressBar::UpdateProgress(float progress)
 {
 	std::lock_guard lock(_mutex);
-	_progress = std::max(0.f, std::min(1.f, progress)); // no throw if out-of-range
+	_progress = std::max(0.f, std::min(1.f, progress));
 }
 
 void ThreadSafeProgressBar::Draw(sf::RenderWindow& window, const sf::Font& font) const

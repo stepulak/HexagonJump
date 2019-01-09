@@ -23,6 +23,10 @@ MainMenu::MainMenu(const sf::Font& font, Camera& camera)
 
 void MainMenu::KeyPressed(sf::Keyboard::Key key)
 {
+	if (_game) {
+		_game->KeyPressed(key);
+		return;
+	}
 	if (key == sf::Keyboard::Escape) {
 		if (_activeMenuLevel == MenuLevel::MAIN) {
 			_quit = true;
@@ -38,12 +42,28 @@ void MainMenu::KeyPressed(sf::Keyboard::Key key)
 
 void MainMenu::Update(float deltaTime)
 {
+	if (_game) {
+		_game->Update(deltaTime);
+		return;
+	}
 	_stripeManager.Update(_camera, deltaTime, true);
 	GetActiveGUI().Update(deltaTime);
+	if (HasConversionFinished()) {
+		_progressBar->get().Close();
+		auto musicName = _conversionResult.get();
+		_playlist->get().AddElement(musicName);
+		if (_scoreLabel->get().GetText().empty()) {
+			ShowScore(musicName);
+		}
+	}
 }
 
 void MainMenu::Draw(sf::RenderWindow& window) const
 {
+	if (_game) {
+		_game->Draw(window);
+		return;
+	}
 	auto color = GetColor(COLOR_PALETTE, ColorEntity::STRIPE);
 	DrawRectangle(window, _camera.GetVirtualViewRect(), color);
 	_stripeManager.Draw(window, _camera, color);
@@ -97,6 +117,10 @@ void MainMenu::CreatePlaylistLevelGUI()
 {
 	auto& gui = (_menuLevelsGuiManagers[MenuLevel::PLAYLIST] = std::make_unique<gui::GuiManager>(_font));
 	
+	CreateScoreLabel();
+	CreateAndFillPlaylist();
+	CreateProgressBar();
+
 	sf::Vector2f openMusicButtonPosition = {
 		GUI_HORIZONTAL_POSITION,
 		_camera.GetVirtualHeight() - OPEN_MUSIC_BUTTON_VERTICAL_OFFSET
@@ -105,9 +129,6 @@ void MainMenu::CreatePlaylistLevelGUI()
 		openMusicButtonPosition,
 		FONT_SIZE,
 		[&] { AddMusic(RunOpenFileDialog()); }));
-
-	CreateScoreLabel();
-	CreateAndFillPlaylist();
 }
 
 void MainMenu::CreateControlsLevelGUI()
@@ -167,17 +188,39 @@ void MainMenu::CreateAndFillPlaylist()
 	auto activeelem = _playlist->get().GetActiveElement();
 }
 
+void MainMenu::CreateProgressBar()
+{
+	auto& gui = _menuLevelsGuiManagers[MenuLevel::PLAYLIST];
+	sf::FloatRect barArea = {
+		_camera.GetVirtualWidth() / 2.f - PROGRESS_BAR_WIDTH / 2.f,
+		_camera.GetVirtualHeight() / 2.f - PROGRESS_BAR_HEIGHT / 2.f,
+		PROGRESS_BAR_WIDTH,
+		PROGRESS_BAR_HEIGHT
+	};
+
+	auto& progressBar = gui->AddGuiElement(std::make_unique<gui::ThreadSafeProgressBar>(barArea, FONT_SIZE));
+	_progressBar = dynamic_cast<gui::ThreadSafeProgressBar&>(*progressBar);
+}
+
 void MainMenu::StartGame(const std::string& musicName)
 {
-	std::cout << musicName << std::endl;
+	_game = std::make_unique<Game>(_font, _camera, musicName, _musicVisualizationManager);
 }
 
 void MainMenu::ShowScore(const std::string& musicName)
 {
+	auto score = _musicVisualizationManager.GetMusicList().at(musicName);
+	_scoreLabel->get().SetText("Best score: " + std::to_string(score));
 }
 
-void MainMenu::AddMusic(const std::string & musicPath)
+void MainMenu::AddMusic(const std::string& musicPath)
 {
+	auto& progressBar = _progressBar->get();
+	progressBar.Invoke();
+
+	_conversionResult = _musicVisualizationManager.ConvertNewMusicAsync(musicPath,
+		Game::TIMERATE, 
+		progressBar);
 }
 
 }

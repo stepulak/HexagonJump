@@ -24,7 +24,9 @@ bool ListBox::MoveUp()
 {
 	if (_activeElementIndex > 0u) {
 		_activeElementIndex--;
-		_moveCallback(GetActiveElement());
+		if (_moveCallback) {
+			_moveCallback(GetActiveElement());
+		}
 		return true;
 	}
 	return false;
@@ -34,7 +36,9 @@ bool ListBox::MoveDown()
 {
 	if (_pool.Size() > 0u && _activeElementIndex < _pool.Size() - 1) {
 		_activeElementIndex++;
-		_moveCallback(GetActiveElement());
+		if (_moveCallback) {
+			_moveCallback(GetActiveElement());
+		}
 		return true;
 	}
 	return false;
@@ -70,7 +74,7 @@ void ListBox::DrawMarker(sf::RenderWindow& window) const
 
 size_t ListBox::GetStartingIndexForDrawing() const
 {
-	return (_pool.Size() <= _numElementsScroll) ? 0u : _pool.Size() - _activeElementIndex;
+	return (_activeElementIndex < _numElementsScroll) ? 0u : _activeElementIndex;
 }
 
 }

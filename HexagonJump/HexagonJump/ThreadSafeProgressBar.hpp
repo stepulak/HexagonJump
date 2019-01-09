@@ -10,12 +10,8 @@ namespace hexagon::gui {
 class ThreadSafeProgressBar : public GuiElement {
 public:
 
-	using Callback = std::function<void()>;
-
-	ThreadSafeProgressBar(const sf::FloatRect& area, float fontSize, const Callback& finishCallback);
+	ThreadSafeProgressBar(const sf::FloatRect& area, float fontSize);
 	~ThreadSafeProgressBar() = default;
-
-	bool IsComplete() const { return GetProgress() >= 1.f; }
 
 	bool IsInvokable() const override { return true; }
 	bool IsInvoked() const { return _invoked; }
@@ -47,7 +43,6 @@ private:
 
 	sf::FloatRect _area;
 	float _fontSize;
-	Callback _callback;
 	float _progress = 0.f;
 	bool _invoked = false;
 };

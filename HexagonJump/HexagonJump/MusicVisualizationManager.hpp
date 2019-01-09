@@ -3,6 +3,7 @@
 #include "MusicVisualization.hpp"
 #include "ThreadSafeProgressBar.hpp"
 
+#include <future>
 #include <map>
 #include <string>
 #include <SFML/Audio.hpp>
@@ -20,12 +21,13 @@ class MusicVisulizationManager {
 public:
 
 	using MusicContainer = std::map<std::string, unsigned>;
+	using ConvertResult = std::future<std::string>;
 
 	MusicVisulizationManager(size_t spectrumColumns);
 
 	const MusicContainer& GetMusicList() const { return _music; }
 
-	std::string ConvertNewMusic(const std::string& path,
+	ConvertResult ConvertNewMusicAsync(const std::string& path,
 		float gameTimerate, 
 		gui::ThreadSafeProgressBar& progressBar);
 

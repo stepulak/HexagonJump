@@ -93,19 +93,25 @@ bool GuiManager::MoveToNextPressableElement(bool up)
 	}
 
 	// Less code than using std::find_if with (reverse) iterators...
-	size_t stop = _activeElementIndex;
+	size_t lastIndex = _activeElementIndex;
 	do {
-		if (up) {
-			_activeElementIndex = (_activeElementIndex == 0u)
-				? _pool.Size() - 1
-				: _activeElementIndex - 1;
+		if (up && _activeElementIndex > 0u) {
+			_activeElementIndex--;
+		}
+		else if (!up && _activeElementIndex < _pool.Size() - 1) {
+			_activeElementIndex++;
 		}
 		else {
-			_activeElementIndex = (_activeElementIndex + 1) % _pool.Size();
+			break;
 		}
-	} while (!GetActiveElement().IsPressable() && stop != _activeElementIndex);
+	} while (!GetActiveElement().IsPressable());
 
-	return GetActiveElement().IsPressable();
+	if (!GetActiveElement().IsPressable()) {
+		_activeElementIndex = lastIndex;
+		return false;
+	}
+
+	return true;
 }
 
 bool GuiManager::TryToMoveInElement(GuiElement& elem, bool up)
