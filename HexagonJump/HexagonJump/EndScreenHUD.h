@@ -8,7 +8,11 @@ namespace hexagon::gui {
 class EndScreenHUD : public GuiElement {
 public:
 
-	EndScreenHUD(const Camera& camera, size_t totalTime, const std::string& resultMessage, const std::string& restartKey);
+	EndScreenHUD(const Camera& camera, 
+		size_t totalTime, 
+		const std::string& resultMessage,
+		const std::string& restartKey);
+
 	~EndScreenHUD() = default;
 
 	void Update(float deltaTime) override;

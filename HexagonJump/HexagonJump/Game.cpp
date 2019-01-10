@@ -71,10 +71,7 @@ void Game::KeyPressed(const sf::Keyboard::Key& key)
 
 void Game::Update(float deltaTime)
 {
-	if (_firstUpdateIteration) {
-		deltaTime = std::max(deltaTime, MAX_DELTA_TIME);
-		_firstUpdateIteration = false;
-	}
+	deltaTime = std::min(deltaTime, MAX_DELTA_TIME);
 
 	UpdateGUI(deltaTime);
 

@@ -57,6 +57,7 @@ void MainMenu::Update(float deltaTime)
 		_game->Update(deltaTime);
 		if (_game->WantToQuit()) {
 			_game.reset();
+			_camera.SetPosition(0.f);
 		}
 		return;
 	}

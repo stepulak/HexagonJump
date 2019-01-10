@@ -88,7 +88,6 @@ private:
 	bool _gameEnded;
 	bool _stopped = true;
 	bool _wantToQuit = false;
-	bool _firstUpdateIteration = true;
 };
 
 }

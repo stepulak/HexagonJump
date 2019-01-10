@@ -11,12 +11,12 @@ GuiManager::GuiManager(const sf::Font& font)
 
 GuiElement& GuiManager::AddGuiElement(const std::string& name, GuiElement::Ptr&& ptr)
 {
-	auto result = _elements.try_emplace(name, std::move(ptr));
-	TrySetPressableActiveElement();
-	if (!result.second) {
+	if (ContainsElement(name)) {
 		throw std::runtime_error("Element " + name + " already exists!");
 	}
-	return *result.first->second;
+	_elements.emplace_back(name, std::move(ptr));
+	TrySetNewActiveElement();
+	return *_elements.back().second;
 }
 
 bool GuiManager::KeyPressed(const sf::Keyboard::Key& key)
@@ -55,18 +55,14 @@ void GuiManager::Draw(sf::RenderWindow& window) const
 		element->Draw(window, _font);
 	}
 	if (!_elements.empty()) {
+		auto& elem = GetActiveElement();
 		GetActiveElement().DrawMarker(window);
 	}
 }
 
-void GuiManager::TrySetPressableActiveElement()
+void GuiManager::TrySetNewActiveElement()
 {
-	_activeElement = std::find_if(_elements.begin(), _elements.end(), [](const auto& elem) { 
-		return elem.second->IsPressable(); 
-	});
-	if (_activeElement == _elements.end()) {
-		_activeElement = _elements.begin();
-	}
+	_activeElement = std::find_if(_elements.begin(), _elements.end(), IsPressable);
 }
 
 bool GuiManager::MoveToNextPressableElement(bool up)
@@ -78,17 +74,16 @@ bool GuiManager::MoveToNextPressableElement(bool up)
 		return true;
 	}
 	
-	static auto isPressable = [](const auto& elem) { return elem.second->IsPressable(); };
 	auto previous = _activeElement;
 
-	if (up) {
-		auto res = std::find_if(std::next(_activeElement, 1), _elements.end(), isPressable);
+	if (!up) {
+		auto res = std::find_if(_activeElement + 1, _elements.end(), IsPressable);
 		_activeElement = (res == _elements.end()) ? previous : res;
 	}
 	else {
-		auto rend = std::make_reverse_iterator(std::prev(_activeElement, 1));
-		auto res = std::find_if(_elements.rbegin(), rend, isPressable);
-		_activeElement = (res == _elements.rend()) ? previous : std::prev(res.base(), 1);
+		auto rbegin = std::make_reverse_iterator(_activeElement);
+		auto res = std::find_if(rbegin, _elements.rend(), IsPressable);
+		_activeElement = (res == _elements.rend()) ? previous : (res + 1).base();
 	}
 	return true;
 }
