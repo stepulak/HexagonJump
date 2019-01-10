@@ -14,7 +14,6 @@
 using namespace hexagon;
 using namespace hexagon::gui;
 
-static constexpr auto MUSIC_FILENAME = "D:\\Git\\HexagonJump\\HexagonJump\\x64\\Debug\\DontBeSoShy.ogg";
 static constexpr auto FONT_FILENAME = "font\\font.ttf";
 
 int main()

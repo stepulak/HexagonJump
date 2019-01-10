@@ -74,7 +74,6 @@ void YesNoDialog::DrawYesNoText(sf::RenderWindow& window, const sf::Font& font) 
 		_area.top + (1.f - TEXT_VERTICAL_POSITION_RATIO) * _area.height
 	};
 	DrawOptionText(window, font, "Yes", position, _yesActive);
-
 	position.x = _area.left + NO_TEXT_HORIZONTAL_POSITION_RATIO * _area.width;
 	DrawOptionText(window, font, "No", position, !_yesActive);
 }

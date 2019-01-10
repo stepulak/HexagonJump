@@ -7,13 +7,11 @@ namespace hexagon::gui {
 ListBox::ListBox(const sf::Vector2f& position,
 	float fontSize,
 	size_t numElementsScroll,
-	const Callback& pressCallback,
-	const Callback& moveCallback)
+	const Callback& pressCallback)
 	: _position(position)
 	, _fontSize(fontSize)
 	, _numElementsScroll(numElementsScroll)
 	, _pressCallback(pressCallback)
-	, _moveCallback(moveCallback)
 {
 	if (numElementsScroll == 0u) {
 		throw std::runtime_error("Number of elements per scroll cannot be zero");
@@ -24,9 +22,6 @@ bool ListBox::MoveUp()
 {
 	if (_activeElementIndex > 0u) {
 		_activeElementIndex--;
-		if (_moveCallback) {
-			_moveCallback(GetActiveElement());
-		}
 		return true;
 	}
 	return false;
@@ -36,9 +31,6 @@ bool ListBox::MoveDown()
 {
 	if (_pool.Size() > 0u && _activeElementIndex < _pool.Size() - 1) {
 		_activeElementIndex++;
-		if (_moveCallback) {
-			_moveCallback(GetActiveElement());
-		}
 		return true;
 	}
 	return false;
@@ -65,6 +57,9 @@ void ListBox::Draw(sf::RenderWindow& window, const sf::Font& font) const
 
 void ListBox::DrawMarker(sf::RenderWindow& window) const
 {
+	if (_pool.Size() == 0u) {
+		return;
+	}
 	sf::Vector2f position = {
 		_position.x,
 		_position.y + (_activeElementIndex - GetStartingIndexForDrawing()) * _fontSize

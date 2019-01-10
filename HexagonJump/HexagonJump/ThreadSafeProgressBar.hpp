@@ -13,7 +13,6 @@ public:
 	ThreadSafeProgressBar(const sf::FloatRect& area, float fontSize);
 	~ThreadSafeProgressBar() = default;
 
-	bool IsInvokable() const override { return true; }
 	bool IsInvoked() const { return _invoked; }
 
 	void Invoke() override;

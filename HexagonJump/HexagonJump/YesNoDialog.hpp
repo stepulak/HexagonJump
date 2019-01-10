@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GuiElement.hpp"
+#include "Controls.hpp"
 
 #include <functional>
 
@@ -15,9 +16,12 @@ public:
 
 	bool IsPressable() const override { return true; }
 	bool IsMovable() const override { return true; }
-	bool IsInvokable() const override { return true; }
 	bool IsInvoked() const { return _invoked; }
 
+	bool InvokableOn(const sf::Keyboard::Key& key) const override { 
+		return key == controls::GUI_INVOKE_OR_CLOSE_KEY;
+	}
+	
 	bool MoveUp() override;
 	bool MoveDown() override;
 	bool Press() override;

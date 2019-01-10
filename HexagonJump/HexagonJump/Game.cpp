@@ -14,11 +14,13 @@ Game::Game(const sf::Font& font,
 	, _musicVisualizationManager(manager)
 	, _musicName(musicName)
 {
-	camera.SetVelocity(CAMERA_VELOCITY);
-	
-	auto musicData = manager.LoadMusic(musicName);
+	auto musicData = manager.OpenMusic(musicName);
+
+	_beatUnitManager = std::make_unique<BeatUnitManager>(std::move(musicData.visualization),
+		NUM_BEAT_UNITS, 
+		TIMERATE);
 	_music.openFromFile(musicData.path);
-	_beatUnitManager = std::make_unique<BeatUnitManager>(std::move(musicData.visualization), NUM_BEAT_UNITS, TIMERATE);
+	camera.SetVelocity(CAMERA_VELOCITY);
 
 	Reset();
 }
@@ -37,12 +39,11 @@ void Game::Stop()
 	_music.pause();
 }
 
-void Game::KeyPressed(sf::Keyboard::Key key)
+void Game::KeyPressed(const sf::Keyboard::Key& key)
 {
 	if (_guiManager->KeyPressed(key)) {
 		return; // handled by gui
 	}
-
 	auto& player = _world->GetPlayer();
 
 	switch (key)
@@ -70,6 +71,11 @@ void Game::KeyPressed(sf::Keyboard::Key key)
 
 void Game::Update(float deltaTime)
 {
+	if (_firstUpdateIteration) {
+		deltaTime = std::max(deltaTime, MAX_DELTA_TIME);
+		_firstUpdateIteration = false;
+	}
+
 	UpdateGUI(deltaTime);
 
 	if (!_stopped && !_gameEnded) {
@@ -117,45 +123,41 @@ void Game::Reset()
 void Game::CreateGUI()
 {
 	_guiManager = std::make_unique<gui::GuiManager>(_font);
-	
+	_guiManager->AddGuiElement(TIME_HUD_NAME, std::make_unique<gui::GameStatsHUD>());
 	CreateQuitDialog();
-
-	auto& statsHud = _guiManager->AddGuiElement(std::make_unique<gui::GameStatsHUD>());
-	_statsHUD = std::ref(dynamic_cast<gui::GameStatsHUD&>(*statsHud));
 }
 
 void Game::CreateQuitDialog()
 {
-	auto quitDialogRect = sf::FloatRect{
-		_camera.GetVirtualWidth() / 2.f - QUIT_DIALOG_WIDTH / 2.f,
-		_camera.GetVirtualHeight() / 2.f - QUIT_DIALOG_HEIGHT / 2.f,
-		QUIT_DIALOG_WIDTH,
-		QUIT_DIALOG_HEIGHT
-	};
-
 	auto dialog = std::make_unique<gui::YesNoDialog>(QUIT_DIALOG_TEXT,
-		quitDialogRect, 40, [&] {
-		SaveScore();
-		_quit = true;
-	});
+		sf::FloatRect {
+			_camera.GetVirtualWidth() / 2.f - QUIT_DIALOG_WIDTH / 2.f,
+			_camera.GetVirtualHeight() / 2.f - QUIT_DIALOG_HEIGHT / 2.f,
+			QUIT_DIALOG_WIDTH,
+			QUIT_DIALOG_HEIGHT
+		},
+		FONT_SIZE, 
+		[&] { _wantToQuit = true; });
 
-	_guiManager->AddGuiElement(std::move(dialog));
+	_guiManager->AddGuiElement(QUIT_DIALOG_NAME, std::move(dialog));
 }
 
 void Game::CreateEndScreenHUD(const std::string& resultMessage)
 {
-	_guiManager->AddGuiElement(std::make_unique<gui::EndScreenHUD>(_camera,
+	auto hud = std::make_unique<gui::EndScreenHUD>(_camera,
 		static_cast<size_t>(GetMusicTime()),
 		resultMessage,
-		controls::RESTART_KEY_STR));
+		controls::RESTART_KEY_STR);
+
+	_guiManager->AddGuiElement(END_SCREEN_HUD_NAME, std::move(hud));
 }
 
 void Game::UpdateGUI(float deltaTime)
 {
-	_guiManager->Update(deltaTime);
 	if (!_world->PlayerDied()) {
-		_statsHUD->get().UpdateStats(static_cast<size_t>(GetMusicTime()));
+		GetTimeHUD().UpdateTime(static_cast<size_t>(GetMusicTime()));
 	}
+	_guiManager->Update(deltaTime);
 }
 
 void Game::TestIfPlayerWon()
@@ -200,15 +202,13 @@ void Game::GameEnded(const std::string& resultMessage)
 {
 	_gameEnded = true;
 	CreateEndScreenHUD(resultMessage);
-	SaveScore();
 }
 
 bool Game::ShouldSpawnObstacles() const
 {
 	if (_music.getStatus() == sf::Music::Playing) {
 		auto duration = _music.getDuration().asSeconds();
-		auto time = _music.getPlayingOffset().asSeconds();
-		return time < duration - LAST_SECONDS_WITHOUT_OBSTACLES;
+		return GetMusicTime() < duration - LAST_SECONDS_WITHOUT_OBSTACLES;
 	}
 	return false;
 }

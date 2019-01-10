@@ -31,62 +31,51 @@ MusicVisulizationManager::MusicVisulizationManager(size_t spectrumColumns)
 	LoadExistingMusicList();
 }
 
-MusicVisulizationManager::ConvertResult MusicVisulizationManager::ConvertNewMusicAsync(
+MusicVisulizationManager::ConvertResult MusicVisulizationManager::ConvertMusicAsync(
 	const std::string& path,
 	float gameTimerate, 
 	gui::ThreadSafeProgressBar& progressBar)
 {
-	sf::SoundBuffer buffer;
-	if (!buffer.loadFromFile(path)) {
-		throw std::runtime_error("Unable to load music: " + path);
-	}
 
-	auto musicName = FilenameWithoutExtension(path);
-	auto musicPath = _applicationDataPath + musicName;
-	SaveMusicScore(0u, musicPath + SCORE_FILE_SUFFIX);
-
-	// Copy the music into app's directory
-	std::filesystem::remove(musicPath);
-	std::filesystem::copy(path, musicPath);
-	
 	// Don't block the main thread
-	return std::async(std::launch::async, [&, buffer, musicName, musicPath] {
-		auto visualizationData = CountMusicVisualizationData(buffer,
-			gameTimerate,
-			_spectrumColumns,
-			progressBar);
-		SaveMusicVisualizationToFile(visualizationData, musicPath + DATA_FILE_SUFFIX);
-		_music[musicName] = LoadMusicScore(musicPath + SCORE_FILE_SUFFIX);
-		return musicName; 
+	return std::async(std::launch::async, [&, path, gameTimerate] () {
+		sf::SoundBuffer buffer;
+		if (!buffer.loadFromFile(path)) {
+			return MaybeString{}; // error
+		}
+		auto musicName = FilenameWithoutExtension(path);
+		auto musicPath = _applicationDataPath + musicName;
+
+		try {
+			// Copy the music into app's directory
+			std::filesystem::remove(musicPath);
+			std::filesystem::copy(path, musicPath);
+
+			auto visualizationData = CountMusicVisualizationData(buffer,
+				gameTimerate,
+				_spectrumColumns,
+				progressBar);
+
+			SaveMusicVisualizationToFile(visualizationData, musicPath + DATA_FILE_SUFFIX);
+		}
+		catch (...) {
+			return MaybeString{};
+		}
+		return MaybeString{ musicName };
 	});
 }
 
-MusicData MusicVisulizationManager::LoadMusic(const std::string& musicName) const
+MusicData MusicVisulizationManager::OpenMusic(const std::string& musicName) const
 {
 	auto musicPath = _applicationDataPath + musicName;
 	auto musicVisualization = LoadMusicVisualizationFromFile(musicPath + DATA_FILE_SUFFIX, _spectrumColumns);
-	auto musicStats = LoadMusicScore(musicPath + SCORE_FILE_SUFFIX);
-	return { musicName, musicPath, musicStats, musicVisualization };
-}
-
-void MusicVisulizationManager::UpdateScoreIfBetter(const std::string& musicName, unsigned score)
-{
-	auto statsFilename = _applicationDataPath + musicName + SCORE_FILE_SUFFIX;
-	auto oldScore = LoadMusicScore(statsFilename);
-	auto betterScore = std::max(score, oldScore);
-
-	_music[musicName] = betterScore;
-	SaveMusicScore(betterScore, statsFilename);
+	return { musicName, musicPath, musicVisualization };
 }
 
 void MusicVisulizationManager::LoadExistingMusicList()
 {
 	for (const auto& filename : std::filesystem::directory_iterator(_applicationDataPath)) {
-		auto path = filename.path().string();
-		auto musicName = FilenameWithoutExtension(path);
-		if (_music.find(musicName) == _music.end()) {
-			_music[musicName] = LoadMusicScore(path);
-		}
+		_musicList.emplace(FilenameWithoutExtension(filename.path().string()));
 	}
 }
 
@@ -138,29 +127,6 @@ void MusicVisulizationManager::SaveMusicVisualizationToFile(const MusicVisualiza
 		}
 		file << std::endl;
 	}
-}
-
-unsigned MusicVisulizationManager::LoadMusicScore(const std::string& filename)
-{
-	std::fstream file(filename, std::ios_base::in);
-	if (!file.good()) {
-		throw std::runtime_error("Unable to open file with music score: " + filename);
-	}
-
-	unsigned score;
-	file >> score;
-
-	return score;
-}
-
-void MusicVisulizationManager::SaveMusicScore(unsigned score, const std::string& filename)
-{
-	std::fstream file(filename, std::ios_base::out);
-	if (!file.good()) {
-		throw std::runtime_error("Unable to save file with music score: " + filename);
-	}
-
-	file << score << std::endl;
 }
 
 }

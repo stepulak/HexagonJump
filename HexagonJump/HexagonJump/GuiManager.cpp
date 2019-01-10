@@ -9,36 +9,17 @@ GuiManager::GuiManager(const sf::Font& font)
 {
 }
 
-GuiElement::Ptr& GuiManager::AddGuiElement(GuiElement::Ptr&& ptr)
+GuiElement& GuiManager::AddGuiElement(const std::string& name, GuiElement::Ptr&& ptr)
 {
-	auto& elem = _pool.Add(std::move(ptr));
-
-	// Set active element to first pressable element added
-	if (!GetActiveElement().IsPressable()) {
-		if (_pool[_pool.Size() - 1]->IsPressable()) {
-			_activeElementIndex = _pool.Size() - 1;
-		}
+	auto result = _elements.try_emplace(name, std::move(ptr));
+	TrySetPressableActiveElement();
+	if (!result.second) {
+		throw std::runtime_error("Element " + name + " already exists!");
 	}
-	return elem;
+	return *result.first->second;
 }
 
-void GuiManager::RemoveGuiElement(const GuiElement::Ptr& ptr)
-{
-	_pool.RemoveAll([&](const auto& elem) {
-		return elem.get() == ptr.get();
-	});
-	if (_activeElementIndex >= _pool.Size()) {
-		_activeElementIndex = 0u; // reset
-	}
-}
-
-void GuiManager::RemoveAllGuiElements()
-{
-	_pool.RemoveAll([](const auto&) { return true; });
-	_activeElementIndex = 0u;
-}
-
-bool GuiManager::KeyPressed(sf::Keyboard::Key key)
+bool GuiManager::KeyPressed(const sf::Keyboard::Key& key)
 {
 	switch (key)
 	{
@@ -47,70 +28,68 @@ bool GuiManager::KeyPressed(sf::Keyboard::Key key)
 			return GetActiveElement().Press();
 		}
 		break;
-	case controls::GUI_INVOKE_DIALOG_KEY:
-		InvokeDialog();
-		break;
 	case controls::GUI_NEXT_BUTTON_KEY:
-		MoveToNextPressableElement(false);
+	case controls::GUI_NEXT_BUTTON_KEY2:
+		return MoveToNextPressableElement(false);
 		break;
 	case controls::GUI_PREVIOUS_BUTTON_KEY:
-		MoveToNextPressableElement(true);
+	case controls::GUI_PREVIOUS_BUTTON_KEY2:
+		return MoveToNextPressableElement(true);
 		break;
 	default:
-		return false;
+		return InvokeOrCloseElements(key);
 	}
 	return true;
 }
 
 void GuiManager::Update(float deltaTime)
 {
-	for (auto& element : _pool) {
+	for (auto& [_, element] : _elements) {
 		element->Update(deltaTime);
-	}
-	if (_invokedDialog && !_invokedDialog->get().IsInvoked()) {
-		_invokedDialog = std::nullopt;
-		MoveToNextPressableElement(true);
 	}
 }
 
 void GuiManager::Draw(sf::RenderWindow& window) const
 {
-	for (auto& element : _pool) {
+	for (auto&[_, element] : _elements) {
 		element->Draw(window, _font);
 	}
-	if (_pool.Size() > 0u) {
+	if (!_elements.empty()) {
 		GetActiveElement().DrawMarker(window);
+	}
+}
+
+void GuiManager::TrySetPressableActiveElement()
+{
+	_activeElement = std::find_if(_elements.begin(), _elements.end(), [](const auto& elem) { 
+		return elem.second->IsPressable(); 
+	});
+	if (_activeElement == _elements.end()) {
+		_activeElement = _elements.begin();
 	}
 }
 
 bool GuiManager::MoveToNextPressableElement(bool up)
 {
-	if (_pool.Size() == 0u) {
-		return false; // do nothing
+	if (_elements.empty()) {
+		return false;
 	}
 	if (TryToMoveInElement(GetActiveElement(), up)) {
 		return true;
 	}
+	
+	static auto isPressable = [](const auto& elem) { return elem.second->IsPressable(); };
+	auto previous = _activeElement;
 
-	// Less code than using std::find_if with (reverse) iterators...
-	size_t lastIndex = _activeElementIndex;
-	do {
-		if (up && _activeElementIndex > 0u) {
-			_activeElementIndex--;
-		}
-		else if (!up && _activeElementIndex < _pool.Size() - 1) {
-			_activeElementIndex++;
-		}
-		else {
-			break;
-		}
-	} while (!GetActiveElement().IsPressable());
-
-	if (!GetActiveElement().IsPressable()) {
-		_activeElementIndex = lastIndex;
-		return false;
+	if (up) {
+		auto res = std::find_if(std::next(_activeElement, 1), _elements.end(), isPressable);
+		_activeElement = (res == _elements.end()) ? previous : res;
 	}
-
+	else {
+		auto rend = std::make_reverse_iterator(std::prev(_activeElement, 1));
+		auto res = std::find_if(_elements.rbegin(), rend, isPressable);
+		_activeElement = (res == _elements.rend()) ? previous : std::prev(res.base(), 1);
+	}
 	return true;
 }
 
@@ -127,22 +106,21 @@ bool GuiManager::TryToMoveInElement(GuiElement& elem, bool up)
 	return false;
 }
 
-void GuiManager::InvokeDialog()
+bool GuiManager::InvokeOrCloseElements(const sf::Keyboard::Key& key)
 {
-	if (_invokedDialog) {
-		return;
+	bool managed = false;
+	for (auto&[_, element] : _elements) {
+		if (element->InvokableOn(key)) {
+			if (element->IsInvoked()) {
+				element->Close();
+			}
+			else {
+				element->Invoke();
+			}
+			managed = true;
+		}
 	}
-
-	auto result = std::find_if(_pool.begin(), _pool.end(), [&](const auto& elem) {
-		return elem->IsInvokable();
-	});
-	if (result != _pool.end()) {
-		auto& dialog = *result->get();
-		dialog.Invoke();
-		_invokedDialog = dialog;
-		std::swap(*result, _pool[_pool.Size() - 1]);
-		_activeElementIndex = _pool.Size() - 1;
-	}
+	return managed;
 }
 
 }

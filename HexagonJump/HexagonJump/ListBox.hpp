@@ -13,8 +13,7 @@ public:
 	ListBox(const sf::Vector2f& position,
 		float fontSize,
 		size_t numElementsScroll,
-		const Callback& pressCallback,
-		const Callback& moveCallback);
+		const Callback& pressCallback);
 
 	const std::string& GetActiveElement() const { return _pool[_activeElementIndex]; }
 	void AddElement(const std::string& text) { _pool.Add(text); }
@@ -40,7 +39,6 @@ private:
 	const size_t _numElementsScroll;
 	size_t _activeElementIndex = 0u;
 	Callback _pressCallback;
-	Callback _moveCallback;
 	Pool<std::string> _pool{ DEFAULT_POOL_SIZE };
 };
 
