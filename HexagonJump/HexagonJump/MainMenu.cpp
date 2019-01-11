@@ -45,10 +45,9 @@ void MainMenu::KeyPressed(const sf::Keyboard::Key& key)
 		else {
 			_activeMenuLevel = MenuLevel::MAIN;
 		}
+		return;
 	}
-	else {
-		GetActiveGUI().KeyPressed(key);
-	}
+	GetActiveGUI().KeyPressed(key);
 }
 
 void MainMenu::Update(float deltaTime)

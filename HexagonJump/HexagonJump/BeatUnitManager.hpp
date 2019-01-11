@@ -33,8 +33,8 @@ private:
 
 	static constexpr float SHUFFLE_TIME_DEFAULT = 2.f;
 	static constexpr float PASS_HIGHEST_BEAT_RATIO = 1.5f;
-	static constexpr double VISUALIZATION_DATA_POW = 1.5;
-	static constexpr double VISUALIZATION_DATA_RATIO = 0.00015;
+	static constexpr double VISUALIZATION_DATA_POW = 0.2;
+	static constexpr double VISUALIZATION_DATA_RATIO = 1;
 
 	float CurrentHighestBeat() const;
 	void ShuffleUnits();

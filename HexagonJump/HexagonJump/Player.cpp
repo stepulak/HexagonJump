@@ -16,10 +16,7 @@ Player::Player(float x, float y, float radius)
 void Player::Move(float distX, float distY)
 {
 	// bugfix
-	_position += { 
-		distX >= MAX_DISTANCE_MOVE ? 0.f : distX,
-		distY >= MAX_DISTANCE_MOVE ? 0.f : distY
-	};
+	_position += { distX, distY };
 }
 
 void Player::CutPosition(float distance)
@@ -77,7 +74,9 @@ void Player::Update(float deltaTime, float gravity, World& world)
 		StartFalling();
 	}
 
-	TryToMove(_horizontalVelocity * deltaTime * (_isMovingRight ? 1.f : -1.f), _verticalVelocity * deltaTime, world.GetObstacleManager());
+	// We cannot move in both directions simultaneously
+	TryToMoveHorizontalDirection(_horizontalVelocity * deltaTime * (_isMovingRight ? 1.f : -1.f), world.GetObstacleManager());
+	TryToMoveVerticalDirection(_verticalVelocity * deltaTime, world.GetObstacleManager());
 }
 
 void Player::Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const
@@ -145,34 +144,6 @@ void Player::StartFalling()
 	_verticalVelocity = 0;
 }
 
-void Player::TryToMove(float distX, float distY, const ObstacleManager& manager)
-{
-	for (const auto& obstacle : manager.GetObstaclePool()) {
-		if (obstacle->GetType() != Obstacle::Type::PLATFORM) {
-			continue;
-		}
-
-		auto [horizontalCollision, cutDistX] = HorizontalMovementSaveDistance(distX, *obstacle);
-		auto [verticalCollision, cutDistY] = VerticalMovementSaveDistance(distY, *obstacle);
-
-		if (horizontalCollision) {
-			// StopMoving();
-			distX = cutDistX;
-		}
-
-		if (verticalCollision) {
-			if (IsJumping()) {
-				StopJumping();
-			}
-			else if (IsFalling()) {
-				StopFalling();
-			}
-			distY = std::abs(cutDistY) < 1.f ? 0.f : cutDistY;
-		}
-	}
-	Move(distX, distY);
-}
-
 void Player::StartRotating()
 {
 	auto rotationDir = Random(0, 1);
@@ -201,6 +172,43 @@ void Player::Explode(ParticleSystem& particleSystem)
 			.SetFadeTime(EXPLOSION_PARTICLE_FADE_TIME)
 			.SetFadeMode(Particle::FadeMode::FADE_OUT);
 	}
+}
+
+void Player::TryToMoveHorizontalDirection(float wantedDistance, const ObstacleManager& manager)
+{
+	float distance = wantedDistance;
+	for (const auto& obstacle : manager.GetObstaclePool()) {
+		if (obstacle->GetType() != Obstacle::Type::PLATFORM) {
+			continue;
+		}
+		auto[collision, cutDistance] = HorizontalMovementSaveDistance(distance, *obstacle);
+		if (collision) {
+			// StopMoving();
+			distance = cutDistance;
+		}
+	}
+	Move(std::abs(distance) > std::abs(wantedDistance) ? 0.f : distance, 0.f);
+}
+
+void Player::TryToMoveVerticalDirection(float wantedDistance, const ObstacleManager & manager)
+{
+	float distance = wantedDistance;
+	for (const auto& obstacle : manager.GetObstaclePool()) {
+		if (obstacle->GetType() != Obstacle::Type::PLATFORM) {
+			continue;
+		}
+		auto[collision, cutDistance] = VerticalMovementSaveDistance(distance, *obstacle);
+		if (collision) {
+			if (IsJumping()) {
+				StopJumping();
+			}
+			else if (IsFalling()) {
+				StopFalling();
+			}
+			distance = std::abs(cutDistance) < 1.f ? 0.f : cutDistance;
+		}
+	}
+	Move(0.f, std::abs(distance) > std::abs(wantedDistance) ? 0.f : distance);
 }
 
 void Player::StopFalling()

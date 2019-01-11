@@ -63,6 +63,9 @@ void GuiManager::Draw(sf::RenderWindow& window) const
 void GuiManager::TrySetNewActiveElement()
 {
 	_activeElement = std::find_if(_elements.begin(), _elements.end(), IsPressable);
+	if (_activeElement == _elements.end()) {
+		_activeElement = _elements.begin();
+	}
 }
 
 bool GuiManager::MoveToNextPressableElement(bool up)

@@ -82,10 +82,11 @@ private:
 	void StopJumping();
 	void StartFalling();
 	void StopFalling();
-	void TryToMove(float distX, float distY, const ObstacleManager& manager);
 	void StartRotating();
 	void StopRotating();
 	void Explode(ParticleSystem& particleSystem);
+	void TryToMoveHorizontalDirection(float wantedDistance, const ObstacleManager& manager);
+	void TryToMoveVerticalDirection(float wantedDistance, const ObstacleManager& manager);
 	
 	bool InCollisionWithSpike(const ObstacleManager& manager) const;
 	std::pair<bool, float> HorizontalMovementSaveDistance(float distance, const Obstacle& obstacle) const;

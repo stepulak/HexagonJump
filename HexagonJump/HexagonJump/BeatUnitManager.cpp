@@ -33,7 +33,7 @@ float BeatUnitManager::CurrentHighestBeatRatio() const
 
 void BeatUnitManager::SyncTimingWithMusic(float musicTime)
 {
-	_visualizationDataIndex = static_cast<size_t>(musicTime / 1000.f / _gameTimerate);
+	_visualizationDataIndex = static_cast<size_t>(musicTime / _gameTimerate);
 }
 
 void BeatUnitManager::Reset()
@@ -68,7 +68,7 @@ void BeatUnitManager::SetNewHeights()
 	}
 	const auto& data = _musicVisualization.data[_visualizationDataIndex];
 	for (size_t i = 0u; i < data.size(); i++) {
-		_beatUnits[i].SetHeight(std::pow(data[i], VISUALIZATION_DATA_POW) * VISUALIZATION_DATA_RATIO / _musicVisualization.averageSampleValue);
+		_beatUnits[i].SetHeight(std::pow(data[i] * 10, 1.6) * (10000/20.0) * _musicVisualization.averageSampleValue);
 	}
 }
 
@@ -89,7 +89,7 @@ void BeatUnitManager::UpdateShuffle(float deltaTime)
 {
 	_shuffleTimer += deltaTime;
 	auto highestBeat = CurrentHighestBeat();
-
+	
 	if (_shuffleTimer > SHUFFLE_TIME_DEFAULT || highestBeat > _lastHighestBeat * PASS_HIGHEST_BEAT_RATIO) {
 		_shuffleTimer = 0.f;
 		ShuffleUnits();

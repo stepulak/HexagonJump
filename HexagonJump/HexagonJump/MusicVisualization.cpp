@@ -1,6 +1,8 @@
 #include "MusicVisualization.hpp"
 #include "Utils.hpp"
 
+#include <iostream>
+
 namespace hexagon {
 namespace {
 
@@ -32,7 +34,7 @@ void BinaryReverseTwoArrays(std::vector<double>& x, std::vector<double>& y)
 In place Radix2 FFT based on https://cnx.org/exports/ce67266a-1851-47e4-8bfc-82eb447212b4%407.pdf/decimation-in-time-dit-radix-2-fft-7.pdf
 Original author: Douglas L. Jones
 Creative Commons "Attribution" license 1.0 http://creativecommons.org/licenses/by/1.0/
-C++ implementation was done by me.
+C++ implementation was rewritten and modified by me.
 */
 void Radix2InPlace(std::vector<double>& real, std::vector<double>& imaginary, int exponent)
 {
@@ -45,9 +47,12 @@ void Radix2InPlace(std::vector<double>& real, std::vector<double>& imaginary, in
 
 		for (size_t j = 0; j < n; j++)
 		{
-			auto c = std::cos(a);
-			auto s = std::sin(a);
-			a += -2 * PI / m;
+			auto angle = -2 * PI * a / n;
+			auto c = std::cos(angle);
+			auto s = std::sin(angle);
+			
+			a += std::pow(2, exponent - i - 1);
+
 			for (size_t k = j; k < real.size(); k = k + m)
 			{
 				auto t1 = c * real[k + n] - s * imaginary[k + n];

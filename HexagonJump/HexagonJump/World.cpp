@@ -27,6 +27,8 @@ void World::Update(float deltaTime, bool skipObstacles)
 
 	UpdateObstaclesAndSurface(skipObstacles);
 	TryToCutPositionAllElements();
+
+	//std::cout << _player.GetPosition().x << " " << _player.GetPosition().y << std::endl;
 }
 
 void World::Draw(sf::RenderWindow& window) const

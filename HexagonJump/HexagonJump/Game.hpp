@@ -31,7 +31,7 @@ public:
 	
 private:
 
-	static constexpr float MAX_DELTA_TIME = 1 / 30.f;
+	static constexpr float MAX_DELTA_TIME = 1 / 24.f;
 	static constexpr float CAMERA_VELOCITY = 700.f;
 	static constexpr float LAST_SECONDS_WITHOUT_OBSTACLES = 10.f;
 	static constexpr float MUSIC_BEAT_MANAGER_SYNC_TIME = 5.f;

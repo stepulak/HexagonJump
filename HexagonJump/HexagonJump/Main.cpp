@@ -23,9 +23,9 @@ int main()
 
 	auto title = APP_NAME + std::string(" (c) ") + DEVELOPER_NAME + " " + RELEASE_YEAR;
 
-	sf::RenderWindow window(sf::VideoMode(800, 600), title, sf::Style::Default, settings);
-
 	Camera camera(960.f, 540.f, 800, 600);
+	sf::RenderWindow window(sf::VideoMode(camera.GetVirtualWidth(), camera.GetVirtualHeight()), title, sf::Style::Default, settings);
+	window.setVerticalSyncEnabled(true);
 
 	sf::Font font;
 	font.loadFromFile(FONT_FILENAME);
