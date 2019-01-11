@@ -22,7 +22,7 @@ private:
 	static constexpr float TEXT_SIZE = 40.f;
 	static const sf::Color TEXT_COLOR;
 
-	size_t _time = 0.f;
+	size_t _time = 0u;
 };
 
 }

@@ -25,7 +25,7 @@ private:
 	static const sf::Color INFO_MESSAGE_COLOR;
 
 	const Camera& _camera;
-	size_t _totalTime;
+	const size_t _totalTime;
 	GuiElement::Ptr _timeInfoMessage;
 	GuiElement::Ptr _resultMessage;
 	GuiElement::Ptr _restartInfoMessage;

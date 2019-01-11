@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <chrono>
 #include <random>
-#include <iostream>
 
 namespace hexagon {
 
@@ -13,6 +12,18 @@ BeatUnitManager::BeatUnitManager(MusicVisualization&& visualization, size_t numB
 	, _gameTimerate(gameTimerate)
 {
 	Reset();
+}
+
+const BeatUnit & BeatUnitManager::GetRandomUnit() const 
+{
+	auto max = static_cast<int>(_beatUnits.size() - 1u);
+	return _beatUnits[static_cast<size_t>(Random(0, max))];
+}
+
+float BeatUnitManager::CurrentHighestBeatRatio() const
+{
+	static constexpr auto minMaxDiff = (BeatUnit::MAX_HEIGHT - BeatUnit::MIN_HEIGHT);
+	return (CurrentHighestBeat() - BeatUnit::MIN_HEIGHT) / minMaxDiff;
 }
 
 void BeatUnitManager::Update(float deltaTime)
@@ -26,16 +37,6 @@ void BeatUnitManager::Update(float deltaTime)
 	}
 }
 
-float BeatUnitManager::CurrentHighestBeatRatio() const
-{
-	return (CurrentHighestBeat() - BeatUnit::MIN_HEIGHT) / (BeatUnit::MAX_HEIGHT - BeatUnit::MIN_HEIGHT);
-}
-
-void BeatUnitManager::SyncTimingWithMusic(float musicTime)
-{
-	_visualizationDataIndex = static_cast<size_t>(musicTime / _gameTimerate);
-}
-
 void BeatUnitManager::Reset()
 {
 	_visualizationDataIndex = 0u;
@@ -46,19 +47,17 @@ void BeatUnitManager::Reset()
 
 float BeatUnitManager::CurrentHighestBeat() const
 {
-	float maxHeight = 0.f;
-	for (const auto& unit : _beatUnits) {
-		if (unit.Height() >= maxHeight) {
-			maxHeight = unit.Height();
-		}
-	}
-	return maxHeight;
+	return std::max_element(_beatUnits.begin(), _beatUnits.end(),
+		[](const auto& unit1, const auto& unit2) {
+		return unit1.Height() < unit2.Height();
+	})->Height();
 }
 
 void BeatUnitManager::ShuffleUnits()
 {
 	auto seed = std::chrono::system_clock::now().time_since_epoch().count();
-	std::shuffle(_beatUnits.begin(), _beatUnits.end(), std::default_random_engine(seed));
+	auto engine = std::default_random_engine(static_cast<unsigned int>(seed));
+	std::shuffle(_beatUnits.begin(), _beatUnits.end(), std::move(engine));
 }
 
 void BeatUnitManager::SetNewHeights()
@@ -66,16 +65,20 @@ void BeatUnitManager::SetNewHeights()
 	if (_visualizationDataIndex >= _musicVisualization.data.size()) {
 		return;
 	}
+	const auto sampleAvg = _musicVisualization.averageSampleValue;
 	const auto& data = _musicVisualization.data[_visualizationDataIndex];
+
 	for (size_t i = 0u; i < data.size(); i++) {
-		_beatUnits[i].SetHeight(std::pow(data[i] * 10, 1.6) * (10000/20.0) * _musicVisualization.averageSampleValue);
+		auto pow = std::pow(data[i] * VISUALIZATION_DATA_RATIO, VISUALIZATION_DATA_POW);
+		auto height = static_cast<float>(pow * VISUALIZATION_DATA_POW_RATIO / sampleAvg);
+		_beatUnits[i].SetHeight(height);
 	}
 }
 
 void BeatUnitManager::UpdateBeat(float deltaTime)
 {
 	_beatTimer += deltaTime;
-	
+
 	if (_beatTimer < _gameTimerate || _visualizationDataIndex >= _musicVisualization.data.size()) {
 		return;
 	}
@@ -87,10 +90,11 @@ void BeatUnitManager::UpdateBeat(float deltaTime)
 
 void BeatUnitManager::UpdateShuffle(float deltaTime)
 {
-	_shuffleTimer += deltaTime;
 	auto highestBeat = CurrentHighestBeat();
-	
-	if (_shuffleTimer > SHUFFLE_TIME_DEFAULT || highestBeat > _lastHighestBeat * PASS_HIGHEST_BEAT_RATIO) {
+	_shuffleTimer += deltaTime;
+
+	if (_shuffleTimer > SHUFFLE_TIME_DEFAULT || 
+		highestBeat > _lastHighestBeat * PASS_HIGHEST_BEAT_RATIO) {
 		_shuffleTimer = 0.f;
 		ShuffleUnits();
 	}

@@ -1,4 +1,4 @@
-#include "EndScreenHUD.h"
+#include "EndScreenHUD.hpp"
 #include "BlinkingLabel.hpp"
 
 namespace hexagon::gui {

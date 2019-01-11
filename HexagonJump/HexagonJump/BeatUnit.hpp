@@ -14,8 +14,14 @@ public:
 
 	float Height() const { return _height; }
 	
-	void SetHeight(float height);
-	void Update(float deltaTime);
+	void SetHeight(float height) {
+		// Set height within range of <MIN_HEIGHT;MAX_HEIGHT>
+		_height = std::min(MAX_HEIGHT, std::max(std::max(height, _height), MIN_HEIGHT));
+	}
+
+	void Update(float deltaTime) {
+		_height = std::max(MIN_HEIGHT, _height - HEIGHT_UPDATE_VEL * deltaTime);
+	}
 
 private:
 

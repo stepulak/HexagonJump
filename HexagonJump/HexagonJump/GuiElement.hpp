@@ -14,8 +14,8 @@ public:
 
 	virtual bool IsPressable() const { return false; }
 	virtual bool IsMovable() const { return false; }
-	virtual bool IsInvoked() const { return false; }
 	virtual bool InvokableOn(const sf::Keyboard::Key&) const { return false; }
+	virtual bool IsInvoked() const { return false; }
 	
 	virtual bool Press() { return false; }
 	virtual bool MoveUp() { return false; }

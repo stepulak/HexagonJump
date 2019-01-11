@@ -8,15 +8,16 @@ namespace hexagon::gui {
 class ListBox : public GuiElement {
 public:
 
-	using Callback = std::function<void(const std::string&)>;
+	using ElementType = std::string;
+	using Callback = std::function<void(const ElementType&)>;
 
 	ListBox(const sf::Vector2f& position,
 		float fontSize,
 		size_t numElementsScroll,
 		const Callback& pressCallback);
 
-	const std::string& GetActiveElement() const { return _pool[_activeElementIndex]; }
-	void AddElement(const std::string& text) { _pool.Add(text); }
+	const ElementType& GetActiveElement() const { return _pool[_activeElementIndex]; }
+	void AddElement(const ElementType& text) { _pool.Add(text); }
 
 	bool IsPressable() const override { return true; }
 	bool IsMovable() const override { return true; }
@@ -37,9 +38,9 @@ private:
 	const sf::Vector2f _position;
 	const float _fontSize;
 	const size_t _numElementsScroll;
+	const Callback _pressCallback;
 	size_t _activeElementIndex = 0u;
-	Callback _pressCallback;
-	Pool<std::string> _pool{ DEFAULT_POOL_SIZE };
+	Pool<ElementType> _pool{ DEFAULT_POOL_SIZE };
 };
 
 }

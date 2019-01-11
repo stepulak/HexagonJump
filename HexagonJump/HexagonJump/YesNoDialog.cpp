@@ -4,7 +4,7 @@
 
 namespace hexagon::gui {
 
-const sf::Color YesNoDialog::BACKGROUND_COLOR = { 50, 50, 50, 128 };
+const sf::Color YesNoDialog::BACKGROUND_COLOR = { 50, 50, 50 };
 const sf::Color YesNoDialog::TEXT_COLOR = { 255, 255, 255 };
 
 YesNoDialog::YesNoDialog(const std::string& text, 

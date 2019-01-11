@@ -25,11 +25,10 @@ public:
 	const Label& GetLabel() const { return _label; }
 
 	bool IsPressable() const override { return true; }
-	bool IsMovable() const override { return false; }
 
 	bool Press() override;
 	void Draw(sf::RenderWindow& window, const sf::Font& font) const override;
-	void DrawMarker(sf::RenderWindow& window) const  override;
+	void DrawMarker(sf::RenderWindow& window) const override;
 
 private:
 

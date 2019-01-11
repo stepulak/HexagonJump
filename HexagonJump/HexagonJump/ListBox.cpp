@@ -1,7 +1,5 @@
 #include "ListBox.hpp"
 
-#include <iostream>
-
 namespace hexagon::gui {
 
 ListBox::ListBox(const sf::Vector2f& position,

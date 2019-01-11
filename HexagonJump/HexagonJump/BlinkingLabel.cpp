@@ -21,7 +21,7 @@ void BlinkingLabel::Update(float deltaTime)
 
 void BlinkingLabel::Draw(sf::RenderWindow& window, const sf::Font& font) const
 {
-	if (_timer < LABEL_VISIBLE_TIME) {
+	if (_timer <= LABEL_VISIBLE_TIME) {
 		Label::Draw(window, font);
 	}
 }

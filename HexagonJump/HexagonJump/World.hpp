@@ -16,6 +16,8 @@ class World {
 public:
 	
 	static constexpr float GRAVITY = 2.f * 1962.f;
+	static constexpr float SURFACE_WIDTH = 1440.f;
+	static constexpr float SURFACE_HEIGHT = 54.f;
 
 	World(Camera& camera, BeatUnitManager& manager);
 
@@ -50,13 +52,10 @@ private:
 	static constexpr float COLOR_CHANGE_HIGHEST_BEAT_MULTIPLIER = 10.f;
 	static const sf::Color PLAYER_COLOR;
 
-	static constexpr float GetSurfaceWidth() { return 1440.f; }
-	static constexpr float GetSurfaceHeight() { return 54.f; }
-
 	void TryToCutPositionAllElements();
-	void UpdateObstaclesAndSurface(bool skipObstacles);
+	void UpdateObstaclesAndSurface(float deltaTime, bool skipObstacles);
 	void SpawnAnotherObstacleSet();
-	void ExtendSurface();
+	void CreateSurface();
 
 	void DrawBeatFlash(sf::RenderWindow& window) const;
 	void DrawBackground(sf::RenderWindow& window) const;
@@ -70,7 +69,8 @@ private:
 	WorldSetCreator _worldSetCreator;
 	Player _player{ PLAYER_SPAWN_POS_X, PLAYER_SPAWN_POS_Y };
 	ColorPaletteChanger _colorPaletteChanger{ COLOR_CHANGE_TIME };
-	float _surfaceEnd = 0.f;
+	std::optional<std::reference_wrapper<Platform>> _surface;
+	float _obstacleSetEnd = 0.f;
 };
 
 }

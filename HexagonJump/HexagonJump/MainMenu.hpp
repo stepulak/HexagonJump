@@ -18,14 +18,14 @@ public:
 
 private:
 
-	enum class MenuLevel {
+	enum class GuiLevel {
 		MAIN,
 		PLAYLIST,
 		CONTROLS
 	};
 
 	static constexpr size_t STRIPE_MANAGER_INIT_ITERATIONS = 300u;
-	static constexpr size_t PLAYLIST_NUM_ELEMENTS = 10u;
+	static constexpr size_t PLAYLIST_NUM_ELEMENTS = 6u;
 	static constexpr auto COLOR_PALETTE = ColorPalette::BLUE;
 
 	static constexpr float FONT_SIZE = 40.f;
@@ -51,31 +51,24 @@ private:
 	static constexpr auto ADD_MUSIC_BUTTON_TEXT = "Add Music";
 	static constexpr auto SELECT_MUSIC_LABEL_TEXT = "Select Music:";
 
-	gui::GuiManager& GetActiveGUI() { 
-		return *_guiManagers.at(_activeMenuLevel);
-	}
-
-	const gui::GuiManager& GetActiveGUI() const {
-		return *_guiManagers.at(_activeMenuLevel);
-	}
+	gui::GuiManager& GetActiveGUI() { return *_guiManagers.at(_activeGuiLevel); }
+	const gui::GuiManager& GetActiveGUI() const { return *_guiManagers.at(_activeGuiLevel); }
 
 	gui::ThreadSafeProgressBar& GetProgressBar() {
-		auto& gui = _guiManagers.at(MenuLevel::PLAYLIST);
+		auto& gui = _guiManagers.at(GuiLevel::PLAYLIST);
 		return gui->GetGuiElement<gui::ThreadSafeProgressBar>(PROGRESS_BAR_NAME);
 	}
 
 	gui::ListBox& GetPlaylist() {
-		auto& gui = _guiManagers.at(MenuLevel::PLAYLIST);
+		auto& gui = _guiManagers.at(GuiLevel::PLAYLIST);
 		return gui->GetGuiElement<gui::ListBox>(PLAYLIST_NAME);
 	}
 
 	void CreateMainLevelGUI();
 	void CreatePlaylistLevelGUI();
 	void CreateControlsLevelGUI();
-
 	void CreateAndFillPlaylist();
 	void CreateProgressBar();
-
 	void TryHandleConversionResult();
 	void StartGame(const std::string& musicName);
 	void AddMusic(const std::string& musicPath);
@@ -86,8 +79,8 @@ private:
 	BackgroundStripeManager _stripeManager;
 	MusicVisulizationManager _musicVisualizationManager;
 	MusicVisulizationManager::ConvertResult _conversionResult;
-	std::unordered_map<MenuLevel, gui::GuiManager::Ptr> _guiManagers;
-	MenuLevel _activeMenuLevel = MenuLevel::MAIN;
+	std::unordered_map<GuiLevel, gui::GuiManager::Ptr> _guiManagers;
+	GuiLevel _activeGuiLevel = GuiLevel::MAIN;
 	bool _wantToQuit = false;
 };
 

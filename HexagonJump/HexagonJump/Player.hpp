@@ -98,6 +98,7 @@ private:
 	void UpdateHorizontalVelocity(float deltaTime);
 	void UpdateRotation(float deltaTime);
 	void UpdateMovementHistory(float deltaTime);
+	void FixPositionOnSurface(const Camera& camera);
 
 	void DrawBody(sf::RenderWindow& window, sf::Vector2f position, float angle, const sf::Color& color) const;
 

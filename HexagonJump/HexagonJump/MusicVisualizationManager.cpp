@@ -4,7 +4,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <iostream>
 
 #ifndef _WIN32
 #include <pwd.h>
@@ -34,9 +33,8 @@ MusicVisulizationManager::MusicVisulizationManager(size_t spectrumColumns)
 MusicVisulizationManager::ConvertResult MusicVisulizationManager::ConvertMusicAsync(
 	const std::string& path,
 	float gameTimerate, 
-	gui::ThreadSafeProgressBar& progressBar)
+	gui::ThreadSafeProgressBar& progressBar) const
 {
-
 	// Don't block the main thread
 	return std::async(std::launch::async, [&, path, gameTimerate] () {
 		sf::SoundBuffer buffer;

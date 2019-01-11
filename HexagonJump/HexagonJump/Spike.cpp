@@ -1,8 +1,6 @@
 #include "Spike.hpp"
 #include "Player.hpp"
 
-#include <iostream>
-
 namespace hexagon {
 
 const sf::Color Spike::BORDER_COLOR = { 255,255,255 };

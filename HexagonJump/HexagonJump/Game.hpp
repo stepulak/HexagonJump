@@ -17,8 +17,8 @@ public:
 
 	Game(const sf::Font& font,
 		Camera& camera,
-		const std::string& musicName,
-		MusicVisulizationManager& manager);
+		MusicVisulizationManager& manager,
+		const std::string& musicName);
 
 	bool WantToQuit() const override { return _wantToQuit; }
 
@@ -60,8 +60,6 @@ private:
 		return _guiManager->GetGuiElement<gui::GameStatsHUD>(TIME_HUD_NAME);
 	}
 
-	float GetMusicTime() const;
-
 	void Reset();
 	void CreateGUI();
 	void CreateQuitDialog();
@@ -69,11 +67,12 @@ private:
 	void UpdateGUI(float deltaTime);
 	void TestIfPlayerWon();
 	void UpdatePlayerAndCamera(float deltaTime);
-	void UpdatePlayerDeath(float deltaTime);
+	void UpdatePlayersDeath(float deltaTime);
 	void SyncMusicAndBeatManager(float deltaTime);
 	void GameEnded(const std::string& resultMessage);
 
 	bool ShouldSpawnObstacles() const;
+	float GetMusicTime() const;
 
 	const sf::Font& _font;
 	Camera& _camera;

@@ -15,9 +15,10 @@ struct MusicVisualization {
 	double averageSampleValue;
 };
 
-MusicVisualization CountMusicVisualizationData(const sf::SoundBuffer& buffer,
+MusicVisualization CountMusicVisualizationData(
+	const sf::SoundBuffer& buffer,
 	float gameTimerate, 
-	uint8_t spectrumColumns,
+	uint8_t numSpectrumColumns,
 	gui::ThreadSafeProgressBar& progressBar);
 
 }

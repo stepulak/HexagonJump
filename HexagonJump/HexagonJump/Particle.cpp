@@ -32,57 +32,75 @@ Particle& Particle::Clear()
 
 void Particle::Update(float deltaTime)
 {
-	// Update timer
-	_timer += deltaTime;
-	if (_liveTime >= 0 && _timer >= _liveTime) {
-		_isFree = true;
+	if (UpdateTimer(deltaTime)) {
 		return;
 	}
-
-	// Update angles
-	_bodyAngle = std::fmod(_bodyAngle + _bodyAngleVelocity * deltaTime, PI * 2.f);
-	_directionAngle = std::fmod(_directionAngle + _directionAngleVelocity * deltaTime, PI * 2.f);
-
-	// Proportions
-	_width = std::max(_width + _proportionsAcceleration * deltaTime, 0.f);
-	_height = std::max(_height + _proportionsAcceleration * deltaTime, 0.f);
-
-	// Position
-	_x += std::cos(_directionAngle) * _velocity * deltaTime;
-	_y -= std::sin(_directionAngle) * _velocity * deltaTime;
-
-	// Body velocity
-	_velocity += _acceleration * deltaTime;
+	UpdateAngles(deltaTime);
+	UpdateProportions(deltaTime);
+	UpdatePosition(deltaTime);
+	UpdateVelocity(deltaTime);
 }
 
 void Particle::Draw(sf::RenderWindow& window, const Camera& camera) const
 {
-	float alpha = 1.f;
-
-	// Count alpha based on fade mode
-	if (_fadeMode & FadeMode::FADE_IN && _timer < _fadeTime) {
-		alpha = _timer / _fadeTime;
-	}
-	else if (_fadeMode & FadeMode::FADE_OUT && _liveTime >= 0 && _timer > _liveTime - _fadeTime) {
-		alpha = 1.f - (_timer - (_liveTime - _fadeTime)) / _fadeTime; // inverse
-	}
-
-	// Create body and fill necessary values
 	sf::RectangleShape shape({ _width, _height });
+
 	shape.setPosition({ _x - camera.GetPosition(), _y });
 	shape.setRotation(RadiusToDegree(_bodyAngle));
 	shape.setOrigin({ _width / 2.f, _height / 2.f });
-	
+	shape.setFillColor(GetColor());
+
 	if (_texture) {
 		shape.setTexture(&_texture->get());
 	}
-
-	// Apply alpha
-	auto color = _color;
-	color.a = static_cast<uint8_t>(255u * alpha);
-	shape.setFillColor(color);
-
 	window.draw(shape);
+}
+
+bool Particle::UpdateTimer(float deltaTime)
+{
+	_timer += deltaTime;
+
+	if (_liveTime >= 0 && _timer >= _liveTime) {
+		_isFree = true;
+		return true;
+	}
+	return false;
+}
+
+void Particle::UpdateAngles(float deltaTime)
+{
+	_bodyAngle = std::fmod(_bodyAngle + _bodyAngleVelocity * deltaTime, PI * 2.f);
+	_directionAngle = std::fmod(_directionAngle + _directionAngleVelocity * deltaTime, PI * 2.f);
+}
+
+void Particle::UpdateProportions(float deltaTime)
+{
+	_width = std::max(_width + _proportionsAcceleration * deltaTime, 0.f);
+	_height = std::max(_height + _proportionsAcceleration * deltaTime, 0.f);
+}
+
+void Particle::UpdatePosition(float deltaTime)
+{
+	_x += std::cos(_directionAngle) * _velocity * deltaTime;
+	_y -= std::sin(_directionAngle) * _velocity * deltaTime;
+}
+
+float Particle::CountAlpha() const
+{
+	if (_fadeMode & FadeMode::FADE_IN && _timer < _fadeTime) {
+		return _timer / _fadeTime;
+	}
+	else if (_fadeMode & FadeMode::FADE_OUT && _liveTime >= 0 && _timer > _liveTime - _fadeTime) {
+		return 1.f - (_timer - (_liveTime - _fadeTime)) / _fadeTime; // inverse
+	}
+	return 1.f;
+}
+
+sf::Color Particle::GetColor() const
+{
+	auto color = _color;
+	color.a = static_cast<uint8_t>(255u * CountAlpha());
+	return color;
 }
 
 }

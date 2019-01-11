@@ -33,7 +33,8 @@ void Label::Draw(sf::RenderWindow& window, const sf::Font& font) const
 	if (_centered) {
 		auto labelWidth = renderText.getLocalBounds().width;
 		auto labelHeight = renderText.getLocalBounds().height;
-		renderText.setPosition(renderText.getPosition() - sf::Vector2f{ labelWidth / 2.f, labelHeight / 2.f });
+		sf::Vector2f offset = { labelWidth / 2.f, labelHeight / 2.f };
+		renderText.setPosition(renderText.getPosition() - offset);
 	}
 	window.draw(renderText);
 }

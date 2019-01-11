@@ -2,8 +2,6 @@
 #include "Controls.hpp"
 #include "OpenFileDialog.hpp"
 
-#include <iostream>
-
 namespace hexagon {
 
 namespace {
@@ -39,11 +37,11 @@ void MainMenu::KeyPressed(const sf::Keyboard::Key& key)
 		return;
 	}
 	if (key == sf::Keyboard::Escape) {
-		if (_activeMenuLevel == MenuLevel::MAIN) {
+		if (_activeGuiLevel == GuiLevel::MAIN) {
 			_wantToQuit = true;
 		}
 		else {
-			_activeMenuLevel = MenuLevel::MAIN;
+			_activeGuiLevel = GuiLevel::MAIN;
 		}
 		return;
 	}
@@ -54,6 +52,7 @@ void MainMenu::Update(float deltaTime)
 {
 	if (_game) {
 		_game->Update(deltaTime);
+
 		if (_game->WantToQuit()) {
 			_game.reset();
 			_camera.SetPosition(0.f);
@@ -79,11 +78,11 @@ void MainMenu::Draw(sf::RenderWindow& window) const
 
 void MainMenu::CreateMainLevelGUI()
 {
-	auto& gui = (_guiManagers[MenuLevel::MAIN] = std::make_unique<gui::GuiManager>(_font));
+	auto& gui = (_guiManagers[GuiLevel::MAIN] = std::make_unique<gui::GuiManager>(_font));
 
 	gui->AddGuiElement(TITLE, std::make_unique<gui::Label>(TITLE,
 		gui::Button::COLOR, // unify colors
-		sf::Vector2f {
+		sf::Vector2f{
 			GUI_HORIZONTAL_POSITION,
 			TITLE_VERTICAL_POSITION
 		},
@@ -95,7 +94,7 @@ void MainMenu::CreateMainLevelGUI()
 			_camera.GetVirtualHeight() / 2.f - FONT_SIZE * 2.f
 		},
 		FONT_SIZE,
-		[&] { _activeMenuLevel = MenuLevel::PLAYLIST; });
+		[&] { _activeGuiLevel = GuiLevel::PLAYLIST; });
 
 	gui->AddGuiElement(PLAY_BUTTON_TEXT, std::move(playButton));
 
@@ -105,7 +104,7 @@ void MainMenu::CreateMainLevelGUI()
 			_camera.GetVirtualHeight() / 2.f
 		},
 		FONT_SIZE,
-		[&] { _activeMenuLevel = MenuLevel::CONTROLS; });
+		[&] { _activeGuiLevel = GuiLevel::CONTROLS; });
 
 	gui->AddGuiElement(CONTROLS_BUTTON_TEXT, std::move(controlButton));
 
@@ -122,7 +121,7 @@ void MainMenu::CreateMainLevelGUI()
 
 void MainMenu::CreatePlaylistLevelGUI()
 {
-	auto& gui = (_guiManagers[MenuLevel::PLAYLIST] = std::make_unique<gui::GuiManager>(_font));
+	auto& gui = (_guiManagers[GuiLevel::PLAYLIST] = std::make_unique<gui::GuiManager>(_font));
 	
 	CreateAndFillPlaylist();
 	CreateProgressBar();
@@ -150,7 +149,7 @@ void MainMenu::CreatePlaylistLevelGUI()
 
 void MainMenu::CreateControlsLevelGUI()
 {
-	auto& gui = (_guiManagers[MenuLevel::CONTROLS] = std::make_unique<gui::GuiManager>(_font));
+	auto& gui = (_guiManagers[GuiLevel::CONTROLS] = std::make_unique<gui::GuiManager>(_font));
 
 	sf::Vector2f position = {
 		_camera.GetVirtualWidth() / 2.f,
@@ -167,7 +166,7 @@ void MainMenu::CreateControlsLevelGUI()
 
 void MainMenu::CreateAndFillPlaylist()
 {
-	auto& gui = _guiManagers[MenuLevel::PLAYLIST];
+	auto& gui = _guiManagers[GuiLevel::PLAYLIST];
 
 	auto playlistListBox = std::make_unique<gui::ListBox>(
 		sf::Vector2f{ 
@@ -181,6 +180,7 @@ void MainMenu::CreateAndFillPlaylist()
 	gui->AddGuiElement(PLAYLIST_NAME, std::move(playlistListBox));
 
 	auto& playlist = GetPlaylist();
+
 	// Fill it with available music
 	for (const auto& musicName : _musicVisualizationManager.GetMusicList()) {
 		playlist.AddElement(musicName);
@@ -189,7 +189,7 @@ void MainMenu::CreateAndFillPlaylist()
 
 void MainMenu::CreateProgressBar()
 {
-	auto& gui = _guiManagers[MenuLevel::PLAYLIST];
+	auto& gui = _guiManagers[GuiLevel::PLAYLIST];
 
 	auto bar = std::make_unique<gui::ThreadSafeProgressBar>(
 		sf::FloatRect {
@@ -205,7 +205,7 @@ void MainMenu::CreateProgressBar()
 
 void MainMenu::StartGame(const std::string& musicName)
 {
-	_game = std::make_unique<Game>(_font, _camera, musicName, _musicVisualizationManager);
+	_game = std::make_unique<Game>(_font, _camera, _musicVisualizationManager, musicName);
 }
 
 void MainMenu::AddMusic(const std::string& musicPath)

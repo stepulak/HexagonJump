@@ -1,5 +1,4 @@
 #include "ParticleSystem.hpp"
-#include <iostream>
 
 namespace hexagon {
 

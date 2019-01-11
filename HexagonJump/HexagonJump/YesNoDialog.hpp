@@ -12,11 +12,16 @@ public:
 
 	using Callback = std::function<void()>;
 
-	YesNoDialog(const std::string& text, const sf::FloatRect& area, float fontSize, const Callback& callback);
+	YesNoDialog(const std::string& text, 
+		const sf::FloatRect& area,
+		float fontSize, 
+		const Callback& callback);
+
+	~YesNoDialog() = default;
 
 	bool IsPressable() const override { return true; }
 	bool IsMovable() const override { return true; }
-	bool IsInvoked() const { return _invoked; }
+	bool IsInvoked() const override { return _invoked; }
 
 	bool InvokableOn(const sf::Keyboard::Key& key) const override { 
 		return key == controls::GUI_INVOKE_OR_CLOSE_KEY;

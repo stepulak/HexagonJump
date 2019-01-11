@@ -3,8 +3,6 @@
 #include "Utils.hpp"
 #include "World.hpp"
 
-#include <iostream>
-
 namespace hexagon {
 
 Player::Player(float x, float y, float radius)
@@ -59,7 +57,6 @@ void Player::Update(float deltaTime, float gravity, World& world)
 	if (_exploded) {
 		return;
 	}
-
 	UpdateTryToJumpCountdown(deltaTime);
 	UpdateJumping(deltaTime);
 	UpdateVerticalVelocity(deltaTime, gravity);
@@ -69,14 +66,15 @@ void Player::Update(float deltaTime, float gravity, World& world)
 	if (InCollisionWithSpike(world.GetObstacleManager())) {
 		Explode(world.GetParticleSystem());
 	}
-
 	if (!StandingOnSurface(world.GetObstacleManager()) && !IsFalling() && !IsJumping()) {
 		StartFalling();
 	}
-
 	// We cannot move in both directions simultaneously
 	TryToMoveHorizontalDirection(_horizontalVelocity * deltaTime * (_isMovingRight ? 1.f : -1.f), world.GetObstacleManager());
 	TryToMoveVerticalDirection(_verticalVelocity * deltaTime, world.GetObstacleManager());
+
+	// Bugfix
+	FixPositionOnSurface(world.GetCamera());
 }
 
 void Player::Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const
@@ -190,7 +188,7 @@ void Player::TryToMoveHorizontalDirection(float wantedDistance, const ObstacleMa
 	Move(std::abs(distance) > std::abs(wantedDistance) ? 0.f : distance, 0.f);
 }
 
-void Player::TryToMoveVerticalDirection(float wantedDistance, const ObstacleManager & manager)
+void Player::TryToMoveVerticalDirection(float wantedDistance, const ObstacleManager& manager)
 {
 	float distance = wantedDistance;
 	for (const auto& obstacle : manager.GetObstaclePool()) {
@@ -319,6 +317,11 @@ void Player::UpdateMovementHistory(float deltaTime)
 		}
 		_positionHistory.back() = PositionHistoryRecord{ _position, _angle };
 	}
+}
+
+void Player::FixPositionOnSurface(const Camera& camera)
+{
+	_position.y = std::min(_position.y, camera.GetVirtualHeight() - World::SURFACE_HEIGHT - _radius);
 }
 
 void Player::DrawBody(sf::RenderWindow& window, sf::Vector2f position, float angle, const sf::Color& color) const

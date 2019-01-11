@@ -24,9 +24,6 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BeatUnit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -206,9 +203,6 @@
     <ClInclude Include="GameStatsHUD.hpp">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
-    <ClInclude Include="EndScreenHUD.h">
-      <Filter>Header Files\gui</Filter>
-    </ClInclude>
     <ClInclude Include="MainMenu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -220,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="OpenFileDialog.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EndScreenHUD.hpp">
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

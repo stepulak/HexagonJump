@@ -29,8 +29,8 @@ public:
 	const MusicContainer& GetMusicList() const { return _musicList; }
 
 	ConvertResult ConvertMusicAsync(const std::string& path,
-		float gameTimerate, 
-		gui::ThreadSafeProgressBar& progressBar);
+		float gameTimerate,
+		gui::ThreadSafeProgressBar& progressBar) const;
 
 	MusicData OpenMusic(const std::string& musicName) const;
 
@@ -40,8 +40,11 @@ private:
 
 	void LoadExistingMusicList();
 
-	static MusicVisualization LoadMusicVisualizationFromFile(const std::string& filename, size_t spectrumColumns);
-	static void SaveMusicVisualizationToFile(const MusicVisualization& visualization, const std::string& filename);
+	static MusicVisualization LoadMusicVisualizationFromFile(const std::string& filename,
+		size_t spectrumColumns);
+
+	static void SaveMusicVisualizationToFile(const MusicVisualization& visualization,
+		const std::string& filename);
 	
 	const size_t _spectrumColumns;
 	std::string _applicationDataPath;

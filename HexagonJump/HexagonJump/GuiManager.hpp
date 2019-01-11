@@ -4,7 +4,9 @@
 #include "ListBox.hpp"
 #include "YesNoDialog.hpp"
 #include "GameStatsHUD.hpp"
-#include "EndScreenHUD.h"
+#include "EndScreenHUD.hpp"
+
+#include <deque>
 
 namespace hexagon::gui {
 
@@ -33,7 +35,9 @@ public:
 		return dynamic_cast<const T&>(GetGuiElement(name));
 	}
 
-	GuiElement& AddGuiElement(const std::string& name, GuiElement::Ptr&& ptr);
+	GuiElement& AddGuiElement(const std::string& name, 
+		GuiElement::Ptr&& ptr, 
+		bool setAtBeginning = false);
 
 	bool KeyPressed(const sf::Keyboard::Key& key);
 	void Update(float deltaTime);
@@ -41,10 +45,11 @@ public:
 
 private:
 
-	// We need to keep track of insertion order, so vector instead of map
-	// Boost's MultiIndex is the key, but I don't wanna to use Boost right here
+	// We need to keep track of insertion order and efficiently insert element
+	// at the beginning, so std::deque instead of std::map...
+	// Boost's MultiIndex is the answer, but I don't wanna to use Boost library in this project
 	using ElementContainerValue = std::pair<std::string, GuiElement::Ptr>;
-	using ElementContainer = std::vector<ElementContainerValue>;
+	using ElementContainer = std::deque<ElementContainerValue>;
 	
 	template<typename Vec>
 	static decltype(auto) FindElement(Vec& vec, const std::string& name) {
@@ -53,11 +58,11 @@ private:
 		});
 	}
 
+	static bool IsPressable(const ElementContainerValue& elem) { return elem.second->IsPressable(); }
+
 	bool ContainsElement(const std::string& name) const {
 		return FindElement(_elements, name) != _elements.end();
 	}
-
-	static bool IsPressable(const ElementContainerValue& elem) { return elem.second->IsPressable(); }
 
 	GuiElement& GetActiveElement() { return *_activeElement->second; }
 	const GuiElement& GetActiveElement() const { return *_activeElement->second; }

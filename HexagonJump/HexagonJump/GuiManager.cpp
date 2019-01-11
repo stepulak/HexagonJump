@@ -9,10 +9,17 @@ GuiManager::GuiManager(const sf::Font& font)
 {
 }
 
-GuiElement& GuiManager::AddGuiElement(const std::string& name, GuiElement::Ptr&& ptr)
+GuiElement& GuiManager::AddGuiElement(const std::string& name,
+	GuiElement::Ptr&& ptr, 
+	bool setAtBeginning)
 {
 	if (ContainsElement(name)) {
 		throw std::runtime_error("Element " + name + " already exists!");
+	}
+	if (setAtBeginning) {
+		_elements.emplace_front(name, std::move(ptr));
+		TrySetNewActiveElement();
+		return *_elements.front().second;
 	}
 	_elements.emplace_back(name, std::move(ptr));
 	TrySetNewActiveElement();
@@ -21,6 +28,10 @@ GuiElement& GuiManager::AddGuiElement(const std::string& name, GuiElement::Ptr&&
 
 bool GuiManager::KeyPressed(const sf::Keyboard::Key& key)
 {
+	if (_elements.empty()) {
+		return false;
+	}
+
 	switch (key)
 	{
 	case controls::GUI_BUTTON_PRESS_KEY:
@@ -55,7 +66,6 @@ void GuiManager::Draw(sf::RenderWindow& window) const
 		element->Draw(window, _font);
 	}
 	if (!_elements.empty()) {
-		auto& elem = GetActiveElement();
 		GetActiveElement().DrawMarker(window);
 	}
 }
@@ -76,7 +86,6 @@ bool GuiManager::MoveToNextPressableElement(bool up)
 	if (TryToMoveInElement(GetActiveElement(), up)) {
 		return true;
 	}
-	
 	auto previous = _activeElement;
 
 	if (!up) {
@@ -93,30 +102,29 @@ bool GuiManager::MoveToNextPressableElement(bool up)
 
 bool GuiManager::TryToMoveInElement(GuiElement& elem, bool up)
 {
-	if (elem.IsMovable()) {
-		if (up && elem.MoveUp()) {
-			return true;
-		}
-		else if (!up && elem.MoveDown()) {
-			return true;
-		}
+	if (!elem.IsMovable()) {
+		return false;
 	}
-	return false;
+	if (up && elem.MoveUp()) {
+		return true;
+	}
+	return !up && elem.MoveDown();
 }
 
 bool GuiManager::InvokeOrCloseElements(const sf::Keyboard::Key& key)
 {
 	bool managed = false;
 	for (auto&[_, element] : _elements) {
-		if (element->InvokableOn(key)) {
-			if (element->IsInvoked()) {
-				element->Close();
-			}
-			else {
-				element->Invoke();
-			}
-			managed = true;
+		if (!element->InvokableOn(key)) {
+			continue;
 		}
+		if (element->IsInvoked()) {
+			element->Close();
+		}
+		else {
+			element->Invoke();
+		}
+		managed = true;
 	}
 	return managed;
 }

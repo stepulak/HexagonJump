@@ -7,8 +7,8 @@ namespace hexagon {
 
 Game::Game(const sf::Font& font,
 	Camera& camera,
-	const std::string& musicName,
-	MusicVisulizationManager& manager)
+	MusicVisulizationManager& manager,
+	const std::string& musicName)
 	: _font(font)
 	, _camera(camera)
 	, _musicVisualizationManager(manager)
@@ -16,9 +16,11 @@ Game::Game(const sf::Font& font,
 {
 	auto musicData = manager.OpenMusic(musicName);
 
-	_beatUnitManager = std::make_unique<BeatUnitManager>(std::move(musicData.visualization),
+	_beatUnitManager = std::make_unique<BeatUnitManager>(
+		std::move(musicData.visualization),
 		NUM_BEAT_UNITS, 
 		TIMERATE);
+
 	_music.openFromFile(musicData.path);
 	camera.SetVelocity(CAMERA_VELOCITY);
 
@@ -44,15 +46,14 @@ void Game::KeyPressed(const sf::Keyboard::Key& key)
 	if (_guiManager->KeyPressed(key)) {
 		return; // handled by gui
 	}
-	auto& player = _world->GetPlayer();
 
 	switch (key)
 	{
 	case controls::PLAYER_JUMP_KEY:
-		player.TryToJump();
+		_world->GetPlayer().TryToJump();
 		break;
 	case controls::PLAYER_FALL_DOWN_FAST_KEY:
-		player.TryToFallDownFast();
+		_world->GetPlayer().TryToFallDownFast();
 		break;
 	case controls::PAUSE_KEY:
 		if (_stopped) {
@@ -90,21 +91,13 @@ void Game::Draw(sf::RenderWindow& window) const
 	_guiManager->Draw(window);
 }
 
-float Game::GetMusicTime() const
-{
-	if (MusicEnded()) {
-		return _music.getDuration().asSeconds();
-	}
-	return _music.getPlayingOffset().asSeconds();
-}
-
 void Game::Reset()
 {
 	// Music
 	_music.stop();
 	_beatUnitManager->Reset();
 
-	// Stats
+	// Stats and camera
 	_camera.SetPosition(0.f);
 	_musicBeatManagerSyncTimer = 0.f;
 	_playerDiedWaitTimer = 0.f;
@@ -146,7 +139,7 @@ void Game::CreateEndScreenHUD(const std::string& resultMessage)
 		resultMessage,
 		controls::RESTART_KEY_STR);
 
-	_guiManager->AddGuiElement(END_SCREEN_HUD_NAME, std::move(hud));
+	_guiManager->AddGuiElement(END_SCREEN_HUD_NAME, std::move(hud), true);
 }
 
 void Game::UpdateGUI(float deltaTime)
@@ -171,14 +164,14 @@ void Game::UpdatePlayerAndCamera(float deltaTime)
 
 	// Dead XOR alive?
 	if (_world->PlayerDied()) {
-		UpdatePlayerDeath(deltaTime);
+		UpdatePlayersDeath(deltaTime);
 	}
 	else {
 		_world->GetPlayer().StartMoving(cameraVelocity, true);
 	}
 }
 
-void Game::UpdatePlayerDeath(float deltaTime)
+void Game::UpdatePlayersDeath(float deltaTime)
 {
 	_playerDiedWaitTimer += deltaTime;
 	if (_playerDiedWaitTimer >= PLAYER_DIED_WAIT_TIME) {
@@ -191,7 +184,7 @@ void Game::SyncMusicAndBeatManager(float deltaTime)
 	_musicBeatManagerSyncTimer += deltaTime;
 	if (_musicBeatManagerSyncTimer >= MUSIC_BEAT_MANAGER_SYNC_TIME) {
 		_musicBeatManagerSyncTimer -= MUSIC_BEAT_MANAGER_SYNC_TIME;
-		_beatUnitManager->SyncTimingWithMusic(static_cast<float>(GetMusicTime()));
+		_beatUnitManager->SyncTimingWithMusic(GetMusicTime());
 	}
 }
 
@@ -208,6 +201,14 @@ bool Game::ShouldSpawnObstacles() const
 		return GetMusicTime() < duration - LAST_SECONDS_WITHOUT_OBSTACLES;
 	}
 	return false;
+}
+
+float Game::GetMusicTime() const
+{
+	if (MusicEnded()) {
+		return _music.getDuration().asSeconds();
+	}
+	return _music.getPlayingOffset().asSeconds();
 }
 
 }

@@ -35,7 +35,7 @@ private:
 	static const sf::Color BAR_UNCOMPLETED_COLOR;
 	static const sf::Color TEXT_COLOR;
 	
-	void DrawPercentageProgress(sf::RenderWindow& window, const sf::Font& font) const;
+	void DrawProgress(sf::RenderWindow& window, const sf::Font& font) const;
 	void DrawBar(sf::RenderWindow& window) const;
 
 	mutable std::mutex _mutex;

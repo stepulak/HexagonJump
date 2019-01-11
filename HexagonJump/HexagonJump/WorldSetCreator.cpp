@@ -7,6 +7,7 @@ namespace hexagon {
 
 WorldSetCreator::WorldSetCreator()
 {
+	//InitTestingSet();
 	InitSet1();
 	InitSet2();
 	InitSet3();
@@ -75,6 +76,13 @@ void WorldSetCreator::AddSquareWithSpikes(World& world,
 	if (!skipBottom) {
 		AddSpike(world, area, xLeftRelative + size / 2.f, yTopRelative + size, Direction::DOWN);
 	}
+}
+
+void WorldSetCreator::InitTestingSet()
+{
+	_setCreators.emplace_back([&](auto& world, const auto& area) {
+		//AddPlatform(world, area, area.width - 400.f, area.height - SPIKE_HEIGHT * 2.5f, 300.f, SPIKE_HEIGHT * 2.5f);
+	});
 }
 
 void WorldSetCreator::InitSet1()

@@ -11,8 +11,8 @@ public:
 
 	ColorPaletteChanger(float nextColorChangeTime);
 
-	sf::Color GetActiveColor(ColorEntity entity) const;
 	void Update(float deltaTime, float skipTime);
+	sf::Color GetActiveColor(ColorEntity entity) const;
 
 private:
 

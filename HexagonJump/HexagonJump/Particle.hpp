@@ -22,9 +22,7 @@ public:
 
 	static constexpr auto INFINITY_TIME = -1.f;
 
-	Particle() {
-		Clear();
-	}
+	Particle() { Clear(); }
 	
 	bool IsFree() const { return _isFree; }
 
@@ -42,13 +40,25 @@ public:
 	Particle& SetFadeTime(float time) { _fadeTime = time; return *this; }
 	Particle& SetLiveTime(float time) { _liveTime = time; return *this; }
 	Particle& SetColor(sf::Color&& col) { _color = std::move(col); return *this; }
-	Particle& SetTexture(sf::Texture& tex) { _texture = std::make_optional(std::ref(tex)); return *this; }
+	Particle& SetTexture(sf::Texture& tex) { _texture = tex; return *this; }
 	Particle& Clear();
 
 	void Update(float deltaTime);
 	void Draw(sf::RenderWindow& window, const Camera& camera) const;
 
 private:
+
+	bool UpdateTimer(float deltaTime);
+	void UpdateAngles(float deltaTime);
+	void UpdateProportions(float deltaTime);
+	void UpdatePosition(float deltaTime);
+
+	void UpdateVelocity(float deltaTime) {
+		_velocity += _acceleration * deltaTime;
+	}
+
+	float CountAlpha() const;
+	sf::Color GetColor() const;
 
 	float _x;
 	float _y;

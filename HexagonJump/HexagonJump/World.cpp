@@ -2,8 +2,6 @@
 #include "Platform.hpp"
 #include "Spike.hpp"
 
-#include <iostream>
-
 namespace hexagon {
 
 const sf::Color World::PLAYER_COLOR = { 255, 255, 255 };
@@ -12,7 +10,7 @@ World::World(Camera& camera, BeatUnitManager& manager)
 	: _camera(camera)
 	, _beatUnitManager(manager)
 {
-	ExtendSurface();
+	CreateSurface();
 }
 
 void World::Update(float deltaTime, bool skipObstacles)
@@ -25,10 +23,8 @@ void World::Update(float deltaTime, bool skipObstacles)
 	auto skipTime = _beatUnitManager.CurrentHighestBeatRatio() * COLOR_CHANGE_HIGHEST_BEAT_MULTIPLIER;
 	_colorPaletteChanger.Update(deltaTime, skipTime);
 
-	UpdateObstaclesAndSurface(skipObstacles);
+	UpdateObstaclesAndSurface(deltaTime, skipObstacles);
 	TryToCutPositionAllElements();
-
-	//std::cout << _player.GetPosition().x << " " << _player.GetPosition().y << std::endl;
 }
 
 void World::Draw(sf::RenderWindow& window) const
@@ -47,16 +43,18 @@ void World::TryToCutPositionAllElements()
 	}
 
 	_camera.Move(-cutOffset);
-	_surfaceEnd -= cutOffset;
+	_obstacleSetEnd -= cutOffset;
 	_backgroundStripeManager.Move(-cutOffset);
 	_obstacleManager.Move(-cutOffset);
 	_player.CutPosition(-cutOffset);
 }
 
-void World::UpdateObstaclesAndSurface(bool skipObstacles)
+void World::UpdateObstaclesAndSurface(float deltaTime, bool skipObstacles)
 {
-	if (_surfaceEnd - _camera.GetPosition() < GetSurfaceWidth()) {
-		ExtendSurface();
+	_surface->get().Move(deltaTime * _camera.GetVelocity());
+
+	if (_obstacleSetEnd - _camera.GetPosition() < SURFACE_WIDTH) {
+		_obstacleSetEnd += SURFACE_WIDTH;
 		if (!skipObstacles) {
 			SpawnAnotherObstacleSet();
 		}
@@ -65,24 +63,21 @@ void World::UpdateObstaclesAndSurface(bool skipObstacles)
 
 void World::SpawnAnotherObstacleSet()
 {
-	auto setArea = sf::FloatRect(_surfaceEnd, 0.f,
-		GetSurfaceWidth(),
-		_camera.GetVirtualHeight() - GetSurfaceHeight());
+	auto setArea = sf::FloatRect(_obstacleSetEnd, 0.f,
+		SURFACE_WIDTH,
+		_camera.GetVirtualHeight() - SURFACE_HEIGHT);
 
 	_worldSetCreator.SpawnRandomSet(*this, setArea);
 }
 
-void World::ExtendSurface()
+void World::CreateSurface()
 {
-	auto surfaceWidth = GetSurfaceWidth();
-	auto surfaceHeight = GetSurfaceHeight();
-	auto surface = std::make_unique<Platform>(_surfaceEnd,
-		_camera.GetVirtualHeight() - surfaceHeight,
-		surfaceWidth,
-		surfaceHeight);
+	auto surface = std::make_unique<Platform>(0.f,
+		_camera.GetVirtualHeight() - SURFACE_HEIGHT,
+		SURFACE_WIDTH,
+		SURFACE_HEIGHT);
 
-	_obstacleManager.GetObstaclePool().Add(std::move(surface));
-	_surfaceEnd += surfaceWidth;
+	_surface = dynamic_cast<Platform&>(*_obstacleManager.GetObstaclePool().Add(std::move(surface)));
 }
 
 void World::DrawBeatFlash(sf::RenderWindow& window) const

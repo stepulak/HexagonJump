@@ -4,9 +4,9 @@
 
 namespace hexagon::gui {
 
-const sf::Color ThreadSafeProgressBar::BACKGROUND_COLOR = { 50, 50, 50, 128 };
+const sf::Color ThreadSafeProgressBar::BACKGROUND_COLOR = { 50, 50, 50 };
 const sf::Color ThreadSafeProgressBar::BAR_COMPLETED_COLOR = { 0, 0, 255 };
-const sf::Color ThreadSafeProgressBar::BAR_UNCOMPLETED_COLOR = { 50, 50, 50 };
+const sf::Color ThreadSafeProgressBar::BAR_UNCOMPLETED_COLOR = { 80, 80, 80 };
 const sf::Color ThreadSafeProgressBar::TEXT_COLOR = { 255, 255, 255 };
 
 ThreadSafeProgressBar::ThreadSafeProgressBar(const sf::FloatRect& area,
@@ -48,11 +48,11 @@ void ThreadSafeProgressBar::Draw(sf::RenderWindow& window, const sf::Font& font)
 		return;
 	}
 	DrawRectangle(window, _area, BACKGROUND_COLOR);
-	DrawPercentageProgress(window, font);
+	DrawProgress(window, font);
 	DrawBar(window);
 }
 
-void ThreadSafeProgressBar::DrawPercentageProgress(sf::RenderWindow& window, const sf::Font& font) const
+void ThreadSafeProgressBar::DrawProgress(sf::RenderWindow& window, const sf::Font& font) const
 {
 	float x = _area.left + (_area.width - _area.width * BAR_WIDTH_RATIO) / 2.f;
 	float y = _area.top + _area.height * PROGRESS_TEXT_VERTICAL_POSITION_RATIO;
