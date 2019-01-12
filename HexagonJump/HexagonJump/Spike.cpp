@@ -41,13 +41,16 @@ void Spike::Draw(sf::RenderWindow& window,
 {
 	auto body = GetSpikeBody();
 	auto position = _position - sf::Vector2f(camera.GetPosition(), 0.f);
+
 	body.setFillColor(color);
 	body.setPosition(position);
 	window.draw(body);
 	DrawBorder(window, position, body);
 }
 
-void Spike::DrawBorder(sf::RenderWindow& window, const sf::Vector2f& position, const sf::ConvexShape& body) const
+void Spike::DrawBorder(sf::RenderWindow& window, 
+	const sf::Vector2f& position,
+	const sf::ConvexShape& body) const
 {
 	sf::Vertex vertices[3] = {
 		body.getPoint(0) + position,
@@ -62,22 +65,12 @@ void Spike::DrawBorder(sf::RenderWindow& window, const sf::Vector2f& position, c
 
 bool Spike::CheckCollisionWithPlayer(const sf::Vector2f& playerPosition, float playerRadius) const
 {
-	//auto playerBody = CreateRectangleFromCircleBody(position, radius * 0.866f);
 	auto body = GetSpikeBody();
-	
-	//
-	// TODO!!
-	//
 
 	for (size_t i = 0u; i < body.getPointCount(); i++) {
-		auto spikeVertex = body.getPoint(i) + _position;
-		auto difference = spikeVertex - playerPosition;
-		if (std::sqrt(difference.x*difference.x + difference.y*difference.y) < playerRadius) {
+		if (PointInsideCircle(playerPosition, playerRadius, body.getPoint(i) + _position)) {
 			return true;
 		}
-		/*if (playerBody.contains(body.getPoint(i) + _position)) {
-			return true;
-		}*/
 	}
 	return false;
 }

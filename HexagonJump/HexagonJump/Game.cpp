@@ -19,7 +19,7 @@ Game::Game(const sf::Font& font,
 	_beatUnitManager = std::make_unique<BeatUnitManager>(
 		std::move(musicData.visualization),
 		NUM_BEAT_UNITS, 
-		TIMERATE);
+		MUSIC_TIMERATE);
 
 	_music.openFromFile(musicData.path);
 	camera.SetVelocity(CAMERA_VELOCITY);

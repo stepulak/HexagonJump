@@ -26,7 +26,7 @@ MainMenu::MainMenu(const sf::Font& font, Camera& camera)
 
 	// Make sure that stripes are already equally spawned on screen
 	for (size_t i = 0u; i < STRIPE_MANAGER_INIT_ITERATIONS; i++) {
-		_stripeManager.Update(_camera, Game::TIMERATE, true);
+		_stripeManager.Update(_camera, Game::MUSIC_TIMERATE, true);
 	}
 }
 
@@ -215,7 +215,7 @@ void MainMenu::AddMusic(const std::string& musicPath)
 
 	_conversionResult = _musicVisualizationManager.ConvertMusicAsync(
 		musicPath,
-		Game::TIMERATE, 
+		Game::MUSIC_TIMERATE,
 		progressBar);
 }
 

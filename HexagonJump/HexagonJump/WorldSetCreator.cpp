@@ -7,7 +7,6 @@ namespace hexagon {
 
 WorldSetCreator::WorldSetCreator()
 {
-	//InitTestingSet();
 	InitSet1();
 	InitSet2();
 	InitSet3();
@@ -78,25 +77,18 @@ void WorldSetCreator::AddSquareWithSpikes(World& world,
 	}
 }
 
-void WorldSetCreator::InitTestingSet()
-{
-	_setCreators.emplace_back([&](auto& world, const auto& area) {
-		//AddPlatform(world, area, area.width - 400.f, area.height - SPIKE_HEIGHT * 2.5f, 300.f, SPIKE_HEIGHT * 2.5f);
-	});
-}
-
 void WorldSetCreator::InitSet1()
 {
 	_setCreators.emplace_back([&](auto& world, const auto& area) {
-		size_t numSpikeGroups = 2u;
+		size_t numGroups = 2u;
 		size_t numSpikesPerGroup = 3u;
-		auto groupOffset = (area.width - numSpikeGroups * numSpikesPerGroup * SPIKE_WIDTH) / (1 + numSpikeGroups);
+		auto offset = (area.width - numGroups * numSpikesPerGroup * SPIKE_WIDTH) / (1 + numGroups);
 
-		for (size_t i = 0u; i < numSpikeGroups; i++) {
+		for (size_t i = 0u; i < numGroups; i++) {
 			for (size_t j = 0u; j < numSpikesPerGroup; j++) {
 				AddSpike(world, 
 					area, 
-					groupOffset + i * groupOffset + j * SPIKE_WIDTH + SPIKE_WIDTH / 2,
+					offset + i * offset + j * SPIKE_WIDTH + SPIKE_WIDTH / 2,
 					area.height,
 					Direction::UP);
 			}
@@ -181,6 +173,7 @@ void WorldSetCreator::InitSet4()
 	_setCreators.emplace_back([&](auto& world, const auto& area) {
 		auto squareOffset = area.width * 0.15f;
 		auto squareHeight = area.height * 0.5f;
+
 		AddSquareWithSpikes(world, area, area.width / 2.f - squareOffset, squareHeight);
 		AddSquareWithSpikes(world, area, area.width / 2.f + squareOffset, squareHeight);
 
@@ -210,6 +203,7 @@ void WorldSetCreator::InitSet5()
 		auto squareOffset = area.width * 0.25f;
 		auto square1Height = area.height - SPIKE_WIDTH;
 		auto square2Height = area.height * 0.4f;
+
 		AddSquareWithSpikes(world, area, area.width / 2.f - squareOffset, square1Height, true);
 		AddSquareWithSpikes(world, area, area.width / 2.f + squareOffset, square1Height, true);
 		AddSquareWithSpikes(world, area, area.width / 2.f - SPIKE_WIDTH / 2.f, square2Height);
@@ -255,7 +249,11 @@ void WorldSetCreator::InitSet6()
 		size_t numSpikes = 3u;
 
 		for (size_t i = 0; i < numSpikes; i++) {
-			AddSpike(world, area, spikesX + i * SPIKE_WIDTH + SPIKE_WIDTH / 2.f, area.height, Direction::UP);
+			AddSpike(world,
+				area, 
+				spikesX + i * SPIKE_WIDTH + SPIKE_WIDTH / 2.f, 
+				area.height, 
+				Direction::UP);
 		}
 	});
 }

@@ -18,7 +18,7 @@ void World::Update(float deltaTime, bool skipObstacles)
 	_backgroundStripeManager.Update(_camera, deltaTime);
 	_obstacleManager.RemoveObstaclesPassedCamera(_camera);
 
-	auto skipTime = _beatUnitManager.CurrentHighestBeatRatio() * COLOR_CHANGE_HIGHEST_BEAT_MULTIPLIER;
+	auto skipTime = _beatUnitManager.CurrentHighestBeatRatio() * COLOR_CHANGE_HIGHEST_BEAT_RATIO;
 	_colorPaletteChanger.Update(deltaTime, skipTime);
 
 	UpdateObstaclesAndSurface(deltaTime, skipObstacles);
@@ -39,7 +39,6 @@ void World::TryToCutPositionAllElements()
 	if (_camera.GetPosition() < cutOffset) {
 		return; // no cut
 	}
-
 	_camera.Move(-cutOffset);
 	_obstacleSetEnd -= cutOffset;
 	_backgroundStripeManager.Move(-cutOffset);
@@ -82,12 +81,11 @@ void World::DrawBeatFlash(sf::RenderWindow& window) const
 {
 	auto colorRatio = _beatUnitManager.CurrentHighestBeatRatio();
 	auto color = _colorPaletteChanger.GetActiveColor(ColorEntity::FLASH);
+	auto cameraSize = _camera.GetVirtualProportions();
 
 	color.r = static_cast<uint8_t>(color.r * colorRatio);
 	color.g = static_cast<uint8_t>(color.g * colorRatio);
 	color.b = static_cast<uint8_t>(color.b * colorRatio);
-
-	auto cameraSize = _camera.GetVirtualProportions();
 
 	DrawRectangle(window, { 0.f, 0.f, cameraSize.x, cameraSize.y }, color);
 }
@@ -98,14 +96,19 @@ void World::DrawBackground(sf::RenderWindow& window) const
 	auto color = _colorPaletteChanger.GetActiveColor(ColorEntity::BACKGROUND);
 
 	DrawRectangle(window, { 0.f, 0.f, cameraSize.x, cameraSize.y }, color);
-	_backgroundStripeManager.Draw(window, _camera, _colorPaletteChanger.GetActiveColor(ColorEntity::STRIPE));
+
+	_backgroundStripeManager.Draw(window,
+		_camera, 
+		_colorPaletteChanger.GetActiveColor(ColorEntity::STRIPE));
 }
 
 void World::DrawForeground(sf::RenderWindow& window) const
 {
-	_particleSystem.Draw(window, _camera);
-	_obstacleManager.Draw(window, _camera, _colorPaletteChanger.GetActiveColor(ColorEntity::OBSTACLE));
+	_obstacleManager.Draw(window, 
+		_camera, 
+		_colorPaletteChanger.GetActiveColor(ColorEntity::OBSTACLE));
 	_player.Draw(window, _camera);
+	_particleSystem.Draw(window, _camera);
 }
 
 }

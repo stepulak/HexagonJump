@@ -36,7 +36,7 @@ private:
 	static const sf::Color BORDER_COLOR;
 	
 	sf::ConvexShape GetSpikeBody() const {
-		return CountTriangleCoords(_width, _maxHeight * _beatUnit.Height(), _direction);
+		return CountTriangle(_width, _maxHeight * _beatUnit.Height(), _direction);
 	}
 
 	bool CheckCollisionWithPlayer(const sf::Vector2f& playerPosition, float playerRadius) const;
@@ -46,9 +46,9 @@ private:
 		const sf::ConvexShape& body) const;
 
 	sf::Vector2f _position;
-	float _width;
-	float _maxHeight;
-	Direction _direction;
+	const float _width;
+	const float _maxHeight;
+	const Direction _direction;
 	const BeatUnit& _beatUnit;
 };
 

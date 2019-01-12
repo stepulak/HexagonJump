@@ -12,7 +12,7 @@ public:
 
 	using Ptr = std::unique_ptr<Game>;
 
-	static constexpr float TIMERATE = 1 / 20.f;
+	static constexpr float MUSIC_TIMERATE = 1 / 20.f;
 	static constexpr size_t NUM_BEAT_UNITS = 8u;
 
 	Game(const sf::Font& font,

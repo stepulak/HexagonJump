@@ -16,11 +16,9 @@ bool CanCollide(const sf::FloatRect& rect1, const sf::FloatRect& rect2, Directio
 			PointInLine(rect1.left + rect1.width - 1, rect2.left, rect2.width) ||
 			PointInLine(rect2.left, rect1.left, rect1.width);
 	}
-	else { // LEFT, RIGHT
-		return PointInLine(rect1.top + 1, rect2.top, rect2.height) ||
-			PointInLine(rect1.top + rect1.height - 1, rect2.top, rect2.height) ||
-			PointInLine(rect2.top, rect1.top, rect1.height);
-	}
+	return PointInLine(rect1.top + 1, rect2.top, rect2.height) ||
+		PointInLine(rect1.top + rect1.height - 1, rect2.top, rect2.height) ||
+		PointInLine(rect2.top, rect1.top, rect1.height);
 }
 
 sf::Vector2f DirectionToVector(Direction direction)
@@ -39,80 +37,74 @@ sf::Vector2f DirectionToVector(Direction direction)
 	return {};
 }
 
+float RectangleAbsoluteXDistance(const sf::FloatRect& rect1, const sf::FloatRect& rect2)
+{
+	auto minDistance = rect1.width / 2 + rect2.width / 2 + 1;
+	return std::abs(rect1.left + rect1.width / 2 - (rect2.left + rect2.width / 2)) - minDistance;
+}
+
+float RectangleAbsoluteYDistance(const sf::FloatRect& rect1, const sf::FloatRect& rect2)
+{
+	auto minDistance = rect1.height / 2 + rect2.height / 2 + 1;
+	return std::abs(rect1.top + rect1.height / 2 - (rect2.top + rect2.height / 2)) - minDistance;
+}
+
 } // namespace
 
-sf::ConvexShape CountTriangleCoords(float width, float height, Direction topVertexDirection)
+sf::ConvexShape CountTriangle(float base, float height, Direction heightDirection)
 {
-	auto[dx, dy] = DirectionToVector(topVertexDirection);
+	auto[dx, dy] = DirectionToVector(heightDirection);
 	sf::ConvexShape shape(3);
 
-	shape.setPoint(0, sf::Vector2f(-dy * width / 2, -dx * width / 2));
-	shape.setPoint(1, sf::Vector2f(dy * width / 2, dx * width / 2));
+	shape.setPoint(0, sf::Vector2f(-dy * base / 2, -dx * base / 2));
+	shape.setPoint(1, sf::Vector2f(dy * base / 2, dx * base / 2));
 	shape.setPoint(2, sf::Vector2f(dx * height, dy * height));
 	
 	return shape;
 }
 
-float RectangleAbsoluteXDistance(const sf::FloatRect& rect1, const sf::FloatRect& rect2)
+sf::Vector2f MoveVectorInDirection(const sf::Vector2f& vec, float distance, Direction direction)
 {
-	return std::abs(rect1.left + rect1.width / 2 - (rect2.left + rect2.width / 2)) - rect1.width / 2 - rect2.width / 2 - 1;
+	return vec + DirectionToVector(direction) * distance;
 }
 
-float RectangleAbsoluteYDistance(const sf::FloatRect& rect1, const sf::FloatRect& rect2)
+bool PointInsideCircle(const sf::Vector2f& center, float radius, const sf::Vector2f& point)
 {
-	return std::abs(rect1.top + rect1.height / 2 - (rect2.top + rect2.height / 2)) - rect1.height / 2 - rect2.height / 2 - 1;
+	auto vec = center - point;
+	return std::sqrt(vec.x * vec.x + vec.y * vec.y) <= radius;
 }
 
-float RectangleDistanceAfterMovement(sf::FloatRect dynamicRect, const sf::FloatRect& staticRect, float distance, Direction direction)
+float RectangleDistanceAfterMovement(sf::FloatRect dynamicRect,
+	const sf::FloatRect& staticRect,
+	float distance, 
+	Direction direction)
 {
 	if (!CanCollide(dynamicRect, staticRect, direction)) {
 		return distance;
 	}
-
-	float returnDistance = 0.f;
-	auto moved = MoveVectorInDirection(sf::Vector2f(dynamicRect.left, dynamicRect.top), distance, direction);
+	auto moved = MoveVectorInDirection({ dynamicRect.left, dynamicRect.top }, distance, direction);
 
 	dynamicRect.left = moved.x;
 	dynamicRect.top = moved.y;
 
-	if (direction == Direction::DOWN || direction == Direction::UP) {
-		if (dynamicRect.intersects(staticRect)) {
-			returnDistance = RectangleAbsoluteYDistance(dynamicRect, staticRect);
-		}
+	if ((direction == Direction::DOWN || direction == Direction::UP) &&
+		dynamicRect.intersects(staticRect)) {
+		return distance + RectangleAbsoluteYDistance(dynamicRect, staticRect);
 	}
-	else { // LEFT, RIGHT
-		if (dynamicRect.intersects(staticRect)) {
-			returnDistance = RectangleAbsoluteXDistance(dynamicRect, staticRect);
-		}
+	if (dynamicRect.intersects(staticRect)) { // Direction::LEFT, Direction::RIGHT
+		return distance + RectangleAbsoluteXDistance(dynamicRect, staticRect);
 	}
-
-	return distance + returnDistance;
+	return distance;
 }
 
-sf::Vector2f MoveVectorInDirection(sf::Vector2f vec, float distance, Direction direction)
+void DrawRectangle(sf::RenderWindow& window, 
+	const sf::FloatRect& rectangle,
+	const sf::Color& color)
 {
-	switch (direction) {
-	case Direction::DOWN:
-		vec.y += distance;
-		break;
-	case Direction::UP:
-		vec.y -= distance;
-		break;
-	case Direction::LEFT:
-		vec.x -= distance;
-		break;
-	case Direction::RIGHT:
-		vec.x += distance;
-		break;
-	}
-	return vec;
-}
-
-int Random(int from, int to)
-{
-	static std::random_device rd;
-	static std::mt19937 eng(rd());
-	return std::uniform_int_distribution<>(from, to)(eng);
+	sf::RectangleShape shape({ rectangle.width, rectangle.height });
+	shape.setPosition({ rectangle.left, rectangle.top });
+	shape.setFillColor(color);
+	window.draw(shape);
 }
 
 sf::Color MixColors(const sf::Color& c1, const sf::Color& c2, float ratio)
@@ -126,12 +118,11 @@ sf::Color MixColors(const sf::Color& c1, const sf::Color& c2, float ratio)
 	};
 }
 
-void DrawRectangle(sf::RenderWindow& window, const sf::FloatRect& rectangle, const sf::Color& color)
+int Random(int from, int to)
 {
-	sf::RectangleShape shape({ rectangle.width, rectangle.height });
-	shape.setPosition({ rectangle.left, rectangle.top });
-	shape.setFillColor(color);
-	window.draw(shape);
+	static std::random_device rd;
+	static std::mt19937 eng(rd());
+	return std::uniform_int_distribution<>(from, to)(eng);
 }
 
 }

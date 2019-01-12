@@ -45,7 +45,6 @@ private:
 		bool skipBottom = false);
 
 	// Ugly, but necessary solution
-	void InitTestingSet();
 	void InitSet1();
 	void InitSet2();
 	void InitSet3();
