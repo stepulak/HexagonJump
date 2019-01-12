@@ -5,7 +5,12 @@ namespace hexagon {
 
 const sf::Color Spike::BORDER_COLOR = { 255,255,255 };
 
-Spike::Spike(float x, float y, float width, float maximumHeight, Direction direction, const BeatUnit& beatUnit)
+Spike::Spike(float x, 
+	float y, 
+	float width, 
+	float maximumHeight,
+	Direction direction,
+	const BeatUnit& beatUnit)
 	: Obstacle(Obstacle::Type::SPIKE)
 	, _position(x, y)
 	, _width(width)
@@ -15,30 +20,26 @@ Spike::Spike(float x, float y, float width, float maximumHeight, Direction direc
 {
 }
 
-void Spike::Move(float horizontalDistance)
-{
-	_position.x += horizontalDistance;
-}
-
-bool Spike::PassedCamera(const Camera& camera) const
-{
-	return _position.x + std::max(_maxHeight, _width / 2.f) - camera.GetPosition() <= 0.f;
-}
-
 bool Spike::InCollision(const Player& player) const
 {
 	return CheckCollisionWithPlayer(player.GetPosition(), player.GetRadius());
 }
 
-float Spike::SaveDistanceToTravel(const Player& player, float wantedDistance, Direction direction) const
+float Spike::SaveDistanceToTravel(const Player& player,
+	float wantedDistance, 
+	Direction direction) const
 {
-	auto playerMoved = MoveVectorInDirection(player.GetPosition(), wantedDistance, direction);
-	return CheckCollisionWithPlayer(playerMoved, player.GetRadius()) ? 0.f : wantedDistance;
+	// Don't count distance, just the collision
+	// Player explode anyway if collision occurs
+	auto moved = MoveVectorInDirection(player.GetPosition(), wantedDistance, direction);
+	return CheckCollisionWithPlayer(moved, player.GetRadius()) ? 0.f : wantedDistance;
 }
 
-void Spike::Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const
+void Spike::Draw(sf::RenderWindow& window, 
+	const Camera& camera, 
+	const sf::Color& color) const
 {
-	auto body = CountSpikeBody();
+	auto body = GetSpikeBody();
 	auto position = _position - sf::Vector2f(camera.GetPosition(), 0.f);
 	body.setFillColor(color);
 	body.setPosition(position);
@@ -59,22 +60,27 @@ void Spike::DrawBorder(sf::RenderWindow& window, const sf::Vector2f& position, c
 	window.draw(vertices, 3, sf::LinesStrip);
 }
 
-bool Spike::CheckCollisionWithPlayer(const sf::Vector2f& position, float radius) const
+bool Spike::CheckCollisionWithPlayer(const sf::Vector2f& playerPosition, float playerRadius) const
 {
-	auto playerBody = CreateRectangleFromCircleBody(position, radius * 0.866f);
-	auto body = CountSpikeBody();
+	//auto playerBody = CreateRectangleFromCircleBody(position, radius * 0.866f);
+	auto body = GetSpikeBody();
 	
+	//
+	// TODO!!
+	//
+
 	for (size_t i = 0u; i < body.getPointCount(); i++) {
-		if (playerBody.contains(body.getPoint(i) + _position)) {
+		auto spikeVertex = body.getPoint(i) + _position;
+		auto difference = spikeVertex - playerPosition;
+		if (std::sqrt(difference.x*difference.x + difference.y*difference.y) < playerRadius) {
 			return true;
 		}
+		/*if (playerBody.contains(body.getPoint(i) + _position)) {
+			return true;
+		}*/
 	}
 	return false;
 }
 
-sf::ConvexShape Spike::CountSpikeBody() const
-{
-	return CountTriangleCoords(_width, _maxHeight * _beatUnit.Height(), _direction);
-}
 
 }

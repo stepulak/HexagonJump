@@ -5,16 +5,12 @@
 
 namespace hexagon {
 
+const sf::Color Player::PLAYER_COLOR = { 255, 255, 255 };
+
 Player::Player(float x, float y, float radius)
 	: _position(x, y)
 	, _radius(radius)
 {
-}
-
-void Player::Move(float distX, float distY)
-{
-	// bugfix
-	_position += { distX, distY };
 }
 
 void Player::CutPosition(float distance)
@@ -32,16 +28,6 @@ void Player::StartMoving(float velocity, bool rightDirection)
 	_isMovingRight = rightDirection;
 }
 
-void Player::StopMoving()
-{
-	_isMoving = false;
-}
-
-void Player::TryToJump()
-{
-	_tryToJumpTimer = TRY_TO_JUMP_TIMER_DEFAULT;
-}
-
 void Player::TryToFallDownFast()
 {
 	if (IsJumping()) {
@@ -57,63 +43,27 @@ void Player::Update(float deltaTime, float gravity, World& world)
 	if (_exploded) {
 		return;
 	}
-	UpdateTryToJumpCountdown(deltaTime);
-	UpdateJumping(deltaTime);
-	UpdateVerticalVelocity(deltaTime, gravity);
-	UpdateHorizontalVelocity(deltaTime);
-	UpdateMovementHistory(deltaTime);
-	
 	if (InCollisionWithSpike(world.GetObstacleManager())) {
 		Explode(world.GetParticleSystem());
 	}
 	if (!StandingOnSurface(world.GetObstacleManager()) && !IsFalling() && !IsJumping()) {
 		StartFalling();
 	}
-	// We cannot move in both directions simultaneously
-	TryToMoveHorizontalDirection(_horizontalVelocity * deltaTime * (_isMovingRight ? 1.f : -1.f), world.GetObstacleManager());
-	TryToMoveVerticalDirection(_verticalVelocity * deltaTime, world.GetObstacleManager());
-
-	// Bugfix
-	FixPositionOnSurface(world.GetCamera());
+	UpdateTryToJumpTimer(deltaTime);
+	UpdateJumping(deltaTime);
+	UpdateVerticalVelocity(deltaTime, gravity);
+	UpdateHorizontalVelocity(deltaTime);
+	UpdateMovement(world, deltaTime);
+	UpdateMovementHistory(deltaTime);
 }
 
-void Player::Draw(sf::RenderWindow& window, const Camera& camera, const sf::Color& color) const
+void Player::Draw(sf::RenderWindow& window, const Camera& camera) const
 {
 	if (_exploded) {
 		return;
 	}
-	auto cameraPosition = sf::Vector2f(camera.GetPosition(), 0.f);
-	float alpha = HISTORY_RECORD_ALPHA_INIT;
-
-	for (size_t i = _positionHistory.size(); i > 0; i--) {
-		auto bodyColor = sf::Color(color.r, color.g, color.b, static_cast<uint8_t>(color.a * alpha));
-		const auto& record = _positionHistory[i - 1];
-		DrawBody(window, record.position - cameraPosition, record.angle, bodyColor);
-		alpha *= HISTORY_RECORD_ALPHA_FADE_OFF;
-	}
-	DrawBody(window, _position - cameraPosition, _angle, color);
-}
-
-bool Player::StandingOnSurface(const ObstacleManager& manager) const
-{
-	if (!IsOnGround()) {
-		return false;
-	}
-	
-	auto& pool = manager.GetObstaclePool();
-	for (size_t i = 0u; i < manager.GetObstaclePool().Size(); i++) {
-		auto& obstacle = *manager.GetObstaclePool()[i];
-
-		if (obstacle.GetType() != Obstacle::Type::PLATFORM) {
-			continue;
-		}
-		auto[collision, _] = VerticalMovementSaveDistance(SURFACE_MAX_DISTANCE, obstacle);
-
-		if (collision) {
-			return true;
-		}
-	}
-	return false;
+	DrawPositionHistory(window, camera);
+	DrawBody(window, _position - sf::Vector2f{ camera.GetPosition(), 0.f} , _angle, PLAYER_COLOR);
 }
 
 void Player::ImmediateJump()
@@ -142,10 +92,18 @@ void Player::StartFalling()
 	_verticalVelocity = 0;
 }
 
+void Player::StopFalling()
+{
+	if (!IsFalling()) {
+		return;
+	}
+	_verticalStatus = VerticalPositionStatus::ON_GROUND;
+	_verticalVelocity = 0;
+}
+
 void Player::StartRotating()
 {
-	auto rotationDir = Random(0, 1);
-	_rotationVelocity = ROTATION_VELOCITY * ((rotationDir == 0) ? -1 : 1);
+	_rotationVelocity = ROTATION_VELOCITY * ((Random(0, 1) == 0) ? -1 : 1);
 	_isRotating = true;
 }
 
@@ -158,8 +116,6 @@ void Player::StopRotating()
 
 void Player::Explode(ParticleSystem& particleSystem)
 {
-	_exploded = true;
-
 	for (size_t i = 0u; i < EXPLOSION_NUM_PARTICLES; i++) {
 		particleSystem.AddParticle()
 			.SetPosition(_position.x, _position.y)
@@ -170,18 +126,20 @@ void Player::Explode(ParticleSystem& particleSystem)
 			.SetFadeTime(EXPLOSION_PARTICLE_FADE_TIME)
 			.SetFadeMode(Particle::FadeMode::FADE_OUT);
 	}
+	_exploded = true;
 }
 
 void Player::TryToMoveHorizontalDirection(float wantedDistance, const ObstacleManager& manager)
 {
 	float distance = wantedDistance;
+
 	for (const auto& obstacle : manager.GetObstaclePool()) {
 		if (obstacle->GetType() != Obstacle::Type::PLATFORM) {
 			continue;
 		}
 		auto[collision, cutDistance] = HorizontalMovementSaveDistance(distance, *obstacle);
+
 		if (collision) {
-			// StopMoving();
 			distance = cutDistance;
 		}
 	}
@@ -191,11 +149,13 @@ void Player::TryToMoveHorizontalDirection(float wantedDistance, const ObstacleMa
 void Player::TryToMoveVerticalDirection(float wantedDistance, const ObstacleManager& manager)
 {
 	float distance = wantedDistance;
+
 	for (const auto& obstacle : manager.GetObstaclePool()) {
 		if (obstacle->GetType() != Obstacle::Type::PLATFORM) {
 			continue;
 		}
 		auto[collision, cutDistance] = VerticalMovementSaveDistance(distance, *obstacle);
+
 		if (collision) {
 			if (IsJumping()) {
 				StopJumping();
@@ -203,61 +163,65 @@ void Player::TryToMoveVerticalDirection(float wantedDistance, const ObstacleMana
 			else if (IsFalling()) {
 				StopFalling();
 			}
-			distance = std::abs(cutDistance) < 1.f ? 0.f : cutDistance;
+			distance = std::abs(cutDistance) < CUT_DISTANCE ? 0.f : cutDistance;
 		}
 	}
 	Move(0.f, std::abs(distance) > std::abs(wantedDistance) ? 0.f : distance);
 }
 
-void Player::StopFalling()
+void Player::FixPositionOnSurface(const Camera & camera)
 {
-	if (!IsFalling()) {
-		return;
-	}
-	_verticalStatus = VerticalPositionStatus::ON_GROUND;
-	_verticalVelocity = 0;
+	_position.y = std::min(_position.y, camera.GetVirtualHeight() - World::SURFACE_HEIGHT - _radius);
 }
 
-bool Player::InCollisionWithSpike(const ObstacleManager& manager) const
+bool Player::StandingOnSurface(const ObstacleManager& manager) const
 {
+	if (!IsOnGround()) {
+		return false;
+	}
+	auto& pool = manager.GetObstaclePool();
+
 	for (const auto& obstacle : manager.GetObstaclePool()) {
-		if (obstacle->GetType() == Obstacle::Type::SPIKE && obstacle->InCollision(*this)) {
+		if (obstacle->GetType() != Obstacle::Type::PLATFORM) {
+			continue;
+		}
+		if (VerticalMovementSaveDistance(SURFACE_MAX_DISTANCE, *obstacle).first) {
 			return true;
 		}
 	}
 	return false;
 }
 
-std::pair<bool, float> Player::HorizontalMovementSaveDistance(float distance, const Obstacle& obstacle) const
+bool Player::InCollisionWithSpike(const ObstacleManager& manager) const
+{
+	auto& pool = manager.GetObstaclePool();
+
+	return std::find_if(pool.begin(), pool.end(), [self = this](const auto& obstacle) {
+		return obstacle->GetType() == Obstacle::Type::SPIKE && obstacle->InCollision(*self);
+	}) != pool.end();
+}
+
+Player::CollisionResult Player::MovementSaveDistance(float distance,
+	Direction direction1,
+	Direction direction2,
+	const Obstacle & obstacle) const
 {
 	if (distance > 0) {
-		auto newDistance = obstacle.SaveDistanceToTravel(*this, distance, Direction::RIGHT);
+		auto newDistance = obstacle.SaveDistanceToTravel(*this, distance, direction1);
 		return { newDistance < distance, newDistance };
 	}
 	else if (distance < 0) {
-		auto newDistance = -obstacle.SaveDistanceToTravel(*this, -distance, Direction::LEFT);
+		auto newDistance = -obstacle.SaveDistanceToTravel(*this, -distance, direction2);
 		return { newDistance > distance, newDistance };
 	}
 	return { false, 0.f };
 }
 
-std::pair<bool, float> Player::VerticalMovementSaveDistance(float distance, const Obstacle& obstacle) const
-{
-	if (distance > 0) {
-		auto newDistance = obstacle.SaveDistanceToTravel(*this, distance, Direction::DOWN);
-		return { newDistance < distance, newDistance };
-	}
-	else if (distance < 0) {
-		auto newDistance = -obstacle.SaveDistanceToTravel(*this, -distance, Direction::UP);
-		return { newDistance > distance, newDistance };
-	}
-	return { false, 0.f };
-}
-
-void Player::UpdateTryToJumpCountdown(float deltaTime)
+void Player::UpdateTryToJumpTimer(float deltaTime)
 {
 	if (_tryToJumpTimer > 0) {
 		_tryToJumpTimer -= deltaTime;
+
 		if (_tryToJumpTimer <= 0) {
 			ImmediateJump();
 		}
@@ -277,23 +241,22 @@ void Player::UpdateJumping(float deltaTime)
 
 void Player::UpdateVerticalVelocity(float deltaTime, float gravity)
 {
+	auto maxGravity = FALL_DOWN_FAST_VELOCITY_RATIO * gravity;
+
 	if (IsFallingSlow() ||
 		_verticalStatus == VerticalPositionStatus::JUMPING) {
 		_verticalVelocity += gravity * deltaTime;
 	}
 	else if (_verticalStatus == VerticalPositionStatus::FALLING_FAST) {
-		_verticalVelocity += 2 * gravity * deltaTime;
+		_verticalVelocity += maxGravity * deltaTime;
 	}
-	_verticalVelocity = std::min(_verticalVelocity, 2 * gravity);
+	_verticalVelocity = std::min(_verticalVelocity, maxGravity);
 }
 
 void Player::UpdateHorizontalVelocity(float deltaTime)
 {
-	if (!_isMoving && _horizontalVelocity > 0) {
-		_horizontalVelocity -= HORIZONTAL_FRICTION * deltaTime;
-		if (_horizontalVelocity <= 0) {
-			_horizontalVelocity = 0;
-		}
+	if (!_isMoving && _horizontalVelocity > 0.f) {
+		_horizontalVelocity = std::max(_horizontalVelocity - HORIZONTAL_FRICTION * deltaTime, 0.f);
 	}
 }
 
@@ -301,37 +264,67 @@ void Player::UpdateRotation(float deltaTime)
 {
 	if (_isRotating) {
 		_angle += _rotationVelocity * deltaTime;
-		if (std::fabs(_angle) >= 1.f / 3.f * PI) {
+
+		if (std::fabs(_angle) >= ROTATION_ANGLE) {
 			StopRotating();
 		}
 	}
 }
 
+void Player::UpdateMovement(World& world, float deltaTime)
+{
+	auto horizontalDistance = _horizontalVelocity * deltaTime * (_isMovingRight ? 1.f : -1.f);
+	TryToMoveHorizontalDirection(horizontalDistance, world.GetObstacleManager());
+	TryToMoveVerticalDirection(_verticalVelocity * deltaTime, world.GetObstacleManager());
+
+	// Bugfix
+	FixPositionOnSurface(world.GetCamera());
+}
+
 void Player::UpdateMovementHistory(float deltaTime)
 {
-	_movementHistoryTimer += deltaTime;
-	if (_movementHistoryTimer >= MOVEMENT_HISTORY_UPDATE_TIME) {
-		_movementHistoryTimer -= MOVEMENT_HISTORY_UPDATE_TIME;
+	_positionHistoryTimer += deltaTime;
+
+	if (_positionHistoryTimer >= MOVEMENT_HISTORY_UPDATE_TIME) {
+		_positionHistoryTimer -= MOVEMENT_HISTORY_UPDATE_TIME;
+
+		// Shift the array
 		for (size_t i = 0u; i < _positionHistory.size() - 1; i++) {
 			_positionHistory[i] = std::move(_positionHistory[i + 1]);
 		}
-		_positionHistory.back() = PositionHistoryRecord{ _position, _angle };
+		_positionHistory.back() = { _position, _angle };
 	}
 }
 
-void Player::FixPositionOnSurface(const Camera& camera)
+void Player::DrawPositionHistory(sf::RenderWindow& window, const Camera& camera) const
 {
-	_position.y = std::min(_position.y, camera.GetVirtualHeight() - World::SURFACE_HEIGHT - _radius);
+	float alpha = HISTORY_RECORD_ALPHA_INIT;
+	sf::Vector2f cameraPosition = { camera.GetPosition(), 0.f };
+	
+	for (size_t i = _positionHistory.size(); i > 0; i--) {
+		sf::Color bodyColor = {
+			PLAYER_COLOR.r,
+			PLAYER_COLOR.g,
+			PLAYER_COLOR.b,
+			static_cast<uint8_t>(PLAYER_COLOR.a * alpha)
+		};
+		const auto& record = _positionHistory[i - 1];
+
+		DrawBody(window, record.position - cameraPosition, record.angle, bodyColor);
+		alpha *= HISTORY_RECORD_ALPHA_FADE_OFF;
+	}
 }
 
 void Player::DrawBody(sf::RenderWindow& window, sf::Vector2f position, float angle, const sf::Color& color) const
 {
 	auto radius = 2 * _radius - _radius * 0.866f + 3;
-	auto body = sf::CircleShape(radius, 6);
+	sf::CircleShape body(radius, 6);
+
 	body.setPosition(position);
 	body.setFillColor(color);
 	body.setOrigin(radius, radius);
 	body.setRotation(30 + RadiusToDegree(angle));
+
 	window.draw(body);
 }
 

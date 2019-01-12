@@ -9,6 +9,11 @@ Platform::Platform(float leftX, float topY, float width, float height)
 {
 }
 
+bool Platform::InCollision(const Player & player) const
+{
+	return CreateRectangleFromCircleBody(player.GetPosition(), player.GetRadius()).intersects(_area);
+}
+
 float Platform::SaveDistanceToTravel(const Player& player, float wantedDistance, Direction direction) const
 {
 	auto playerBody = CreateRectangleFromCircleBody(player.GetPosition(), player.GetRadius());

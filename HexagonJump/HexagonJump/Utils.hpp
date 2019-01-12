@@ -31,6 +31,9 @@ float RectangleAbsoluteYDistance(const sf::FloatRect& rect1, const sf::FloatRect
 float RectangleDistanceAfterMovement(sf::FloatRect dynamicRect, const sf::FloatRect& staticRect, float distance, Direction direction);
 sf::Vector2f MoveVectorInDirection(sf::Vector2f vec, float distance, Direction direction);
 
+static bool PointInsideCircle(const sf::Vector2f& center, float radius, const sf::Vector2f& point) {
+
+}
 static inline sf::FloatRect CreateRectangleFromCircleBody(const sf::Vector2f& position, float radius) {
 	return { position.x - radius, position.y - radius, radius * 2, radius * 2 };
 }

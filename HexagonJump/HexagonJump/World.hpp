@@ -50,7 +50,6 @@ private:
 	static constexpr float PLAYER_SPAWN_POS_Y = 200.f;
 	static constexpr float COLOR_CHANGE_TIME = 10.f;
 	static constexpr float COLOR_CHANGE_HIGHEST_BEAT_MULTIPLIER = 10.f;
-	static const sf::Color PLAYER_COLOR;
 
 	void TryToCutPositionAllElements();
 	void UpdateObstaclesAndSurface(float deltaTime, bool skipObstacles);

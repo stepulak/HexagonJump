@@ -20,9 +20,7 @@ public:
 		return _area.left + _area.width - camera.GetPosition() <= 0.f;
 	}
 
-	bool InCollision(const Player& player) const override {
-		return CreateRectangleFromCircleBody(player.GetPosition(), player.GetRadius()).intersects(_area);
-	}
+	bool InCollision(const Player& player) const override;
 
 	float SaveDistanceToTravel(const Player& player,
 		float wantedDistance, 

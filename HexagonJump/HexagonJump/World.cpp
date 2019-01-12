@@ -4,8 +4,6 @@
 
 namespace hexagon {
 
-const sf::Color World::PLAYER_COLOR = { 255, 255, 255 };
-
 World::World(Camera& camera, BeatUnitManager& manager)
 	: _camera(camera)
 	, _beatUnitManager(manager)
@@ -107,7 +105,7 @@ void World::DrawForeground(sf::RenderWindow& window) const
 {
 	_particleSystem.Draw(window, _camera);
 	_obstacleManager.Draw(window, _camera, _colorPaletteChanger.GetActiveColor(ColorEntity::OBSTACLE));
-	_player.Draw(window, _camera, PLAYER_COLOR);
+	_player.Draw(window, _camera);
 }
 
 }
